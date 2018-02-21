@@ -11,6 +11,9 @@ Development of a process simulator using object oriented programming:  Numerical
 Kheng Hock Lau
 https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=11324&context=rtd
 
+The thermodynamics methods implemented in this libary are part of the IKCAPE thermodynamics. I reimplemented the equations in my own modeling framework. I also use the neutral input format described in their user guide as an input format.
+http://dechema.de/en/IK_CAPE+THERMO-p-40.html
+
 If you are interested in Process Simulation software, make sure to check out the stellar DWSIM project by Daniel Medeiros: https://github.com/DanWBR/dwsim5
 
 Disclaimer: This is my first real GitHub project. I apologize for any things that I forgot to add. If you find some things are missing (like Licenses for libraries), please notify me. I will add them as soon as possible.
