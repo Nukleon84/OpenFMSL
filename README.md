@@ -1,6 +1,20 @@
 # OpenFMSL
 The Open Flowsheet Modeling Library is a collection of C# libraries that can be used to simulate stationary chemical processes using mass- and energy balances. The library includes a basic implementation of the IKCAPE Thermodynamics and a handful of simple unit operations. The resulting equation system is solved simulatenously using a Newton-type solver using the L/U decomposition provided in CSPARSE.net.
 
+This program was build for fun and the enjoyment of exploring process simulation tools. It was heavily inspired by the PhD thesis of K.Lau and G. Varma.
+
+Development of a process simulator using object oriented programming: Information modeling and program structure
+Gadiraju V. Varma
+https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=11354&context=rtd
+
+Development of a process simulator using object oriented programming:  Numerical procedures and convergence studies
+Kheng Hock Lau
+https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=11324&context=rtd
+
+If you are interested in Process Simulation software, make sure to check out the stellar DWSIM project by Daniel Medeiros: https://github.com/DanWBR/dwsim5
+
+Disclaimer: This is my first real GitHub project. I apologize for any things that I forgot to add. If you find some things are missing (like Licenses for libraries), please notify me. I will add them as soon as possible.
+
 ## Prerequisites
 * Visual Studio
 * MSBuild
@@ -21,3 +35,6 @@ As the build script is still hard-coded to my development computer, you must bui
 3. Press the RUN button on the toolbar to execute the script.
 ![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_console.PNG "The IDE has a simple python shell integrated that reports results and takes interactive commands")
 ![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_plots.PNG "The IDE can also display simple charts and diagrams")
+
+## Going further
+You can also build your own programs that use the different components of OpenFMSL. YOu should strongly consider using Castle.Windsor as the dependency injection container, as the library was build around this. As a starting point, you could create a command line program that uses the ThermodynamicsImporter and the basic classes in the library to run a fixed flowsheet. You can copy a lot of the Python code from the examples directly to C# (just add semicolons). 
