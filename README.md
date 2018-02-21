@@ -1,6 +1,8 @@
 # OpenFMSL
 The Open Flowsheet Modeling Library is a collection of C# libraries that can be used to simulate stationary chemical processes using mass- and energy balances. The library includes a basic implementation of the IKCAPE Thermodynamics and a handful of simple unit operations. The resulting equation system is solved simulatenously using a Newton-type solver using the L/U decomposition provided in CSPARSE.net.
 
+The library also includes a very simple IDE that allows saving, editing and executing multiple simulation scripts (written in the Python language) in a single project file (persisted with Newtonsoft.JSON). The IDE has a simple interactive shell based on IronPython and a very simple graph model for showing diagrams (rendered using OxyPlot). This project would not have been possible without those awesome open-source libraries.
+
 This program was build for fun and the enjoyment of exploring process simulation tools. It was heavily inspired by the PhD thesis of K.Lau and G. Varma.
 
 Development of a process simulator using object oriented programming: Information modeling and program structure
