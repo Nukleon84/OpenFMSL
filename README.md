@@ -26,13 +26,13 @@ Disclaimer: This is my first real GitHub project. I apologize for any things tha
 ## Set up
 As the build script is still hard-coded to my development computer, you must build everything manually for the moment. The project is setup using an enterprise component architecture model, so building from scratch is rather simple. Just follow the steps given below.
 
-1. Clone repository on your hard drive
+1. Clone the repository on your hard drive
 2. Build the solution ./source.contracts/OpenFMSL.contracts/OpenFMSL.contracts.sln. This will create a bin.contracts folder in the project root that all the components in the source folder reference to.
-3. Build all the solution in the ./source/ folder in any order you like. The binaries are put into the deploy/exe or deploy/exe_debug folder.
+3. Build all the solutions in the ./source/ folder in any order you like. The binaries are put into the deploy/exe or deploy/exe_debug folder. There are no dependencies between the component projects.
 4. Execute shell.exe in the deploy folder to launch the simple IDE.
    
 ## Getting started
-1. Once the program has started, click the Load button to select the BasicExample.project file.
+1. Once the program has started, click the Load button (second from the left) to select the BasicExample.project file.
 2. Double-click the model "BTX column" from the list
 ![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_Model.PNG "The IDE with a model loaded")
 3. Press the RUN button on the toolbar to execute the script.
@@ -41,3 +41,8 @@ As the build script is still hard-coded to my development computer, you must bui
 
 ## Going further
 You can also build your own programs that use the different components of OpenFMSL. YOu should strongly consider using Castle.Windsor as the dependency injection container, as the library was build around this. As a starting point, you could create a command line program that uses the ThermodynamicsImporter and the basic classes in the library to run a fixed flowsheet. You can copy a lot of the Python code from the examples directly to C# (just add semicolons). 
+
+## Next Steps
+1. Write better documentation/WIKI
+2. Add some more examples
+3. Properly tidy up the build script to make it run from any PC
