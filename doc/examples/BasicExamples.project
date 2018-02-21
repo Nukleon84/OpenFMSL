@@ -1,0 +1,455 @@
+{
+  "$id": "1",
+  "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+  "Id": "00000000-0000-0000-0000-000000000000",
+  "Name": "Root",
+  "Children": {
+    "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+    "$values": [
+      {
+        "$id": "2",
+        "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+        "Id": "00000000-0000-0000-0000-000000000000",
+        "Name": "Projects",
+        "Children": {
+          "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+          "$values": [
+            {
+              "$id": "3",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "Scripts",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": [
+                  {
+                    "$id": "4",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "def title(text):\r\n print(text)\r\n print('=' * (len(text)))\r\n return\r\n \r\ndef runTest(text, test):\r\n print('\\n')\r\n title(text)\r\n run(test)\r\n return\r\n\r\nresults=[]\r\nnames=[]\r\ntestNode = Items[\"Projects|Equation Systems\"]\r\n\r\nfor c in testNode.Children:\r\n runTest(c.Name, c.Data)\r\n names.append(c.Name)\r\n results.append(_newton.IsConverged)\r\n\r\nprint \"{0:30} {1:10}\".format(\"Test Name\", \"Test Converged?\") \r\nfor i in range(len(results)):\r\n if(results[i]):\r\n \tprint \"+++ {0:30} {1:10}\".format(names[i], results[i])\r\n else:\r\n \tprint \"!!! {0:30} {1:10}\".format(names[i], results[i])\r\n\r\n\r\n\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "Test Suite",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "3"
+                    }
+                  },
+                  {
+                    "$id": "5",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\ndef EnableLinesearch():\r\n\t_newton.DoLinesearch=True\r\ndef DisableLinesearch():\r\n\t_newton.DoLinesearch=False\r\n\t\r\ndef EnableScaling():\r\n\t_newton.DoScaling=True\r\ndef DisableScaling():\r\n\t_newton.DoScaling=False\r\n\t\r\ndef MaxIter(iter):\r\n\t_newton.MaximumIterations=iter;\r\n\r\ndef printTitle(msg):\r\n print '╔══════════════════════════════════════════════════╗'\r\n print '║'+msg.center(50)+'║' \r\n print '╚══════════════════════════════════════════════════╝'\r\n return\r\ndef printUnderline(msg): \r\n print ' '+msg.center(50)+' ' \r\n print '════════════════════════════════════════════════════'\r\n return\r\n\r\ndef StreamMolarFractionToFlow(stream):\r\n total= stream.GetVariable(\"n\").ValueInSI\r\n for c in range(stream.System.Components.Count):\r\n  stream.GetVariable(\"n[\"+stream.System.Components[c].ID+\"]\").ValueInSI = total *  stream.GetVariable(\"x[\"+stream.System.Components[c].ID+\"]\").ValueInSI\r\n\r\ndef printSection(sec):\r\n\tclr.AddReference(\"System.Core\")\r\n\timport System\r\n\tclr.ImportExtensions(System.Linq)\r\n\ttrays=sec.NumberOfTrays\r\n\t\r\n\tprint '{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10} {10:10}'.format('Stage', 'T','TV', 'P', 'Q','L' ,'V','F','W','RL', 'EPS')\r\n\tprint '{0:>10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10} {10:10}'.format('',sec.GetVariable(\"T[1]\").OutputUnit,sec.GetVariable(\"TV[1]\").OutputUnit,sec.GetVariable(\"P[1]\").OutputUnit,sec.GetVariable(\"Q[1]\").OutputUnit, sec.GetVariable(\"L[1]\").OutputUnit,sec.GetVariable(\"V[1]\").OutputUnit,sec.GetVariable(\"F[1]\").OutputUnit,sec.GetVariable(\"W[1]\").OutputUnit,sec.GetVariable(\"RL[1]\").OutputUnit,'[-]')\r\n\tfor i in range(trays):\r\n\t\tj=str(i+1)\r\n\t\tprint '{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10} {9:10} {10:10}'.format(j, sec.GetVariable(\"T[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"TV[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"P[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"Q[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"L[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"V[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"F[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"W[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"RL[\"+j+\"]\").ValueInOutputUnit,sec.GetVariable(\"eps[\"+j+\"]\").ValueInOutputUnit)\t\r\n\tprint ''\r\n\tprint '{0:10} {1:10} '.format('Stage', ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format('x['+c.ID+']'))))\r\n\tfor i in range(trays):\r\n\t\tj=str(i+1)\r\n\t\tprint '{0:10} {1:10}'.format(j, ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format( sec.GetVariable( 'x['+ j +', '+c.ID+']' ).ValueInSI ) ) ))\r\n\tprint '{0:10} {1:10} '.format('Stage', ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format('y['+c.ID+']'))))\r\n\tfor i in range(trays):\r\n\t\tj=str(i+1)\r\n\t\tprint '{0:10} {1:10}'.format(j, ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format( sec.GetVariable( 'y['+ j +', '+c.ID+']' ).ValueInSI ) ) ))\r\n\tprint '{0:10} {1:10} '.format('Stage', ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format('y*['+c.ID+']'))))\r\n\tfor i in range(trays):\r\n\t\tj=str(i+1)\r\n\t\tprint '{0:10} {1:10}'.format(j, ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format( sec.GetVariable( 'yeq['+ j +', '+c.ID+']' ).ValueInSI ) ) ))\r\n\tprint '{0:10} {1:10} '.format('Stage', ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format('z['+c.ID+']'))))\r\n\tfor i in range(trays):\r\n\t\tj=str(i+1)\r\n\t\tprint '{0:10} {1:10}'.format(j, ' '.join(sec.System.Components.Select(lambda c: '{0:10}'.format( sec.GetVariable( 'z['+ j +', '+c.ID+']' ).ValueInSI ) ) ))\r\n\r\n\treturn\r\n\t\r\ndef printHEX(hex):\r\n\tcells=hex.Discretization\r\n\ttubeSideCells=hex.Tube\r\n\tshellSideCells=hex.Shell\r\n\ttubeSideStreams=hex.TubeStreams\r\n\tshellSideStreams=hex.ShellStreams\r\n\tqex= hex.QExchanged\r\n\t\r\n\ttubeIn=hex.FindMaterialPort(\"TubeIn\").Streams[0]\r\n\tshellIn=hex.FindMaterialPort(\"ShellIn\").Streams[0]\r\n\ttubeOut=hex.FindMaterialPort(\"TubeOut\").Streams[0]\r\n\tshellOut=hex.FindMaterialPort(\"ShellOut\").Streams[0]\r\n\t\r\n\t\r\n\tprint '--- {0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10}'.format('Tube_Cell', 'Tube_T', 'Tube_P', 'Tube_VF','Shell_Cell' ,'Shell_T', 'Shell_P', 'Shell_VF', 'Q')\r\n\tprint '--- {0:>10} {1:>10} {2:>10} {3:>10} {4:10} {5:>10} {6:>10} {7:>10} {8:>10}'.format('', tubeIn.GetVariable(\"T\").OutputUnit,tubeIn.GetVariable(\"p\").OutputUnit,tubeIn.GetVariable(\"VF\").OutputUnit, '',shellIn.GetVariable(\"T\").OutputUnit,shellIn.GetVariable(\"p\").OutputUnit,shellIn.GetVariable(\"VF\").OutputUnit, qex[0].Q.OutputUnit)\r\n\tprint '--- {0:>10} {1:10} {2:10} {3:10} {4:>10} {5:10} {6:10} {7:10}'.format('In', tubeIn.GetVariable(\"T\").ValueInOutputUnit,tubeIn.GetVariable(\"p\").ValueInOutputUnit,tubeIn.GetVariable(\"VF\").ValueInSI, 'In',shellIn.GetVariable(\"T\").ValueInOutputUnit,shellIn.GetVariable(\"p\").ValueInOutputUnit,shellIn.GetVariable(\"VF\").ValueInSI)\r\n\tfor i in range(cells):\r\n\t\tj=i+1\r\n\t\tif(hex.FlowPattern==FlowPattern.CounterCurrent):\r\n\t\t j=cells-i\r\n\t\tprint '--- {0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10} {7:10} {8:10}'.format((i+1), tubeSideCells[i].GetVariable(\"T\").ValueInOutputUnit,tubeSideCells[i].GetVariable(\"P\").ValueInOutputUnit,tubeSideStreams[i].GetVariable(\"VF\").ValueInSI, j,shellSideCells[i].GetVariable(\"T\").ValueInOutputUnit,shellSideCells[i].GetVariable(\"P\").ValueInOutputUnit,shellSideStreams[i].GetVariable(\"VF\").ValueInSI,qex[0].Q.ValueInOutputUnit)\r\n\tprint '--- {0:>10} {1:10} {2:10} {3:10} {4:>10} {5:10} {6:10} {7:10}'.format('Out', tubeOut.GetVariable(\"T\").ValueInOutputUnit,tubeOut.GetVariable(\"p\").ValueInOutputUnit,tubeOut.GetVariable(\"VF\").ValueInSI, 'Out',shellOut.GetVariable(\"T\").ValueInOutputUnit,shellOut.GetVariable(\"p\").ValueInOutputUnit,shellOut.GetVariable(\"VF\").ValueInSI)\t\t\r\n\treturn\r\n\r\ndef plot(name, xlabel, ylabel, x,y):\r\n \tchart=ChartModel(name);\t\r\n\tchart.XAxisTitle = xlabel\r\n\tchart.YAxisTitle = ylabel\r\n\tchart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\t\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\r\n\tfor i in range(len(x)):\t\r\n\t\txValues.Add(x[i])\r\n\t\tyValues.Add(y[i])\r\n\tySeries = SeriesModel(\"Series\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\tchart.Series.Add(ySeries)\r\n\tshow(chart)\t\t\r\n\treturn\r\n\r\ndef plotHEX(hex):\r\n\tchartEntity= Chart(\"HEX Plot\")\r\n\tchartEntity.Model=ChartModel(\"Heat Exchanger Temperature Profile\");\r\n\t\r\n\tchart=chartEntity.Model\r\n\tchart.XAxisTitle = \"Length [-]\"\r\n\tchart.YAxisTitle = \"Temperature [°C]\"\r\n\tchart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\r\n\tsteps = hex.Discretization\r\n\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\r\n\t\r\n\ttubeOut=hex.FindMaterialPort(\"TubeOut\").Streams[0]\r\n\tshellOut=hex.FindMaterialPort(\"ShellOut\").Streams[0]\r\n\r\n\tfor i in range(steps):\t\t\r\n\t\txValues.Add(i+1)\r\n\t\tyValues.Add(hex.Tube[i].GetVariable(\"T\").ValueInOutputUnit)\r\n\txValues.Add(steps+1)\r\n\tyValues.Add(tubeOut.GetVariable(\"T\").ValueInOutputUnit)\r\n\tySeries = SeriesModel(\"Tube T\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\r\n\t\r\n\tfor i in range(steps):\t\t\r\n\t\tj=i+1\r\n\t\tif(hex.FlowPattern==FlowPattern.CounterCurrent):\r\n\t\t j=steps-i\r\n\t\txValues.Add(j)\r\n\t\tyValues.Add(hex.Shell[i].GetVariable(\"T\").ValueInOutputUnit)\r\n\tif(hex.FlowPattern==FlowPattern.CounterCurrent):\r\n\t\txValues.Add(0)\r\n\telse:\r\n\t\txValues.Add(steps+1)\r\n\tyValues.Add(shellOut.GetVariable(\"T\").ValueInOutputUnit)\r\n\tySeries = SeriesModel(\"Shell T\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\r\n\t\r\n\tfor i in range(steps):\t\t\r\n\t\tj=i+1\t\r\n\t\txValues.Add(j)\r\n\t\tyValues.Add(hex.TubeStreams[i].GetVariable(\"VF\").ValueInOutputUnit*100)\r\n\txValues.Add(steps+1)\r\n\tyValues.Add(tubeOut.GetVariable(\"VF\").ValueInOutputUnit*100)\r\n\r\n\tySeries = SeriesModel(\"Tube VF\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\r\n\t\r\n\tfor i in range(steps):\t\t\r\n\t\tj=i+1\r\n\t\tif(hex.FlowPattern==FlowPattern.CounterCurrent):\r\n\t\t j=steps-i\r\n\t\txValues.Add(j)\r\n\t\tyValues.Add(hex.ShellStreams[i].GetVariable(\"VF\").ValueInOutputUnit*100)\r\n\tif(hex.FlowPattern==FlowPattern.CounterCurrent):\r\n\t\txValues.Add(0)\r\n\telse:\r\n\t\txValues.Add(steps+1)\r\n\tyValues.Add(shellOut.GetVariable(\"VF\").ValueInOutputUnit)\r\n\r\n\tySeries = SeriesModel(\"Shell VF\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\t#Items.Add(\"Results|Charts\",chartEntity)\r\n\tshow(chart)\r\n\treturn\r\n\t\r\ndef plotSection(section):\r\n\tchart=ChartModel(section.Name +\" Temperature\");\r\n\tchart.YAxisTitle = \"Tray\"\r\n\tchart.XAxisTitle = \"Temperature [°C]\"\r\n\t#chart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\r\n\tchart.IsReversedYAxis=True\r\n\tsteps = section.NumberOfTrays\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\t\r\n\tchart.XMin = 0\r\n\tchart.XMax = 160\r\n\tfor i in range(steps):\t\t\r\n\t\tyValues.Add(i+1)\r\n\t\txValues.Add(section.GetVariable(\"T[\"+str(i+1)+\"]\").ValueInOutputUnit)\r\n\t\r\n\tySeries = SeriesModel(\"T\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\t\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\t\r\n\tfor i in range(steps):\t\t\r\n\t\tyValues.Add(i+1)\r\n\t\txValues.Add(section.GetVariable(\"TV[\"+str(i+1)+\"]\").ValueInOutputUnit)\r\n\t\r\n\tySeries = SeriesModel(\"TV\", SeriesType.Line, xValues, yValues, \"Blue\")\t\r\n\tchart.Series.Add(ySeries)\r\n\t\r\n\t\r\n\tshow(chart)\r\n\treturn\r\n\r\n\r\ndef plotHT(section):\r\n\tchart=ChartModel(\"H-T Profile\");\r\n\tchart.YAxisTitle = \"Tray\"\r\n\tchart.XAxisTitle = \"Enthalpy [kW]\"\r\n\tchart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\r\n\tchart.IsReversedYAxis=True\r\n\tsteps = section.NumberOfTrays\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\t\r\n\tx2Values = chart.CreateList()\t\r\n\tfor i in range(steps):\t\t\r\n\t\tyValues.Add(i+1)\r\n\t\txValues.Add(section.GetVariable(\"HL[\"+str(i+1)+\"]\").ValueInSI*section.GetVariable(\"L[\"+str(i+1)+\"]\").ValueInSI*1e-3)\r\n\t\tx2Values.Add(section.GetVariable(\"HV[\"+str(i+1)+\"]\").ValueInSI*section.GetVariable(\"V[\"+str(i+1)+\"]\").ValueInSI*1e-3)\r\n\t#section.GetVariable(\"T[\"+str(i+1)+\"]\").ValueInOutputUnit\r\n\tySeries = SeriesModel(\"HL\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\ty2Series = SeriesModel(\"HV\", SeriesType.Line, x2Values, yValues, \"Blue\")\r\n\t\r\n\tchart.Series.Add(ySeries)\r\n\tchart.Series.Add(y2Series)\r\n\t\t\r\n\t\r\n\tshow(chart)\r\n\treturn\r\n\t\r\ndef plotXT(section):\r\n\tchart=ChartModel(\"X-T Profile\");\r\n\tchart.YAxisTitle = \"Stage\"\r\n\tchart.XAxisTitle = \"Molar Fraction [-]\"\r\n\tchart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\t\r\n\tchart.IsReversedYAxis=True\r\n\tsteps = section.NumberOfTrays\t\r\n\tyValues = chart.CreateList()\r\n\txValues = chart.CreateList()\t\r\n\tx2Values = chart.CreateList()\t\r\n\tx3Values = chart.CreateList()\t\r\n\tfor i in range(steps):\t\t\r\n\t\tyValues.Add(i+1)\r\n\t\txValues.Add(section.GetVariable(\"x[\"+str(i+1)+\", XYLOL]\").ValueInSI)\r\n\t\tx2Values.Add(section.GetVariable(\"y[\"+str(i+1)+\", XYLOL]\").ValueInSI)\r\n\t\tx3Values.Add(section.GetVariable(\"yeq[\"+str(i+1)+\", XYLOL]\").ValueInSI)\r\n\t#section.GetVariable(\"T[\"+str(i+1)+\"]\").ValueInOutputUnit\r\n\tySeries = SeriesModel(\"x\", SeriesType.Line, xValues, yValues, \"Red\")\r\n\ty2Series = SeriesModel(\"y\", SeriesType.Line, x2Values, yValues, \"Blue\")\r\n\ty3Series = SeriesModel(\"yeq\", SeriesType.Line, x3Values, yValues, \"Green\")\r\n\t\r\n\tchart.Series.Add(ySeries)\r\n\tchart.Series.Add(y2Series)\r\n\tchart.Series.Add(y3Series)\r\n\t\t\r\n\t\r\n\tshow(chart)\r\n\treturn\r\n\t\r\ndef plotMcCabe(title, section, xF,xB,xD, rr,q):\r\n\tchart=ChartModel(title);\r\n\tchart.YAxisTitle = \"vapor mole fraction [-]\"\r\n\tchart.XAxisTitle = \"liquid mole fraction [-]\"\r\n\tchart.YMin = 0.0\r\n\tchart.YMax = 1\r\n\tchart.XMin = 0.0\r\n\tchart.XMax = 1\t\t\r\n\tsteps = section.NumberOfTrays\t\r\n\txValues = chart.CreateList()\r\n\ty1Values = chart.CreateList()\t\r\n\ty2Values = chart.CreateList()\r\n\tqxValues = chart.CreateList()\r\n\tqyValues = chart.CreateList()\r\n\r\n\ty1Series = SeriesModel(\"y\", SeriesType.Line, xValues, y1Values, \"Blue\")\r\n\ty2Series = SeriesModel(\"yeq\", SeriesType.Line, xValues, y2Values, \"Green\")\t\r\n\ty3Series = SeriesModel(\"x\", SeriesType.Line, xValues, xValues, \"Black\")\t\r\n\tqSeries = SeriesModel(\"q\", SeriesType.Line, qxValues, qyValues, \"Black\")\t\r\n\t\r\n\ty1Series.DashPattern=DashPattern.Dash\r\n\ty3Series.ShowInLegend=False\r\n\tqSeries.ShowInLegend=False\r\n\r\n\t#chart.Series.Add(y1Series)\r\n\tchart.Series.Add(y2Series)\r\n\tchart.Series.Add(y3Series)\r\n\tchart.Series.Add(qSeries)\r\n\t\r\n\t\r\n\t\r\n\txValues.Add(1)\r\n\ty1Values.Add(1)\r\n\ty2Values.Add(1)\r\n\t\r\n\tyF=xD-rr/(1+rr)*(xD-xF)\r\n\t\r\n\t\r\n\tif q==0:\r\n\t\tqxValues.Add(xF)\r\n\t\tqxValues.Add(xF)\r\n\t\tqyValues.Add(xF)\r\n\t\tqyValues.Add(yF)\r\n\r\n\t\t\r\n\tfor i in range(steps):\t\t\t\t\r\n\t\txValues.Add(section.GetVariable(\"x[\"+str(i+1)+\", BENZOL]\").ValueInSI+section.GetVariable(\"x[\"+str(i+1)+\", TOLUOL]\").ValueInSI)\r\n\t\ty1Values.Add(section.GetVariable(\"y[\"+str(i+1)+\", BENZOL]\").ValueInSI+section.GetVariable(\"y[\"+str(i+1)+\", TOLUOL]\").ValueInSI)\r\n\t\ty2Values.Add(section.GetVariable(\"yeq[\"+str(i+1)+\", BENZOL]\").ValueInSI+section.GetVariable(\"yeq[\"+str(i+1)+\", TOLUOL]\").ValueInSI)\r\n\t\t\r\n\t\tx = chart.CreateList()\t\t\r\n\t\ty = chart.CreateList()\t\r\n\t\tx.Add(xValues.Last())\r\n\t\tx.Add(xValues.Last())\t\t\r\n\t\tif(xValues.Last()>xF):\r\n\t\t y.Add(xD-rr/(1+rr)*(xD-xValues.Last()))\r\n\t\telse:\r\n\t\t y.Add(xB+(yF-xB)/(xF-xB)*(xValues.Last()-xB))\r\n\t\ty.Add(y1Values.Last())\r\n\t\tstageSeries = SeriesModel(\"S\"+str(i+1), SeriesType.Line, x, y, \"Black\")\t\t\r\n\t\tstageSeries.ShowInLegend=False\t\r\n\t\tchart.Series.Add(stageSeries)\r\n\t\r\n\txValues.Add(0.0)\r\n\ty1Values.Add(0.0)\r\n\ty2Values.Add(0.0)\r\n\t\r\n\t\r\n\t\r\n\t#Draw Top, Feed and Bot vertical lines\r\n\tfeedLineValuesX = chart.CreateList()\r\n\tfeedLineValuesY = chart.CreateList()\r\n\toperatingLineValuesX = chart.CreateList()\r\n\toperatingLineValuesY = chart.CreateList()\r\n\t\r\n\tfeedLineValuesX.Add(xF)\r\n\tfeedLineValuesX.Add(xF)\r\n\tfeedLineValuesY.Add(0)\r\n\tfeedLineValuesY.Add(xF)\r\n\t\r\n\t#Bottom\r\n\t#xB= section.FindMaterialPort(\"VIn\").Streams[0].GetVariable(\"xV[BENZOL]\").ValueInSI+section.FindMaterialPort(\"VIn\").Streams[0].GetVariable(\"xV[TOLUOL]\").ValueInSI\r\n\t#xB=section.GetVariable(\"x[\"+str(steps)+\", BENZOL]\").ValueInSI+section.GetVariable(\"x[\"+str(steps)+\", TOLUOL]\").ValueInSI\r\n\t#xD=section.GetVariable(\"y[\"+str(1)+\", BENZOL]\").ValueInSI+section.GetVariable(\"y[\"+str(1)+\", TOLUOL]\").ValueInSI\r\n\r\n\toperatingLineValuesX.Add(xB)\r\n\toperatingLineValuesY.Add(0)\r\n\t\r\n\toperatingLineValuesX.Add(xB)\t\r\n\toperatingLineValuesY.Add(xB)\r\n\t\r\n\t#Stripping Line\r\n\toperatingLineValuesX.Add(xB)\r\n\toperatingLineValuesY.Add(xB)\r\n\t\r\n\toperatingLineValuesX.Add(xF)\t\r\n\toperatingLineValuesY.Add(xD-rr/(1+rr)*(xD-xF))\r\n\t\r\n\t\t\r\n\t#Rectifying Line\r\n\t\r\n\toperatingLineValuesX.Add(xF)\r\n\toperatingLineValuesY.Add(xD-rr/(1+rr)*(xD-xF))\r\n\t\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesY.Add(xD)\t\r\n\t\r\n\t#Top\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesY.Add(0)\r\n\toperatingLineValuesY.Add(xD)\r\n\t\r\n\tfeedLine = SeriesModel(\"F\", SeriesType.Line, feedLineValuesX, feedLineValuesY, \"Black\")\t\r\n\toperatingLine = SeriesModel(\"Op\", SeriesType.Line, operatingLineValuesX, operatingLineValuesY, \"Black\")\t\r\n\t\r\n\tfeedLine.ShowInLegend=False\r\n\toperatingLine.ShowInLegend=False\r\n\t\r\n\tchart.Series.Add(feedLine)\r\n\tchart.Series.Add(operatingLine)\r\n\tchart.LegendPosition=LegendPosition.TopLeft\t\t\r\n\tshow(chart)\r\n\treturn\r\n\t\r\n\t\r\ndef plotMcCabe2(section, xF,xB,xD, rr, LBID):\r\n\tchart=ChartModel(\"McCabe-Thiele rr=\"+str(rr));\r\n\tchart.YAxisTitle = \"Vapor Molar Fraction \"+LBID+\" [-]\"\r\n\tchart.XAxisTitle = \"Liquid Molar Fraction \"+LBID+\" [-]\"\r\n\tchart.YMin = 0\r\n\tchart.YMax = 1\r\n\tchart.XMin = 0\r\n\tchart.XMax = 1\t\t\r\n\tsteps = section.NumberOfTrays\t\r\n\txValues = chart.CreateList()\r\n\ty1Values = chart.CreateList()\t\r\n\ty2Values = chart.CreateList()\r\n\r\n\ty1Series = SeriesModel(\"y\", SeriesType.Line, xValues, y1Values, \"Blue\")\r\n\ty2Series = SeriesModel(\"yeq\", SeriesType.Line, xValues, y2Values, \"Green\")\t\r\n\ty3Series = SeriesModel(\"x\", SeriesType.Line, xValues, xValues, \"Black\")\t\r\n\t\r\n\ty1Series.DashPattern=DashPattern.Dash\r\n\tchart.Series.Add(y1Series)\r\n\tchart.Series.Add(y2Series)\r\n\tchart.Series.Add(y3Series)\r\n\t\r\n\t\r\n\txValues.Add(1)\r\n\ty1Values.Add(1)\r\n\ty2Values.Add(1)\r\n\t\r\n\tyF=xD-rr/(1+rr)*(xD-xF)\r\n\t\r\n\tfor i in range(steps):\t\t\t\t\r\n\t\txValues.Add(section.GetVariable(\"x[\"+str(i+1)+\", \"+LBID+\"]\").ValueInSI)\r\n\t\ty1Values.Add(section.GetVariable(\"y[\"+str(i+1)+\", \"+LBID+\"]\").ValueInSI)\r\n\t\ty2Values.Add(section.GetVariable(\"yeq[\"+str(i+1)+\", \"+LBID+\"]\").ValueInSI)\r\n\t\t\r\n\t\tx = chart.CreateList()\t\t\r\n\t\ty = chart.CreateList()\t\r\n\t\tx.Add(xValues.Last())\r\n\t\tx.Add(xValues.Last())\t\t\r\n\t\tif(xValues.Last()>xF):\r\n\t\t y.Add(xD-rr/(1+rr)*(xD-xValues.Last()))\r\n\t\telse:\r\n\t\t y.Add(xB+(yF-xB)/(xF-xB)*(xValues.Last()-xB))\r\n\t\ty.Add(y1Values.Last())\r\n\t\tstageSeries = SeriesModel(\"S\"+str(i+1), SeriesType.Line, x, y, \"Black\")\t\t\r\n\t\tstageSeries.ShowInLegend=False\r\n\t\tchart.Series.Add(stageSeries)\r\n\t\r\n\txValues.Add(0.0)\r\n\ty1Values.Add(0.0)\r\n\ty2Values.Add(0.0)\r\n\t\r\n\t\r\n\t\r\n\t#Draw Top, Feed and Bot vertical lines\r\n\tfeedLineValuesX = chart.CreateList()\r\n\tfeedLineValuesY = chart.CreateList()\r\n\toperatingLineValuesX = chart.CreateList()\r\n\toperatingLineValuesY = chart.CreateList()\r\n\t\r\n\tfeedLineValuesX.Add(xF)\r\n\tfeedLineValuesX.Add(xF)\r\n\tfeedLineValuesY.Add(0)\r\n\tfeedLineValuesY.Add(yF)\r\n\t\r\n\t#Bottom\r\n\t#xB= section.FindMaterialPort(\"VIn\").Streams[0].GetVariable(\"xV[BENZOL]\").ValueInSI+section.FindMaterialPort(\"VIn\").Streams[0].GetVariable(\"xV[TOLUOL]\").ValueInSI\r\n\t#xB=section.GetVariable(\"x[\"+str(steps)+\", BENZOL]\").ValueInSI+section.GetVariable(\"x[\"+str(steps)+\", TOLUOL]\").ValueInSI\r\n\t#xD=section.GetVariable(\"y[\"+str(1)+\", BENZOL]\").ValueInSI+section.GetVariable(\"y[\"+str(1)+\", TOLUOL]\").ValueInSI\r\n\r\n\toperatingLineValuesX.Add(xB)\r\n\toperatingLineValuesY.Add(0)\r\n\t\r\n\toperatingLineValuesX.Add(xB)\t\r\n\toperatingLineValuesY.Add(xB)\r\n\t\r\n\t#Stripping Line\r\n\toperatingLineValuesX.Add(xB)\r\n\toperatingLineValuesY.Add(xB)\r\n\t\r\n\toperatingLineValuesX.Add(xF)\t\r\n\toperatingLineValuesY.Add(xD-rr/(1+rr)*(xD-xF))\r\n\t\r\n\t\t\r\n\t#Rectifying Line\r\n\t\r\n\toperatingLineValuesX.Add(xF)\r\n\toperatingLineValuesY.Add(xD-rr/(1+rr)*(xD-xF))\r\n\t\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesY.Add(xD)\t\r\n\t\r\n\t#Top\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesX.Add(xD)\r\n\toperatingLineValuesY.Add(0)\r\n\toperatingLineValuesY.Add(xD)\r\n\t\r\n\tfeedLine = SeriesModel(\"F\", SeriesType.Line, feedLineValuesX, feedLineValuesY, \"DarkRed\")\t\r\n\toperatingLine = SeriesModel(\"Op\", SeriesType.Line, operatingLineValuesX, operatingLineValuesY, \"DarkRed\")\t\r\n\t\r\n\tchart.Series.Add(feedLine)\r\n\tchart.Series.Add(operatingLine)\r\n\tchart.LegendPosition=LegendPosition.TopLeft\r\n\t\r\n\tshow(chart)\t\r\n\treturn\r\n\t\r\n\t\r\ndef plotSectionConcLiquid(section):\r\n\tchart=ChartModel(section.Name +\" Liq. Conc. Profile\");\r\n\tchart.YAxisTitle = \"Tray\"\r\n\tchart.XAxisTitle = \"Liquid molar fraction [-]\"\r\n\tchart.AutoScaleX = True\r\n\tchart.AutoScaleY = True\r\n\tchart.IsReversedYAxis=True\r\n\tchart.ShowLegend=True\r\n\tsteps = section.NumberOfTrays\t\r\n\t\r\n\tfor j in range(section.System.Components.Count):\r\n\t\tyValues = chart.CreateList()\r\n\t\txValues = chart.CreateList()\t\r\n \t\tfor i in range(steps):\t\t\r\n\t\t\tyValues.Add(i+1)\r\n\t\t\txValues.Add(section.GetVariable(\"x[\"+str(i+1)+\", \"+section.System.Components[j].ID+\"]\").ValueInOutputUnit)\t\r\n\t\tySeries = SeriesModel(section.System.Components[j].ID, SeriesType.Line, xValues, yValues, \"Auto\")\r\n\t\tchart.Series.Add(ySeries)\r\n\t\r\n\tshow(chart)\t\r\n\treturn\r\n\t\r\n\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "Hex Helper",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "3"
+                    }
+                  }
+                ]
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
+            },
+            {
+              "$id": "6",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "Single Process Units",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": []
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
+            },
+            {
+              "$id": "7",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "Small Processes",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": [
+                  {
+                    "$id": "8",
+                    "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "BTX",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": [
+                        {
+                          "$id": "9",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "# Python Scripting Language Input File\r\n# Python Scripting Language Input File\r\n\r\nsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n#report(sys)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\n\r\nS01 = MaterialStream(\"S01\", sys)\r\n\r\nS01.Specify(\"T\",85, METRIC.C)\r\nS01.Specify(\"p\",1, METRIC.bar)\r\nS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n#S01.Specify(\"m\",20, SI.kg/SI.h)\r\n\r\nproblem = EquationSystem();\r\nS01.FillEquationSystem(problem)\r\n\r\nFlashPT(S01)\r\nsolve(problem)\r\nTValues=[]\r\nVFValues=[]\r\n\r\nfor i in range(1,5):\r\n T=65+i*2\r\n print ('T= '+str(T))\r\n S01.Specify(\"T\",T, METRIC.C)\r\n problem = EquationSystem();\r\n S01.FillEquationSystem(problem)\r\n solve(problem)\r\n print \"VaporFraction=\"+str(S01.GetVariable(\"VF\").ValueInSI)\r\n TValues.append(T)\r\n VFValues.append(S01.GetVariable(\"VF\").ValueInSI)\r\n \r\nfor i in range(len(TValues)):\r\n print \"{0:10} {1:10}\".format(TValues[i], VFValues[i])\r\n#report(problem)\r\n\r\nS01.Unspecify(\"T\")\r\nfor i in range(1,5):\r\n\tS01.Specify(\"VF\",1.0/5.0*i)\r\n\t\r\n\tproblem = EquationSystem();\r\n \tS01.FillEquationSystem(problem)\r\n \tsolve(problem)\r\n \tprint \"T=\"+str(S01.GetVariable(\"T\").ValueInOutputUnit)",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Stream",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": false,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "10",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "sys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n#report(sys)\r\nS01 = MaterialStream(\"S01\", sys)\r\nS02 = MaterialStream(\"S02\", sys)\r\nS03 = MaterialStream(\"S03\", sys)\r\n\r\nS01.Specify(\"T\",105, METRIC.C)\r\nS01.Specify(\"p\",1, METRIC.bar)\r\nS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[XYLOL]\",0, SI.mol/SI.s)\r\n\r\nS02.Specify(\"T\",25, METRIC.C)\r\nS02.Specify(\"p\",2, METRIC.bar)\r\nS02.Specify(\"n[BENZOL]\",0, SI.mol/SI.s)\r\nS02.Specify(\"n[TOLUOL]\",0, SI.mol/SI.s)\r\nS02.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n\r\nMIX01 = Mixer(\"MIX01\",sys)\r\nMIX01.Connect(\"In\", S01)\r\nMIX01.Connect(\"In\", S02)\r\nMIX01.Connect(\"Out\", S03)\r\nMIX01.Specify(\"DP\",0, METRIC.mbar)\r\n\r\nFlashPT(S01)\r\nFlashPT(S02)\r\nMIX01.Initialize()\r\n\r\nflowsheet= Flowsheet(\"Flow\")\r\nflowsheet.AddMaterialStreams(S01,S02,S03)\r\nflowsheet.AddUnit(MIX01)\r\n\r\nproblem = EquationSystem();\r\nflowsheet.FillEquationSystem(problem)\r\ndecomp(problem)\r\nreport(problem)\r\nreport(MIX01)",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Mixer",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": false,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "11",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "# Python Scripting Language Input File\r\nsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n#report(sys)\r\nS01 = MaterialStream(\"S01\", sys)\r\nS02 = MaterialStream(\"S02\", sys)\r\nS03 = MaterialStream(\"S03\", sys)\r\n\r\nS01.Specify(\"T\",105, METRIC.C)\r\nS01.Specify(\"p\",1, METRIC.bar)\r\nS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n\r\n\r\nSPLIT01 = Splitter(\"SPLIT01\",sys)\r\nSPLIT01.Connect(\"In\", S01)\r\nSPLIT01.Connect(\"Out1\", S02)\r\nSPLIT01.Connect(\"Out2\", S03)\r\nSPLIT01.Specify(\"DP\",0, METRIC.mbar)\r\nSPLIT01.Specify(\"K\",0.5)\r\n\r\nFlashPT(S01)\r\nSPLIT01.Initialize()\r\n\r\nflowsheet= Flowsheet(\"Flow\")\r\nflowsheet.AddMaterialStreams(S01,S02,S03)\r\nflowsheet.AddUnit(SPLIT01)\r\n\r\nproblem = EquationSystem();\r\nflowsheet.FillEquationSystem(problem)\r\nsolve(problem)\r\nreport(problem)\r\nreport(SPLIT01)\r\n",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Splitter",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": true,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "12",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "# Python Scripting Language Input File\r\ndef heatWithExternalStream():\r\n\tsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n\t#report(sys)\r\n\tS01 = MaterialStream(\"S01\", sys)\r\n\tS02 = MaterialStream(\"S02\", sys)\r\n\tQ01 = HeatStream(\"Q01\", sys)\r\n\t\r\n\t\r\n\tS01.Specify(\"T\",25, METRIC.C)\r\n\tS01.Specify(\"p\",1, METRIC.bar)\r\n\tS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\n\tS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\n\tS01.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n\t\r\n\t\r\n\tHEAT01 = Heater(\"HEAT01\",sys)\r\n\tHEAT01.Connect(\"In\", S01)\r\n\tHEAT01.Connect(\"Out\", S02)\r\n\tHEAT01.Connect(\"Duty\", Q01)\r\n\tHEAT01.Specify(\"DP\",0, METRIC.mbar)\r\n\tHEAT01.Specify(\"T\",100, METRIC.C)\r\n\t\r\n\tFlashPT(S01)\r\n\tHEAT01.Initialize()\r\n\t\r\n\tflowsheet= Flowsheet(\"Flow\")\r\n\tflowsheet.AddMaterialStreams(S01,S02)\r\n\tflowsheet.AddHeatStreams(Q01)\r\n\tflowsheet.AddUnit(HEAT01)\r\n\t\r\n\tproblem = EquationSystem();\r\n\tflowsheet.FillEquationSystem(problem)\r\n\tdecomp(problem)\r\n\treport(problem)\r\n\treport(HEAT01)\r\n\treturn\r\n\r\ndef heatWithoutExternalStream():\r\n\tsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\n\tsys.VariableFactory.SetOutputDimension(PhysicalDimension.HeatFlow, SI.kW)\r\n\r\n\t#report(sys)\r\n\tS01 = MaterialStream(\"S01\", sys)\r\n\tS02 = MaterialStream(\"S02\", sys)\r\n\t\r\n\t\r\n\tS01.Specify(\"T\",420, METRIC.C)\r\n\tS01.Specify(\"p\",1, METRIC.bar)\r\n\tS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\n\tS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\n\tS01.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n\t\r\n\t\r\n\tHEAT01 = Heater(\"HEAT01\",sys)\r\n\tHEAT01.Connect(\"In\", S01)\r\n\tHEAT01.Connect(\"Out\", S02)\r\n\tHEAT01.Specify(\"DP\",0, METRIC.mbar)\r\n\tHEAT01.Specify(\"T\",290, METRIC.C)\r\n\t\r\n\tFlashPT(S01)\r\n\tHEAT01.Initialize()\r\n\t\r\n\tflowsheet= Flowsheet(\"Flow\")\r\n\tflowsheet.AddMaterialStreams(S01,S02)\r\n\tflowsheet.AddUnit(HEAT01)\r\n\t#flowsheet.AddHeatStreams(Q01)\r\n\t\r\n\tproblem = EquationSystem();\r\n\tflowsheet.FillEquationSystem(problem)\r\n\tdecomp(problem)\r\n\t#report(problem)\r\n\treport(HEAT01)\r\n\treport(flowsheet)\r\n\t#for i in range(0,10):\r\n\t# HEAT01.Specify(\"T\",320-i*5, METRIC.C)\r\n\t# problem = EquationSystem();\r\n\t# flowsheet.FillEquationSystem(problem)\r\n\t## solve(problem)\r\n\t# report(flowsheet)\r\n\treturn\r\n\r\nheatWithoutExternalStream()",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Heater",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": true,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "13",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "sys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\n#report(sys)\r\n\r\nS01 = MaterialStream(\"S01\", sys)\\\r\n\t\t.Specify(\"T\",25, METRIC.C)\\\r\n\t\t.Specify(\"p\",1, METRIC.bar)\\\r\n\t\t.Specify(\"n[BENZOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[TOLUOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[XYLOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.FlashPT()\r\n\t\t\r\nS02 = MaterialStream(\"S02\", sys)\r\nS03 = MaterialStream(\"S03\", sys)\r\n\r\nSPLIT01 = ComponentSplitter(\"SPLIT01\",sys)\\\r\n\t\t\t.Connect(\"In\", S01)\\\r\n\t\t\t.Connect(\"Out1\", S02)\\\r\n\t\t\t.Connect(\"Out2\", S03)\\\r\n\t\t\t.Specify(\"DP\",5, METRIC.mbar)\\\r\n\t\t\t.Specify(\"K[BENZOL]\",0.9)\\\r\n\t\t\t.Specify(\"K[TOLUOL]\",0.5)\\\r\n\t\t\t.Specify(\"K[XYLOL]\",0.1)\\\r\n\t\t\t.Initialize()\r\n\r\nflowsheet= Flowsheet(\"Flow\")\r\nflowsheet.AddMaterialStreams(S01,S02,S03)\r\nflowsheet.AddUnit(SPLIT01)\r\n\r\nsolve(flowsheet)\r\nreport(SPLIT01)\r\nreport(flowsheet)\r\n",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "ComponentSplitter",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": true,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "14",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "# Python Scripting Language Input File\r\n\r\nsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\nreport(sys)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\n\r\nS01 = MaterialStream(\"S01\", sys)\r\n\r\nS01.Specify(\"T\",105, METRIC.C)\r\nS01.Specify(\"p\",1, METRIC.bar)\r\nS01.Specify(\"n[BENZOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[TOLUOL]\",1, SI.mol/SI.s)\r\nS01.Specify(\"n[XYLOL]\",1, SI.mol/SI.s)\r\n#S01.Specify(\"m\",20, SI.kg/SI.h)\r\n\r\nproblem = EquationSystem();\r\nS01.FillEquationSystem(problem)\r\nreport(problem)\r\n\r\nFlashPT(S01)\r\nsolve(problem)\r\n#report(problem)\r\n\r\nsnap= Snapshot(\"Snap1\",problem)\r\n#Items.Add(\"Results|Snapshots\",)\r\nshow(snap)\r\n",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "SingleStream",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": false,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "15",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "sys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.HeatFlow, SI.kW)\r\n\r\n#report(sys)\r\nS01 = MaterialStream(\"S01\", sys)\\\r\n\t\t.Specify(\"T\",25, METRIC.C)\\\r\n\t\t.Specify(\"p\",1, METRIC.bar)\\\r\n\t\t.Specify(\"n[BENZOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[TOLUOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[XYLOL]\",2, SI.kmol/SI.h)\\\r\n\t\t.FlashPT()\r\n\r\nS02 = MaterialStream(\"S02\", sys)\r\nS03 = MaterialStream(\"S03\", sys)\r\n\r\n\r\nSPLIT01 = Flash(\"FLASH01\",sys)\\\r\n\t\t.Connect(\"In\", S01)\\\r\n\t\t.Connect(\"Vap\", S02)\\\r\n\t\t.Connect(\"Liq\", S03)\\\r\n\t\t.Specify(\"P\",1, METRIC.bar)\\\r\n\t\t.Specify(\"VF\",0.35)\\\r\n\t\t.Initialize()\r\n#report(SPLIT01)\r\n\r\nflowsheet= Flowsheet(\"Flow\")\r\nflowsheet.AddMaterialStreams(S01,S02,S03)\r\nflowsheet.AddUnit(SPLIT01)\r\nproblem = EquationSystem();\r\nflowsheet.FillEquationSystem(problem)\r\nsolve(problem)\r\n\r\nSPLIT01.Unspecify(\"VF\")\r\nopti =  OptimizationProblem();\r\nflowsheet.FillEquationSystem(opti);\r\nopti.SetObjective(10*Sym.Pow(S02.GetVariable(\"x[XYLOL]\"),2))\r\nopti.AddInequalityConstraints( Constraint(0.1,ConstraintComparisonOperator.LessThanOrEqual, SPLIT01.GetVariable(\"VF\")))\r\nopti.AddDecisionVariables(SPLIT01.GetVariable(\"VF\"))\r\nsolve(opti)\r\nreport(opti)\r\n#report(flowsheet)\r\n\r\n\r\n",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Flash",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": false,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "16",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "run(Items[\"Projects|Scripts|Hex Helper\"].Data)\t\r\n\r\n# Python Scripting Language Input File\r\nsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\t\t\r\nsysutil= CreateThermo(Items[\"Projects|Thermodynamics|STEAM\"].Data)\t\t\r\nEnableLinesearch()\r\n\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\n\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsysutil.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\n\r\nprint '\\n### BUILDING UP FLOWSHEET\\n'\r\n\r\nTUBEIN = MaterialStream(\"TUBEIN\", sys)\\\r\n\t\t.Specify(\"T\",25, METRIC.C)\\\r\n\t\t.Specify(\"p\",1, METRIC.bar)\\\r\n\t\t.Specify(\"n[BENZOL]\",3, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[TOLUOL]\",3, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[XYLOL]\",4, SI.kmol/SI.h)\\\r\n\t\t.FlashPT()\r\n\r\nSHELLIN = MaterialStream(\"SHELLIN\", sysutil)\\\r\n\t\t.Specify(\"VF\",1)\\\r\n\t\t.Specify(\"p\",4, METRIC.bar)\\\r\n\t\t.Specify(\"n[H2O]\",50, SI.mol/SI.s)\\\r\n\t\t.FlashPZ()\r\nTUBEOUT = MaterialStream(\"TUBEOUT\", sys)\r\nSHELLOUT = MaterialStream(\"SHELLOUT\", sysutil)\r\n\r\n\t\r\nHEX01 = ShellAndTubeHeatExchanger(\"HEX01\",sys, 1, 5)\\\r\n\t\t.Connect(\"ShellIn\", SHELLIN)\\\r\n\t\t.Connect(\"ShellOut\", SHELLOUT)\\\r\n\t\t.Connect(\"TubeIn\", TUBEIN)\\\r\n\t\t.Connect(\"TubeOut\", TUBEOUT)\\\r\n\t\t.Specify(\"k\", 350, SI.W/SI.sqm/SI.K)\\\r\n\t\t.Specify(\"A\", 3.0, SI.sqm)\\\r\n\t\t.SetFlowPattern(FlowPattern.CoCurrent)\\\r\n\t\t.Configure()\\\r\n\t\t.Initialize(.1,60, 0,0)\r\nprint '\\n### TRIVIAL INITIALIZATION\\n'\r\n\r\nflowsheet= Flowsheet(\"Flow\")\\\r\n\t\t.AddMaterialStreams(SHELLIN, SHELLOUT, TUBEIN,TUBEOUT)\\\r\n\t\t.AddUnit(HEX01)\r\n\r\nprint '\\n### SOLVING BASE CASE PROBLEM\\n'\r\ndecomp(flowsheet)\r\n\r\nprint '###'\r\nprint '### SOLVING STEAM CONSTRAINT (Condensate VaporFraction=1%, find Steam flow rate)'\r\nprint '###'\r\nSHELLIN.Unspecify(\"n[H2O]\")\r\nflowsheet.AddDesignSpecification(SHELLOUT.GetVariable(\"VF\").IsEqualTo(0.01) )\r\ndecomp(flowsheet)\r\nreport(SHELLIN.GetVariable(\"m[H2O]\"))\r\nreport(TUBEIN.GetVariable(\"m\"))\r\nreport(HEX01.GetVariable(\"A\"))\r\n\r\nprint '###'\r\nprint '### SOLVING TUBE-SIDE CONSTRAINT (Product VaporFraction=25%, find Area)'\r\nprint '###'\r\nHEX01.Unspecify(\"A\")\r\nflowsheet.AddDesignSpecification(\"VFSpec\",TUBEOUT.GetVariable(\"VF\").IsEqualTo(0.25) )\r\n\r\ndecomp(flowsheet)\r\n\r\nreport(SHELLIN.GetVariable(\"m[H2O]\"))\r\nreport(TUBEIN.GetVariable(\"m\"))\r\nreport(HEX01.GetVariable(\"A\"))\r\n\r\nVOUT = MaterialStream(\"VOUT\", sys)\r\nLOUT = MaterialStream(\"LOUT\", sys)\r\n\r\nSPLIT01 = Flash(\"FLASH01\",sys)\\\r\n\t.Connect(\"In\", TUBEOUT)\\\r\n\t.Connect(\"Vap\", VOUT)\\\r\n\t.Connect(\"Liq\", LOUT)\\\r\n\t.Specify(\"T\",109, METRIC.C)\\\r\n\t.Specify(\"DP\",0, METRIC.mbar)\\\r\n\t.Init(\"Q\",0, SI.kW)\\\r\n\t.Init(\"VF\",0.25)\\\r\n\t.Initialize()\\\r\n\t.Unspecify(\"T\")\\\r\n\t.Specify(\"Q\",0, SI.kW)\r\n\r\nflowsheet.AddMaterialStreams(VOUT, LOUT)\r\nflowsheet.AddUnit(SPLIT01)\r\n\r\nprob=decomp(flowsheet)\r\n\r\nreport(flowsheet)\r\nreport(HEX01)\r\nplotHEX(HEX01)\t\r\nprintHEX(HEX01)\r\nreport(prob)\r\n\t",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "Falling Film Evap",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": false,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        },
+                        {
+                          "$id": "17",
+                          "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                          "SourceCode": "run(Items[\"Projects|Scripts|Hex Helper\"].Data)\t\r\n\r\nsys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\n\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.HeatFlow, SI.kW)\r\nreport(sys)\r\n\r\nS001 = MaterialStream(\"S001\", sys)\\\r\n\t\t.Specify(\"T\",25, METRIC.C)\\\r\n\t\t.Specify(\"p\",1, METRIC.bar)\\\r\n\t\t.Specify(\"n[BENZOL]\",30, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[TOLUOL]\",30, SI.kmol/SI.h)\\\r\n\t\t.Specify(\"n[XYLOL]\",40, SI.kmol/SI.h)\r\nS008 = MaterialStream(\"S008\", sys)\\\r\n\t\t.Init(\"T\",170, METRIC.C)\\\r\n\t\t.Init(\"p\",1, METRIC.bar)\\\r\n\t\t.Init(\"n[BENZOL]\",80, SI.kmol/SI.h)\\\r\n\t\t.Init(\"n[TOLUOL]\",3, SI.kmol/SI.h)\\\r\n\t\t.Init(\"n[XYLOL]\",1, SI.kmol/SI.h)\r\nS004 = MaterialStream(\"S004\", sys)\\\r\n\t\t.Init(\"T\",60, METRIC.C)\\\r\n\t\t.Init(\"p\",1, METRIC.bar)\\\r\n\t\t.Init(\"n[BENZOL]\",1, SI.kmol/SI.h)\\\r\n\t\t.Init(\"n[TOLUOL]\",80, SI.kmol/SI.h)\\\r\n\t\t.Init(\"n[XYLOL]\",1, SI.kmol/SI.h)\r\n\r\nS002 \t= MaterialStream(\"S002\", sys)\r\nS006 \t= MaterialStream(\"S006\", sys)\r\nS009 \t= MaterialStream(\"S009\", sys)\r\nS007 \t= MaterialStream(\"S007\", sys)\r\nS005 \t= MaterialStream(\"S005\", sys)\r\nS003 \t= MaterialStream(\"S003\", sys)\r\n\r\nFlashPT(S001)\r\n\r\n\r\nSEC01 = TraySection(\"SEC01\",sys,40)\t\\\r\n\t\t.Connect(\"VIn\", S008)\t\t\\\r\n\t\t.Connect(\"LIn\", S004)\t\t\\\r\n\t\t.Connect(\"VOut\", S002)\t\t\\\r\n\t\t.Connect(\"LOut\", S006)\t\t\\\r\n\t\t.ConnectFeed(S001,25)\t\t\\\r\n\t\t.MakeAdiabatic()\t\t\t\\\r\n\t\t.MakeIsobaric()\t\t\t\t\\\r\n\r\nREBSPLI = Splitter(\"REBSPLI\",sys)\t\\\r\n\t\t.Connect(\"In\", S006)\t\t\\\r\n\t\t.Connect(\"Out1\", S007)\t\\\r\n\t\t.Connect(\"Out2\", S009)\t\t\\\r\n\t\t.Specify(\"DP\",0, METRIC.bar)\\\r\n\t\t.Specify(\"K\",0.6)\r\n\r\nREB = Heater(\"REB\",sys)\t\t\t\t\\\r\n\t\t.Connect(\"In\", S007)\t\t\\\r\n\t\t.Connect(\"Out\", S008)\t\t\\\r\n\t\t.Specify(\"P\",1, METRIC.bar)\t\\\r\n\t\t.Specify(\"VF\",0.99)\r\n\r\nCOND = Heater(\"COND\",sys)\t\t\t\\\r\n\t\t.Connect(\"In\", S002)\t\t\\\r\n\t\t.Connect(\"Out\", S003)\t\t\\\r\n\t\t.Specify(\"DP\",0, METRIC.bar)\t\\\r\n\t\t.Specify(\"T\",30, METRIC.C)\r\n\r\nREFSPLI = Splitter(\"REFSPLI\",sys)\t\\\r\n\t\t.Connect(\"In\", S003)\t\t\t\\\r\n\t\t.Connect(\"Out1\", S004)\t\t\\\r\n\t\t.Connect(\"Out2\", S005)\t\t\\\r\n\t\t.Specify(\"DP\",0, METRIC.bar)\\\r\n\t\t.Specify(\"K\",0.4)\r\n\r\nSEC01.Initialize()\r\n\r\nunits=[SEC01,COND, REFSPLI, SEC01, REBSPLI, REB]\r\n\r\nfor u in units:\r\n u.Initialize()\r\n\r\nflowsheet= Flowsheet(\"Flow\")\r\nflowsheet.AddMaterialStreams(S001,S002, S003,S004, S005, S006,S007, S008, S009)\r\nflowsheet.AddUnits(SEC01, COND, REFSPLI, REBSPLI,REB)\r\n\r\ndecomp(flowsheet)\r\n\r\nprint '***'\r\nprint '*** Enable S005 and Bottom purity specifications'\r\nprint '***'\r\nflowsheet.AddDesignSpecification(S005.GetVariable(\"w[BENZOL]\").IsEqualTo(0.99))\r\nflowsheet.AddDesignSpecification(S009.GetVariable(\"w[BENZOL]\").IsEqualTo(0.01))\r\nREBSPLI.GetVariable(\"K\").LowerBound=0.1\r\nREBSPLI.GetVariable(\"K\").UpperBound=0.99\r\nREBSPLI.Unspecify(\"K\")\r\n\r\nREFSPLI.GetVariable(\"K\").LowerBound=0.1\r\nREFSPLI.GetVariable(\"K\").UpperBound=0.99\r\nREFSPLI.Unspecify(\"K\")\r\n\r\ndecomp(flowsheet)\r\n\r\nreport(COND)\r\nreport(REB)\r\nreport(REBSPLI)\r\nreport(REFSPLI)\r\nreport(flowsheet)\r\n\r\nprintSection(SEC01)\r\nplotSection(SEC01)\r\nplotSectionConcLiquid(SEC01)\r\n\r\n",
+                          "Id": "00000000-0000-0000-0000-000000000000",
+                          "Name": "BTX Column",
+                          "Children": {
+                            "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                            "$values": []
+                          },
+                          "IsExpanded": true,
+                          "IconName": "LanguagePythonText",
+                          "IsRenaming": false,
+                          "Parent": {
+                            "$ref": "8"
+                          }
+                        }
+                      ]
+                    },
+                    "IsExpanded": true,
+                    "IconName": "Folder",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "7"
+                    }
+                  }
+                ]
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
+            },
+            {
+              "$id": "18",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "Equation Systems",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": [
+                  {
+                    "$id": "19",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\n\r\nproblem = EquationSystem();\r\nproblem.Name=\"Nonlinear with 3 Variables\"\r\nx1 = Variable(\"x1\", 1, SI.K);\r\nx2 = Variable(\"x2\", 1, SI.mol/SI.s);\r\nx3 = Variable(\"x3\", 1);\r\nproblem.AddVariables(x1, x2, x3);\r\nproblem.AddConstraints(Equation(3 * x1 - Sym.Cos(x2 * x3) - 3.0 / 2.0, 0));\r\nproblem.AddConstraints(Equation(4 * Sym.Pow(x1, 2) - 625 * Sym.Pow(x2, 2) + 2 * x2 - 1, 0));\r\nproblem.AddConstraints(Equation(Sym.Exp(-x1 * x2) + 20 * x3 + (10 * Math.PI - 3.0) / 3.0, 0));\r\n\r\nsolve(problem)\r\nreport(problem)",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "3 Variables",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  },
+                  {
+                    "$id": "20",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\n\r\nproblem = EquationSystem();\r\nx1 = Variable(\"x\", 2);\r\n\r\nproblem.AddVariables(x1);\r\nproblem.AddConstraints(Equation(Sym.Pow(x1, 3)));\r\n\r\nsolve(problem)\r\nreport(problem)",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "Ill-conditioned at solution",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  },
+                  {
+                    "$id": "21",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\n\r\nproblem = EquationSystem();\r\nx1 = Variable(\"x\", 2);\r\nx2 = Variable(\"x_real\", 2);\r\n\r\nproblem.AddVariables(x1,x2);\r\nproblem.AddConstraints(Equation(Sym.Pow(x1, 3)-1));\r\nproblem.AddConstraints(Equation(x1-1,x2));\r\n\r\nsolve(problem)\r\nreport(problem)",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "Well-conditioned at solution",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": true,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  },
+                  {
+                    "$id": "22",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\n\r\nproblem = EquationSystem();\r\nproblem.Name=\"Nonlinear with 2 Variables\"\r\nx1 = Variable(\"x1\", 1, SI.K);\r\nx2 = Variable(\"x2\", 1, SI.mol/SI.s);\r\nproblem.AddVariables(x1, x2);\r\nproblem.AddConstraints(Equation(x1-4));\r\nproblem.AddConstraints(Equation(x1/2-x2));\r\n\r\n\r\nsolve(problem)\r\nreport(problem)\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "2 Variables",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  },
+                  {
+                    "$id": "23",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\nproblem = EquationSystem();\r\nproblem.Name=\"Nonlinear with 2 Variables\"\r\nx1 = Variable(\"x1\", 1, SI.K);\r\nx2 = Variable(\"x2\", 1, SI.mol/SI.s);\r\nx2.UpperBound=2\r\nproblem.AddVariables(x1, x2);\r\nproblem.AddConstraints(Equation(x1-4));\r\nproblem.AddConstraints(Equation(x1-x2));\r\n\r\n\r\nsolve(problem)\r\nreport(problem)\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "Should not work",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": true,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  },
+                  {
+                    "$id": "24",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "# Python Scripting Language Input File\r\nrun(Items[\"Projects|Scripts|Hex Helper\"].Data)\t\r\n\r\nprintTitle(\"Test Problem: Hock-Schittkowski 71\")\r\nproblem =  OptimizationProblem();\r\nx1 =  Variable(\"x1\", 1,1,5);\r\nx2 =  Variable(\"x2\", 5, 1, 5);\r\nx3 =  Variable(\"x3\", 5, 1, 5);\r\nx4 =  Variable(\"x4\", 1, 1, 5);\r\n\r\nproblem.AddVariables(x1, x2,x3,x4);\r\nproblem.ObjectiveFunction = x1 * x4 * Sym.Par(x1 + x2 + x3) + x3;\r\nproblem.AddInequalityConstraints(Constraint(x1*x2*x3*x4, ConstraintComparisonOperator.GreaterThanOrEqual,25));\r\nproblem.AddConstraints((Sym.Pow(x1,2)+ Sym.Pow(x2, 2)+ Sym.Pow(x3, 2)+ Sym.Pow(x4, 2)).IsEqualTo(40) ) ;\r\nproblem.DecisionVariables.Add(x1)\r\nproblem.DecisionVariables.Add(x2)\r\nproblem.DecisionVariables.Add(x3)\r\nproblem.DecisionVariables.Add(x4)\r\n\r\nsolve(problem);\r\n\r\nreport(problem)\r\n\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "HS071",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": true,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "18"
+                    }
+                  }
+                ]
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
+            },
+            {
+              "$id": "25",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "Thermodynamics",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": [
+                  {
+                    "$id": "26",
+                    "$type": "OpenFMSL.Contracts.Entities.ThermodynamicSystemEntity, OpenFMSL.Contracts",
+                    "SourceCode": "THER     3   75    8   12   10\r\nSYST DATA     1    3\r\nSHOR    1 BENZOL\r\nNAME    1 BENZENE\r\nCASN    1 71-43-2\r\nMOLW    1 BASE   7.81147000D+01\r\nTC      1 DIPP   5.62159970D+02\r\nPC      1 DIPP   4.89800000D+06\r\nRHOC    1 DIPP   3.86100401D+00\r\nCL      1 VARG POLY     3  2.80000000D+02  5.00000000D+02    0\r\n  1.42421048D+05 -2.44567802D+02  7.34782802D-01\r\nCPID    1 EXPL ALYL     5  2.50000000D+02  6.00000000D+02    0\r\n  5.52380000D+04  1.73380000D+05  7.64250000D+02  7.25450000D+04  2.44570000D+03\r\nHVAP    1 EXPL DIP4     6  2.50000000D+02  6.00000000D+02    0\r\n  5.62050000D+02  5.00070000D+07  6.53930000D-01 -2.76980000D-01  2.95690000D-02\r\n  0.00000000D+00\r\nDENL    1 DIPP WATS     4  2.78679990D+02  5.53150020D+02    0\r\n  7.67892188D-01  4.01053449D-01  5.62159970D+02  3.86100401D+00\r\nVP      1 EXPL ANT1     7  2.50000000D+02  6.00000000D+02    0\r\n  8.31070000D+01 -6.48620000D+03  0.00000000D+00  0.00000000D+00 -9.21940000D+00\r\n  6.98440000D-06  2.00000000D+00\r\nSHOR    2 TOLUOL\r\nNAME    2 TOLUENE\r\nCASN    2 108-88-3\r\nMOLW    2 BASE   9.21418000D+01\r\nTC      2 DIPP   5.91799990D+02\r\nPC      2 DIPP   4.10860000D+06\r\nRHOC    2 DIPP   3.16455669D+00\r\nCL      2 VARG POLY     3  2.73149990D+02  5.23150020D+02    0\r\n  3.74916274D+05 -1.54116130D+03  2.70199531D+00\r\nCPID    2 EXPL ALYL     5  2.50000000D+02  6.00000000D+02    0\r\n  5.81400000D+04  2.86300000D+05  1.44060000D+03  1.89800000D+05  6.50430000D+02\r\nHVAP    2 EXPL DIP4     6  2.50000000D+02  6.00000000D+02    0\r\n  5.91750000D+02  5.46430000D+07  7.67640000D-01 -6.20560000D-01  2.59350000D-01\r\n  0.00000000D+00\r\nDENL    2 DIPP WATS     4  2.63149990D+02  5.91799990D+02    0\r\n  5.69308891D-01  4.19037639D-01  5.91799990D+02  3.16455669D+00\r\nVP      2 EXPL ANT1     7  2.50000000D+02  6.00000000D+02    0\r\n  7.69450000D+01 -6.72980000D+03  0.00000000D+00  0.00000000D+00 -8.17900000D+00\r\n  5.30170000D-06  2.00000000D+00\r\nSHOR    3 XYLOL\r\nNAME    3 P-XYLENE\r\nCASN    3 106-42-3\r\nMOLW    3 BASE   1.06168900D+02\r\nTC      3 DIPP   6.16229980D+02\r\nPC      3 DIPP   3.51081000D+06\r\nRHOC    3 DIPP   2.63852249D+00\r\nCL      3 VDI  POLY     3  2.93149990D+02  5.73150020D+02    0\r\n  1.52587424D+05 -7.91887052D+01  6.01081062D-01\r\nCPID    3 EXPL ALYL     5  2.50000000D+02  6.00000000D+02    0\r\n  8.52100000D+04  3.29540000D+05  1.49440000D+03  2.11500000D+05  6.75800000D+02\r\nHVAP    3 EXPL DIP4     6  2.50000000D+02  6.00000000D+02    0\r\n  6.30300000D+02  6.53930000D+07  9.88130000D-01 -9.16170000D-01  3.50230000D-01\r\n  0.00000000D+00\r\nDENL    3 DIPP WATS     4  2.86410000D+02  5.83150020D+02    0\r\n  4.92976355D-01  4.14466743D-01  6.16229980D+02  2.63852249D+00\r\nVP      3 EXPL ANT1     7  2.50000000D+02  6.00000000D+02    0\r\n  9.04050000D+01 -7.95520000D+03  0.00000000D+00  0.00000000D+00 -1.00860000D+01\r\n  5.95940000D-06  2.00000000D+00\r\nAVER MOLA MOLW\r\nAVER MOLA TC\r\nAVER MOLA PC\r\nAVER MOLA RHOC\r\nAVER MOLA CL\r\nAVER MOLA CPID\r\nAVER MOLA HVAP\r\nAVER VOLU DENL\r\nAVER MOLA VP\r\nAVER VLEQ DENV\r\nENTH SP00 NONE NONE\r\nPHAS    1 GAS\r\nPHAS    2 GAS\r\nPHAS    3 GAS\r\nTREF    1   2.73150000D+02\r\nTREF    2   2.73150000D+02\r\nTREF    3   2.73150000D+02\r\nLVEQ SP00 IDEA NONE NONE NONE NONE\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "BTX",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": false,
+                    "IconName": "FlaskOutline",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "25"
+                    }
+                  }
+                ]
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
+            }
+          ]
+        },
+        "IsExpanded": true,
+        "IconName": "Folder",
+        "IsRenaming": false,
+        "Parent": {
+          "$ref": "1"
+        }
+      },
+      {
+        "$id": "27",
+        "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+        "Id": "00000000-0000-0000-0000-000000000000",
+        "Name": "Results",
+        "Children": {
+          "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+          "$values": []
+        },
+        "IsExpanded": true,
+        "IconName": "Folder",
+        "IsRenaming": false,
+        "Parent": {
+          "$ref": "1"
+        }
+      }
+    ]
+  },
+  "IsExpanded": true,
+  "IconName": "Folder",
+  "IsRenaming": false,
+  "Parent": null
+}

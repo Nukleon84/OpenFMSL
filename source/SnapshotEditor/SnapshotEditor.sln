@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotEditor", "SnapshotEditor\SnapshotEditor.csproj", "{63FAFE27-E50E-4A9D-8FFB-48B99698883B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotEditor.bootstrapper", "SnapshotEditor.bootstrapper\SnapshotEditor.bootstrapper.csproj", "{AF09E8D3-AB25-41EC-A721-5F996B8533CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63FAFE27-E50E-4A9D-8FFB-48B99698883B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63FAFE27-E50E-4A9D-8FFB-48B99698883B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63FAFE27-E50E-4A9D-8FFB-48B99698883B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63FAFE27-E50E-4A9D-8FFB-48B99698883B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF09E8D3-AB25-41EC-A721-5F996B8533CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF09E8D3-AB25-41EC-A721-5F996B8533CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF09E8D3-AB25-41EC-A721-5F996B8533CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF09E8D3-AB25-41EC-A721-5F996B8533CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

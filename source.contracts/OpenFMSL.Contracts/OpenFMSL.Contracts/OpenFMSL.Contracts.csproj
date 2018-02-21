@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4881615B-467D-4285-A631-439C33951E5C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OpenFMSL.Contracts</RootNamespace>
+    <AssemblyName>OpenFMSL.Contracts</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin.contracts\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin.contracts\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Documents\AddNewDocumentMessage.cs" />
+    <Compile Include="Documents\IChartViewModelFactory.cs" />
+    <Compile Include="Documents\IDocumentEditorViewModel.cs" />
+    <Compile Include="Documents\IPythonScriptDocumentViewModel.cs" />
+    <Compile Include="Documents\IPythonScriptViewModelFactory.cs" />
+    <Compile Include="Documents\ISnapshotDocumentViewModel.cs" />
+    <Compile Include="Documents\IThermodynamicsSystemViewModelFactory.cs" />
+    <Compile Include="Documents\IThermodynamicSystemImporter.cs" />
+    <Compile Include="Documents\IThermodynamicSystemViewModel.cs" />
+    <Compile Include="Entities\ChartEntity.cs" />
+    <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Entities\Folder.cs" />
+    <Compile Include="Entities\IEntityManager.cs" />
+    <Compile Include="Entities\OpenRepositoryMessage.cs" />
+    <Compile Include="Entities\PersistChangesMessage.cs" />
+    <Compile Include="Entities\RequestEntityEditorMessage.cs" />
+    <Compile Include="Entities\RestoreProjectFromRepositoryMessage.cs" />
+    <Compile Include="Entities\Script.cs" />
+    <Compile Include="Entities\Snapshot.cs" />
+    <Compile Include="Entities\StoreEntityInRepositoryMessage.cs" />
+    <Compile Include="Entities\ThermodynamicSystem.cs" />
+    <Compile Include="Infrastructure\Messaging\BaseMessage.cs" />
+    <Compile Include="Infrastructure\Messaging\ChangeStatusBarTextMessage.cs" />
+    <Compile Include="Infrastructure\Messaging\IMessageLogViewModel.cs" />
+    <Compile Include="Infrastructure\Messaging\LogMessage.cs" />
+    <Compile Include="Infrastructure\Persistence\IProjectStorage.cs" />
+    <Compile Include="Infrastructure\Reporting\ChartModel.cs" />
+    <Compile Include="Infrastructure\Reporting\Helper.cs" />
+    <Compile Include="Infrastructure\Reporting\SeriesModel.cs" />
+    <Compile Include="Infrastructure\Scripting\ExecuteSourceCodeMessage.cs" />
+    <Compile Include="Infrastructure\Scripting\IInteractiveConsoleViewModel.cs" />
+    <Compile Include="Infrastructure\Scripting\IPythonEnvironment.cs" />
+    <Compile Include="Infrastructure\Scripting\RunCurrentScriptMessage.cs" />
+    <Compile Include="Infrastructure\Scripting\ShowConsoleMessage.cs" />
+    <Compile Include="Infrastructure\Scripting\StopCurrentScriptMessage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenFMSL.Core\OpenFMSL.Core.csproj">
+      <Project>{9C934644-812A-4306-A854-789F5F3A437A}</Project>
+      <Name>OpenFMSL.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

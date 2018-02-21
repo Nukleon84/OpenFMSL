@@ -1,0 +1,73 @@
+﻿<Window x:Class="Shell.Views.MainWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Shell"
+             xmlns:cal="http://www.caliburnproject.org"
+        mc:Ignorable="d" 
+        Title="OpenFMSL Simple IDE" Height="400" Width="600"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}" WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        >
+    <DockPanel>
+        
+        <!--<Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem x:Name="New" Header="New"></MenuItem>
+                <MenuItem x:Name="Open" Header="Open"></MenuItem>
+                <MenuItem x:Name="Save" Header="Save"></MenuItem>
+                <Separator></Separator>
+                <MenuItem x:Name="Quit" Header="Quit"></MenuItem>
+            </MenuItem>
+        </Menu>-->
+        <ToolBar DockPanel.Dock="Top">
+            <Button   Name="ToolbarNew" cal:Message.Attach="[Event Click] = [Action New()]" ToolTip="Create a new project">
+                <materialDesign:PackIcon Kind="File" />
+            </Button>
+            <Button Name="ToolbarLoad" cal:Message.Attach="[Event Click] = [Action Open()]" ToolTip="Load an existing project">
+                <materialDesign:PackIcon Kind="Folder" />
+            </Button>
+            <Button Name="ToolbarSave" cal:Message.Attach="[Event Click] = [Action Save()]" ToolTip="Save project under current filename">
+                <materialDesign:PackIcon Kind="ContentSave" />
+            </Button>
+            <Button Name="ToolbarSaveAs" cal:Message.Attach="[Event Click] = [Action SaveAs()]" ToolTip="Save project under a different filename">
+                <materialDesign:PackIcon Kind="ContentSaveSettings" />
+            </Button>
+            <Separator></Separator>
+            <Button Name="Console" cal:Message.Attach="[Event Click] = [Action ShowConsole()]" ToolTip="Open interactive console" >
+                <materialDesign:PackIcon Kind="Console" />
+            </Button>
+            <Button Name="Clear" cal:Message.Attach="[Event Click] = [Action ClearConsole()]" ToolTip="Clear the console window" >
+                <materialDesign:PackIcon Kind="Broom" />
+            </Button>
+            <Separator></Separator>
+            <Button Name="Run" cal:Message.Attach="[Event Click] = [Action ExecuteCurrentDocument()]" ToolTip="Execute current document" >
+                <materialDesign:PackIcon Kind="Play" />
+            </Button>
+            <Button Name="Stop" cal:Message.Attach="[Event Click] = [Action StopCurrentTask()]" ToolTip="Stop current long-running process" >
+                <materialDesign:PackIcon Kind="Stop" />
+            </Button>
+            <Separator></Separator>
+        </ToolBar>
+        <StatusBar DockPanel.Dock="Bottom" Height="30" Background="{DynamicResource PrimaryHueMidBrush}" >
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusbarText}" Foreground="White"></TextBlock>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock Text="{Binding CurrentFilename}" Foreground="White"></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+
+        <ContentControl Margin="5" DockPanel.Dock="Left" MinWidth="200" x:Name="EntityManager"  ></ContentControl>
+
+        <ContentControl  Margin="5" DockPanel.Dock="Bottom" MaxHeight="150" x:Name="MessageLog"></ContentControl>
+        <ContentControl Margin="5"  x:Name="Documents"></ContentControl>
+    </DockPanel>
+</Window>

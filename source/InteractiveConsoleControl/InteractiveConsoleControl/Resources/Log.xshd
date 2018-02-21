@@ -1,0 +1,52 @@
+<SyntaxDefinition name="Log" extensions=".log">
+	
+	<Properties>
+		<Property name="LineComment" value="#"/>
+	</Properties>
+
+  
+	<Digits name="Digits" color="DarkBlue"/>
+
+	<RuleSets>
+		<RuleSet ignorecase="false">
+			
+			<Delimiters>()[]{}@,:.`=;+-*/% &amp;|^&gt;&lt;</Delimiters>
+			
+			<Span name="Char" stopateol="true" color="Red" escapecharacter="\">
+				<Begin>'</Begin>
+				<End>'</End>
+			</Span>
+			
+			<Span name="DocComment" color="Green">
+				<Begin>"""</Begin>
+				<End>"""</End>
+			</Span>
+			
+			<Span name="LineComment" stopateol="true" color="Green">
+				<Begin>#</Begin>
+			</Span>
+
+      <Span name="LineSuccess" stopateol="true" color="YellowGreen">
+        <Begin>+++</Begin>
+      </Span>
+      <Span name="Error" stopateol="true" color="OrangeRed">
+        <Begin>!!!</Begin>
+      </Span>
+      <Span name="Warning" stopateol="true" color="Gold">
+        <Begin>***</Begin>
+      </Span>
+      <Span name="Info" stopateol="true" color="DimGray">
+        <Begin>---</Begin>
+      </Span>
+			
+			<Span name="String" stopateol="true" color="Red" escapecharacter="\">
+				<Begin>"</Begin>
+				<End>"</End>
+			</Span>
+			
+			<MarkPrevious bold="true" color="MidnightBlue">(</MarkPrevious>
+		
+			
+		</RuleSet>
+	</RuleSets>
+</SyntaxDefinition>

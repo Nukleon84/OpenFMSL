@@ -1,0 +1,212 @@
+﻿<UserControl x:Class="SnapshotEditor.Views.EquationRenderControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SnapshotEditor.Views"               
+             xmlns:expr="clr-namespace:OpenFMSL.Core.Expressions;assembly=OpenFMSL.Core"           
+             xmlns:flow="clr-namespace:OpenFMSL.Core.Flowsheeting;assembly=OpenFMSL.Core"     
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             Background="White"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type expr:Addition}">
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="+" Margin="2,0,2,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type expr:Subtraction}">
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="-" Margin="2,0,2,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:Division}">
+            <StackPanel Orientation="Vertical" Margin="2">
+                <ContentControl Margin="6,0,6,1" HorizontalAlignment="Center" Content="{Binding Left}"></ContentControl>
+                <Border BorderBrush="Black" BorderThickness="0,1,0,1"></Border>
+                <ContentControl Margin="6,1,6,0" HorizontalAlignment="Center" Content="{Binding Right}"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type expr:Multiplication}" >
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="⦁"  FontSize="12" Margin="2,0,2,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type expr:Power}">
+            <StackPanel Orientation="Horizontal">
+
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center" >
+                </ContentControl>
+
+                <ContentControl Margin="0,0,0,16" Content="{Binding Right}" VerticalAlignment="Top">
+                    <ContentControl.LayoutTransform>
+                        <ScaleTransform ScaleY="0.75" ScaleX="0.75"></ScaleTransform>
+                    </ContentControl.LayoutTransform>
+                </ContentControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:Exp}">
+            <StackPanel Orientation="Horizontal" Margin="5,0,5,0">
+                <TextBlock Text="e"  VerticalAlignment="Center"></TextBlock>
+                <ContentControl Margin="0,-6,0,0" VerticalAlignment="Top" Content="{Binding Parameter}">
+                    <ContentControl.LayoutTransform>
+                        <ScaleTransform ScaleY="0.75" ScaleX="0.75"></ScaleTransform>
+                    </ContentControl.LayoutTransform>
+                </ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type expr:Sqrt}">
+            <StackPanel Orientation="Horizontal">
+                <Polyline Points="0,5 10,10 10,0" Stroke="Black" StrokeThickness="1" Stretch="Fill" ></Polyline>
+                <Border BorderThickness="0,1,0,0" BorderBrush="Black">
+                    <ContentControl Margin="2,1,0,0" Content="{Binding Parameter}" VerticalAlignment="Center" ></ContentControl>
+                </Border>
+            </StackPanel>
+        </DataTemplate>
+
+        <!--<DataTemplate DataType="{x:Type expr:Partial}">
+            <StackPanel Orientation="Vertical" Margin="2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="∂" Margin="6,0,2,0" VerticalAlignment="Center"></TextBlock>
+                    <ContentControl Margin="0,0,6,1" HorizontalAlignment="Center" Content="{Binding Parameter}"></ContentControl>
+                </StackPanel>
+                <Border BorderBrush="Black" BorderThickness="0,1,0,1"></Border>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="∂" Margin="6,0,2,0" VerticalAlignment="Center"></TextBlock>
+                    <ContentControl Margin="0,1,6,0" HorizontalAlignment="Center" Content="{Binding WithRespectTo}"></ContentControl>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>-->
+
+        <DataTemplate DataType="{x:Type expr:Negation}">
+            <StackPanel Orientation="Horizontal" Margin="2,0,2,0">
+                <!--<Border BorderThickness="1,0,1,0" BorderBrush="Black">-->
+                <TextBlock Text="-" VerticalAlignment="Center"  FontWeight="Bold" ></TextBlock>
+                <Polyline Points="5,0 0,0 0,18, 5,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <ContentControl Content="{Binding Child}" VerticalAlignment="Center" ></ContentControl>
+                <Polyline Points="0,0 5,0 5,18, 0,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <!--</Border>-->
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:UnaryFunction}">
+            <StackPanel Orientation="Horizontal" Margin="2,0,2,0">
+                <!--<Border BorderThickness="1,0,1,0" BorderBrush="Black">-->
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"  FontWeight="Bold" ></TextBlock>
+                <Polyline Points="5,0 0,0 0,18, 5,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <ContentControl Content="{Binding Parameter}" VerticalAlignment="Center" ></ContentControl>
+                <Polyline Points="0,0 5,0 5,18, 0,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <!--</Border>-->
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:Parentheses}">
+            <StackPanel Orientation="Horizontal" Margin="2,0,2,0">
+                <!--<Border BorderThickness="1,0,1,0" BorderBrush="Black">-->
+                <Polyline Points="5,0 0,0 0,18, 5,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <ContentControl Content="{Binding Child}" VerticalAlignment="Center" ></ContentControl>
+                <Polyline Points="0,0 5,0 5,18, 0,18" Stroke="Black" StrokeThickness="1" Stretch="Fill"></Polyline>
+                <!--</Border>-->
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:Equation}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="=" Margin="5,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <!--<DataTemplate DataType="{x:Type eq:LessThanOrEqualConstraint}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="≤" Margin="5,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type eq:GreaterThanOrEqualConstraint}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl Content="{Binding Left}" VerticalAlignment="Center"></ContentControl>
+                <TextBlock Text="≥" Margin="5,0,5,0" VerticalAlignment="Center"></TextBlock>
+                <ContentControl Content="{Binding Right}" VerticalAlignment="Center"></ContentControl>
+            </StackPanel>
+        </DataTemplate>-->
+
+        <DataTemplate DataType="{x:Type expr:Literal}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Value}" Foreground="Orange"></TextBlock>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type expr:Variable}">
+            <StackPanel Orientation="Horizontal" Name="VariableTag" >
+
+                <StackPanel Name="ModelTag" Visibility="Collapsed" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ModelName}" Foreground="Gray" FontSize="10" FontStretch="Condensed"></TextBlock>
+                    <TextBlock Text="⟼" Foreground="Gray" FontSize="10"></TextBlock>
+                   
+                </StackPanel>
+
+                
+                <TextBlock Text="{Binding Name}" >
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+
+                            <StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Path=ValueInSI}"></TextBlock>
+                                    <TextBlock Margin="3,0,0,0"  Text="{Binding Path=InternalUnit.Symbol}"></TextBlock>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Path=ValueInOutputUnit}"></TextBlock>
+                                    <TextBlock Margin="3,0,0,0" Text="{Binding Path=OutputUnit.Symbol}"></TextBlock>
+                                </StackPanel>
+                                <TextBlock Text="{Binding Path=Description}"></TextBlock>
+                                <TextBlock Text="{Binding Path=DefiningExpression}"></TextBlock>
+
+
+                            </StackPanel>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <Grid>
+                    <ContentControl Margin="0,-6,0,0" Content="{Binding Superscript}" VerticalAlignment="Center">
+                        <ContentControl.LayoutTransform>
+                            <ScaleTransform ScaleY="0.5" ScaleX="0.5"></ScaleTransform>
+                        </ContentControl.LayoutTransform>
+                    </ContentControl>
+                    <ContentControl Margin="0,0,0,-12" Content="{Binding Subscript}" VerticalAlignment="Center">
+                        <ContentControl.LayoutTransform>
+                            <ScaleTransform ScaleY="0.5" ScaleX="0.5"></ScaleTransform>
+                        </ContentControl.LayoutTransform>
+                    </ContentControl>
+                </Grid>
+               
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <Trigger SourceName="VariableTag" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="ModelTag" Property="Visibility" Value="Visible"></Setter>
+                </Trigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+
+    </UserControl.Resources>
+    <Grid >
+        <!--<Viewbox RenderTransformOrigin="0.5,0.5">-->
+
+        <ContentControl Margin="5" Content="{Binding}" FontFamily="Cambria Math" FontSize="16"  Foreground="Black"></ContentControl>
+        <!--</Viewbox>-->
+    </Grid>
+</UserControl>

@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="EntityManagerControl.Views.EntityManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EntityManagerControl.Views"
+               xmlns:cal="http://www.caliburnproject.org"
+             xmlns:common="clr-namespace:EntityManagerControl.Behaviors"
+             xmlns:domain="clr-namespace:OpenFMSL.Contracts.Entities;assembly=OpenFMSL.Contracts"
+             xmlns:viewmodels="clr-namespace:EntityManagerControl.ViewModels"
+               xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             Name="ManagerControl"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        
+        <HierarchicalDataTemplate  DataType="{x:Type viewmodels:EntityViewModel}" ItemsSource="{Binding Children}">
+            <ContentControl cal:Message.Attach="[Event PreviewMouseRightButtonDown] = [Action ChangeActiveEntity($dataContext)];[Event MouseDoubleClick] = [Action RequestDetails($dataContext)]">
+                <StackPanel  Orientation="Horizontal" Tag="{Binding DataContext, ElementName=ManagerControl}">
+                    <StackPanel.ContextMenu>
+                        <ContextMenu  DataContext="{Binding Path=PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="Add Script" cal:Message.Attach="AddScript"/>
+                            <MenuItem Header="Add Thermo" cal:Message.Attach="AddThermoSystem"/>
+                            <MenuItem Header="Add Folder" cal:Message.Attach="AddFolder" />
+                            <Separator></Separator>
+                            <MenuItem Header="Rename" cal:Message.Attach="RenameEntity"/>
+                            <Separator></Separator>
+                            <MenuItem Header="Cut" cal:Message.Attach="CutEntity"/>
+                            <MenuItem Header="Copy" cal:Message.Attach="CopyEntity"/>
+                            <MenuItem Header="Paste" cal:Message.Attach="PasteEntity"/>
+                            <MenuItem Header="Delete" cal:Message.Attach="DeleteEntity"/>
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
+
+                    <materialDesign:PackIcon Kind="{Binding IconName}" Width="20" Height="20"></materialDesign:PackIcon>
+                    <TextBlock Name="TextBlockName" Margin="5" VerticalAlignment="Center" Text="{Binding Name}"></TextBlock>
+                    <TextBox Name="TextBoxName"  Margin="5" VerticalAlignment="Center" Text="{Binding Name}" Visibility="Collapsed">
+                    </TextBox>
+
+
+                </StackPanel>
+            </ContentControl>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                    <Setter TargetName="TextBoxName" Property="Visibility" Value="Visible"></Setter>
+                    <Setter TargetName="TextBlockName" Property="Visibility" Value="Collapsed"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRenaming}" Value="False">
+                    <Setter TargetName="TextBoxName" Property="Visibility" Value="Collapsed"></Setter>
+                    <Setter TargetName="TextBlockName" Property="Visibility" Value="Visible"></Setter>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <TreeView Grid.Column="0"  Grid.Row ="0" Grid.RowSpan="2" MinWidth="50"   ItemsSource="{Binding Root.Children}"  
+                      cal:Message.Attach="[Event MouseLeftButtonUp] = [Action UnselectEntity()]; [Event DragEnter] = [Action DragEnter($eventArgs)]; [Event Drop] = [Action Drop($executionContext)]; [Event SelectedItemChanged]= [Action SelectItem($source)]"  
+                      AllowDrop="True"  >
+
+            <i:Interaction.Triggers>
+                <common:InputBindingTrigger>
+                    <common:InputBindingTrigger.InputBinding>
+                        <KeyBinding Key="Delete"/>
+                    </common:InputBindingTrigger.InputBinding>
+                    <cal:ActionMessage MethodName="DeleteSelectedItem"/>
+                </common:InputBindingTrigger>
+            </i:Interaction.Triggers>
+
+            <!--<Setter Property="ItemContainerStyle">cal:Message.Attach=""
+                    <Setter.Value>
+                        <Style TargetType="{x:Type ListViewItem}">
+                           
+                        </Style>
+                    </Setter.Value>
+                </Setter>-->
+
+            <TreeView.ItemContainerStyle  >
+                <Style TargetType="{x:Type TreeViewItem}" >
+                    <Setter Property="common:DragAndDropProperties.EnabledForDrag" Value="True" />
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+        </TreeView>
+    </Grid>
+</UserControl>

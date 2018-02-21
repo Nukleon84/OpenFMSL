@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="InteractiveConsoleControl.Views.InteractiveConsoleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InteractiveConsoleControl.Views"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <DockPanel>
+        <DockPanel.Resources>
+            <Style TargetType="Button"></Style>
+        </DockPanel.Resources>
+        <DockPanel DockPanel.Dock="Bottom">
+            <!--<Button DockPanel.Dock="Right" x:Name="ExecuteCurrentCommand">Run</Button>-->
+            <TextBox FontFamily="Consolas" FontSize="12" DockPanel.Dock="Left" Text="{Binding CurrentCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="False" AcceptsTab="True"
+                     cal:Message.Attach="[Event PreviewKeyDown] = [Action TextInputCommand($eventArgs)]"
+                     ></TextBox>
+        </DockPanel>
+
+        <ae:TextEditor Name="History" ShowLineNumbers="True" Document="{Binding History}"
+                       FontFamily="Consolas" IsReadOnly="True"
+                    SyntaxHighlighting="C#" FontSize="10pt" 
+                       cal:Message.Attach="[Event PreviewTextInput] = [Action TextInputHistory($eventArgs)];[Event PreviewKeyDown] = [Action TextInputCommand($eventArgs)]"
+                       TextChanged="History_TextChanged"
+                       >
+        </ae:TextEditor>
+    </DockPanel>
+</UserControl>

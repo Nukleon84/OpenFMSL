@@ -1,0 +1,1 @@
+To use IPOPT in OpenFMSL, copy the IPOPT binaries to this folder and rebuild the contracts solution.

@@ -1,0 +1,129 @@
+﻿<UserControl x:Class="ThermodynamicSystemEditor.Views.ThermodynamicSystemEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ThermodynamicSystemEditor.Views"
+               
+                xmlns:cal="http://www.caliburnproject.org"
+             xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="600">
+    <TabControl TabStripPlacement="Left">
+        <TabItem Header="Source">
+            <ae:TextEditor Name="PythonScriptTextBox" SyntaxHighlighting="C#" ShowLineNumbers="True" Document="{Binding ScriptDocument}"  FontFamily="Consolas" FontSize="10pt">
+            </ae:TextEditor>
+        </TabItem>
+        <TabItem Header="Pure Component Constants">
+            <DockPanel>
+                <ListView DockPanel.Dock="Left" MinWidth="100" ItemsSource="{Binding AvailableComponents}" SelectedItem="{Binding SelectedComponent}" DisplayMemberPath="ID" ></ListView>
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Name</Label>
+                        <TextBox Text="{Binding SelectedComponent.Name}" MinWidth="150"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">ID</Label>
+                        <TextBox Text="{Binding SelectedComponent.ID}" Width="150"></TextBox>                      
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">CasNumber</Label>
+                        <TextBox Text="{Binding SelectedComponent.CasNumber}" Width="150"></TextBox>
+                    </StackPanel>
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding AvailableConstants}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding FullName}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Value" Binding="{Binding ValueInOutputUnit}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Unit" Binding="{Binding OutputUnit}" Width="*"></DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Pure Component Analysis">
+            <DockPanel>
+                <ListView DockPanel.Dock="Left" MinWidth="100" ItemsSource="{Binding ComponentsForPureAnalysis}" >
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                <TextBlock Text="{Binding Data.ID}"  />                              
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Property</Label>
+                        <ComboBox ItemsSource="{Binding AvailableFunctionTypes}" SelectedItem="{Binding SelectedFunctionType}"  MinWidth="100"></ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Tmin</Label>
+                        <TextBox Text="{Binding MinimumTemperature}" Width="100"></TextBox>
+                        <Label Width="80">°C</Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Tmax</Label>
+                        <TextBox Text="{Binding MaximumTemperature}" Width="100"></TextBox>
+                        <Label Width="80">°C</Label>
+                    </StackPanel>
+                    <Button x:Name="RedrawPureComponentChart">Redraw</Button>
+                </StackPanel>
+                <ContentControl x:Name="PureComponentPropertyChart"></ContentControl>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Binary Analysis">
+            <DockPanel>            
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100">Component 1</Label>
+                        <ComboBox ItemsSource="{Binding AvailableComponents}" SelectedItem="{Binding BinaryComponent1}" DisplayMemberPath="ID" MinWidth="100"></ComboBox>                        
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100">Component 2</Label>
+                        <ComboBox ItemsSource="{Binding AvailableComponents}" SelectedItem="{Binding BinaryComponent2}" DisplayMemberPath="ID" MinWidth="100"></ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100">Pressure</Label>
+                        <TextBox Text="{Binding PressureForTX}" Width="100"></TextBox>
+                        <Label Width="80">mbar</Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100">Temperature</Label>
+                        <TextBox Text="{Binding TemperatureForPX}" Width="100"></TextBox>
+                        <Label >°C</Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100">Analysis Type</Label>
+                        <ComboBox ItemsSource="{Binding BinaryAnalysisTypes}" SelectedItem="{Binding SelectedBinaryAnalysis}" MinWidth="100"></ComboBox>
+
+                    </StackPanel>
+                    <Button x:Name="RedrawBinaryAnalysisChart">Redraw</Button>
+                </StackPanel>
+                <ContentControl x:Name="BinaryAnalysisChart"></ContentControl>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Ternary Analysis"></TabItem>
+        <TabItem Header="Residue Analysis"></TabItem>
+        <TabItem Header="Enthalpy Curves">
+            <DockPanel>
+                <ListView DockPanel.Dock="Left" MinWidth="100" ItemsSource="{Binding AvailableComponents}" SelectedItem="{Binding SelectedComponent}" DisplayMemberPath="ID" ></ListView>
+                <StackPanel DockPanel.Dock="Top">                   
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Tmin</Label>
+                        <TextBox Text="{Binding MinimumTemperatureEnthalpy}" Width="100"></TextBox>
+                        <Label Width="80">°C</Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="80">Tmax</Label>
+                        <TextBox Text="{Binding MaximumTemperatureEnthalpy}" Width="100"/>
+                        <Label Width="80">°C</Label>
+                    </StackPanel>
+                    <Button x:Name="RedrawEnthalpyChart">Redraw</Button>
+                </StackPanel>
+                <ContentControl x:Name="EnthalpyChart"></ContentControl>
+            </DockPanel>
+        </TabItem>
+    </TabControl>
+    
+</UserControl>

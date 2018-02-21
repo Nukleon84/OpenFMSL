@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="Shell.Views.TestDocumentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Shell.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="20">
+
+                <Grid.Resources>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="24"></Setter>
+                        <Setter Property="FontWeight" Value="Bold"></Setter>
+                        <Setter Property="HorizontalAlignment" Value="Right"></Setter>
+
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition MinWidth="400" MaxWidth="600"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0">about</Label>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10">
+                    <TextBlock TextWrapping="WrapWithOverflow">OpenFMSL Simple IDE is a program designed for the management of multiple process simulation models,
+                    the solution of simulation problems and the visualization of simulation results.</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">© OpenFMSL by J. Steimel 2017</TextBlock>
+                </StackPanel>
+                <Label Grid.Row="1" Grid.Column="0">numerics</Label>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
+                    <TextBlock TextWrapping="Wrap"> This program uses IPOPT.  Ipopt is written in C++ and is released as open source code under the Eclipse Public License (EPL). It is available from the ​COIN-OR initiative. The code has been written by ​Andreas Wächter and ​Carl Laird. The COIN-OR project managers for Ipopt are ​Andreas Wächter und ​Stefan Vigerske. For a list of all contributors, see the AUTHORS file​.</TextBlock>
+                    <TextBlock>  A. Wächter and L. T. Biegler, ​On the Implementation of a Primal-Dual Interior Point Filter Line Search Algorithm for Large-Scale Nonlinear Programming, Mathematical Programming 106(1), pp. 25-57, 2006 (​preprint)</TextBlock>
+                    <TextBlock>  This program uses CSparse.net for the Dulmage-Mendelsohn Decomposition of equation systems</TextBlock>
+                    <TextBlock>  This program uses CSparse.net for the solution of linear equation systems with the SparseLU class</TextBlock>
+                </StackPanel>
+
+                <Label Grid.Row="2" Grid.Column="0">frameworks</Label>
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="10" >
+                    <TextBlock TextWrapping="WrapWithOverflow">OpenFMSL Simple IDE uses several third-party libraries for the GUI.</TextBlock>
+                    <!--<TextBlock TextWrapping="WrapWithOverflow">This program uses MahApps.Metro controls. https://github.com/MahApps/MahApps.Metro</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses XCEED.ExtendedWPFToolkit controls. http://wpftoolkit.codeplex.com/</TextBlock>-->
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Caliburn.Micro as a MVVM toolkit. https://caliburnmicro.com/</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Castle.Windsor for dependency injection. http://www.castleproject.org/projects/windsor/</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses MaterialDesignThemes in XAML. https://github.com/ButchersBoy/MaterialDesignInXamlToolkit</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses the AvalonEdit control. http://avalonedit.net/</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses IronPython for scripting. http://ironpython.net/</TextBlock>
+
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
