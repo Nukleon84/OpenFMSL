@@ -15,3 +15,9 @@ As the build script is still hard-coded to my development computer, you must bui
 4. Execute shell.exe in the deploy folder to launch the simple IDE.
    
 ## Getting started
+1. Once the program has started, click the Load button to select the BasicExample.project file.
+2. Double-click the model "BTX column" from the list
+![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_Model.PNG "The IDE with a model loaded")
+3. Press the RUN button on the toolbar to execute the script.
+![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_console.PNG "The IDE has a simple python shell integrated that reports results and takes interactive commands")
+![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_plots.PNG "The IDE can also display simple charts and diagrams")
