@@ -40,7 +40,7 @@ As the build script is still hard-coded to my development computer, you must bui
 ![alt text](https://github.com/Nukleon84/OpenFMSL/blob/master/doc/IDE_plots.PNG "The IDE can also display simple charts and diagrams")
 
 ## Going further
-You can also build your own programs that use the different components of OpenFMSL. YOu should strongly consider using Castle.Windsor as the dependency injection container, as the library was build around this. As a starting point, you could create a command line program that uses the ThermodynamicsImporter and the basic classes in the library to run a fixed flowsheet. You can copy a lot of the Python code from the examples directly to C# (just add semicolons). 
+You can also build your own programs that use the different components of OpenFMSL. You should strongly consider also using Castle.Windsor as the dependency injection container, as the library was build around this very nice and powerful libary. As a starting point, you could create a command line program that uses the ThermodynamicsImporter and the basic classes in the library to run a fixed flowsheet. You can copy a lot of the Python code from the examples directly to C# (just add semicolons). 
 
 ## Next Steps
 1. Write better documentation/WIKI
