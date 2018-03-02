@@ -158,7 +158,7 @@
                             "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
                             "$values": []
                           },
-                          "IsExpanded": true,
+                          "IsExpanded": false,
                           "IconName": "LanguagePythonText",
                           "IsRenaming": false,
                           "Parent": {
@@ -420,6 +420,40 @@
               "Parent": {
                 "$ref": "2"
               }
+            },
+            {
+              "$id": "27",
+              "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
+              "Id": "00000000-0000-0000-0000-000000000000",
+              "Name": "WIKI examples",
+              "Children": {
+                "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                "$values": [
+                  {
+                    "$id": "28",
+                    "$type": "OpenFMSL.Contracts.Entities.Script, OpenFMSL.Contracts",
+                    "SourceCode": "sys= CreateThermo(Items[\"Projects|Thermodynamics|BTX\"].Data)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MassFlow, SI.kg/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.MolarFlow, SI.kmol/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.VolumeFlow, SI.cum/SI.h)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Temperature, METRIC.C)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.Pressure, METRIC.mbar)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.SpecificMolarEnthalpy, SI.kJ/SI.mol)\r\nsys.VariableFactory.SetOutputDimension(PhysicalDimension.HeatFlow, SI.kW)\r\n\r\nreport(sys)\r\n\r\nS01 = MaterialStream(\"S01\", sys)\\\r\n\t.Specify(\"T\",420, METRIC.C)\\\r\n\t.Specify(\"p\",1.013, METRIC.bar)\\\r\n\t.Specify(\"n[BENZOL]\",1, SI.kmol/SI.h)\\\r\n\t.Specify(\"n[TOLUOL]\",1, SI.kmol/SI.h)\\\r\n\t.Specify(\"n[XYLOL]\",1, SI.kmol/SI.h)\\\r\n\t.FlashPT()\r\nS02 = MaterialStream(\"S02\", sys)\r\n\r\n\r\nHEAT01 = Heater(\"HEAT01\",sys)\\\r\n\t.Connect(\"In\", S01)\\\r\n\t.Connect(\"Out\", S02)\\\r\n\t.Specify(\"DP\",5, METRIC.mbar)\\\r\n\t.Specify(\"T\",290, METRIC.C)\\\r\n\t.Initialize()\r\n\r\nflowsheet= Flowsheet(\"Flow\")\\\r\n\t.AddMaterialStreams(S01,S02)\\\r\n\t.AddUnit(HEAT01)\r\n\r\ndecomp(flowsheet)\r\n\r\nreport(HEAT01)\r\nreport(flowsheet)\r\n",
+                    "Id": "00000000-0000-0000-0000-000000000000",
+                    "Name": "#1 Heater",
+                    "Children": {
+                      "$type": "System.Collections.Generic.List`1[[OpenFMSL.Contracts.Entities.Entity, OpenFMSL.Contracts]], mscorlib",
+                      "$values": []
+                    },
+                    "IsExpanded": true,
+                    "IconName": "LanguagePythonText",
+                    "IsRenaming": false,
+                    "Parent": {
+                      "$ref": "27"
+                    }
+                  }
+                ]
+              },
+              "IsExpanded": true,
+              "IconName": "Folder",
+              "IsRenaming": false,
+              "Parent": {
+                "$ref": "2"
+              }
             }
           ]
         },
@@ -431,7 +465,7 @@
         }
       },
       {
-        "$id": "27",
+        "$id": "29",
         "$type": "OpenFMSL.Contracts.Entities.Folder, OpenFMSL.Contracts",
         "Id": "00000000-0000-0000-0000-000000000000",
         "Name": "Results",
