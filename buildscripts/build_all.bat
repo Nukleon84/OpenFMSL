@@ -34,8 +34,8 @@ call %MSBUILD%  /t:Build /p:Configuration=%config% ..\source.contracts\OpenFMSL.
 
 for /r %ROOT% %%i in (%WHAT%) do (
   echo Building: %%~ni [%%i]
-  call %NUGET% restore %%i
-  call %MSBUILD%  /t:Build /p:Configuration=%config% %%i /nologo /verbosity:normal >> build.log 2>&1
+  call %NUGET% restore "%%i"
+  call %MSBUILD%  /t:Build /p:Configuration=%config% "%%i" /nologo /verbosity:normal >> build.log 2>&1
   rem Can you read the return code of call?
 )
 goto end
