@@ -20,6 +20,11 @@ If you are interested in Process Simulation software, make sure to check out the
 
 Disclaimer: This is my first real GitHub project. I apologize for any things that I forgot to add. If you find some things are missing (like Licenses for libraries), please notify me. I will add them as soon as possible.
 
+## Quick Start
+
+In the \install folder you will find a precompiled version of the project. You can just unzip and run it directly. You will need the .net-Framework 4.5 installed.
+https://github.com/Nukleon84/OpenFMSL/tree/master/install
+
 ## Prerequisites
 * Visual Studio
 * MSBuild
