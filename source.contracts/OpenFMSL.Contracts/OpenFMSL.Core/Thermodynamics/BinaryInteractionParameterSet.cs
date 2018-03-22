@@ -86,7 +86,7 @@ namespace OpenFMSL.Core.Thermodynamics
             Matrices.Add("B", new double[NC, NC]);
             Matrices.Add("C", new double[NC, NC]);
             Matrices.Add("D", new double[NC, NC]);
-
+         
         }
     }
 

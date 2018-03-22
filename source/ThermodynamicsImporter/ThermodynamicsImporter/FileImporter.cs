@@ -500,7 +500,45 @@ namespace ThermodynamicsImporter
             }
 
         }
+        void ParseWilson(string[] line)
+        {
 
+            int i = ParseInteger(line[2]);
+            int j = ParseInteger(line[3]);
+            double aij = ParseDouble(line[4]);
+            double aji = ParseDouble(line[5]);
+          
+            var comp1 = _currentSystem.Components[i - 1];
+            var comp2 = _currentSystem.Components[j - 1];
+
+
+            if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "WILSON") == 0)
+                _currentSystem.BinaryParameters.Add(new WILSON(_currentSystem));
+
+            var currentParameterSet = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "WILSON");
+            switch (line[1])
+            {
+                case "A":
+                    currentParameterSet.SetParam("A", comp1, comp2, aij);
+                    currentParameterSet.SetParam("A", comp2, comp1, aji);
+                    break;
+                case "B":
+                    currentParameterSet.SetParam("B", comp1, comp2, aij);
+                    currentParameterSet.SetParam("B", comp2, comp1, aji);
+                    break;
+                case "C":
+                    currentParameterSet.SetParam("C", comp1, comp2, aij);
+                    currentParameterSet.SetParam("C", comp2, comp1, aji);
+                    break;
+                case "D":
+                    currentParameterSet.SetParam("D", comp1, comp2, aij);
+                    currentParameterSet.SetParam("D", comp2, comp1, aji);
+                    break;
+                default:
+                    _aggregator.PublishOnUIThread(new LogMessage { MessageText = "Parameter " + line[1] + " is not allowed for Wilson." });
+                    break;
+            }
+        }
         int ParseInteger(string token)
         {
             int value = -1;
@@ -562,6 +600,9 @@ namespace ThermodynamicsImporter
                         return true;
                     case "HNRY":
                         ParseHenry(line);
+                        return true;
+                    case "WILS":
+                        ParseWilson(line);
                         return true;
                     case "VP":
                         ParsePureFunction(line, c => c.GetFunction(EvaluatedProperties.VaporPressure));

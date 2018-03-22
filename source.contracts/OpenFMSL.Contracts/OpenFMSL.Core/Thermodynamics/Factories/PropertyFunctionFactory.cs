@@ -22,9 +22,17 @@ namespace OpenFMSL.Core.Thermodynamics
                     {
 
                         case ActivityMethod.NRTL:
-                            var gamma = new ActivityCoefficientNRTL(system, T, x, index);
-                            liquidPart = gamma ;
-                            break;
+                            {
+                                var gamma = new ActivityCoefficientNRTL(system, T, x, index);
+                                liquidPart = gamma;
+                                break;
+                            }                           
+                        case ActivityMethod.Wilson:
+                            {
+                                var gamma = new ActivityCoefficientWilson(system, T, x, index);
+                                liquidPart = gamma;
+                                break;
+                            }                          
                         default:
                             liquidPart = 1.0;
                             break;
@@ -52,9 +60,17 @@ namespace OpenFMSL.Core.Thermodynamics
                     {
 
                         case ActivityMethod.NRTL:
-                            var gamma = new ActivityCoefficientNRTL(system, T, x, index);
-                            liquidPart = gamma* GetVaporPressure(system, system.Components[index], T);
-                            break;
+                            {
+                                var gamma = new ActivityCoefficientNRTL(system, T, x, index);
+                                liquidPart = gamma * GetVaporPressure(system, system.Components[index], T);
+                                break;
+                            }
+                        case ActivityMethod.Wilson:
+                            {
+                                var gamma = new ActivityCoefficientWilson(system, T, x, index);
+                                liquidPart = gamma * GetVaporPressure(system, system.Components[index], T);
+                                break;
+                            }
                         default:
                             liquidPart = GetVaporPressure(system, system.Components[index], T);
                             break;

@@ -11,8 +11,14 @@
              d:DesignHeight="300" d:DesignWidth="600">
     <TabControl TabStripPlacement="Left">
         <TabItem Header="Source">
-            <ae:TextEditor Name="PythonScriptTextBox" SyntaxHighlighting="C#" ShowLineNumbers="True" Document="{Binding ScriptDocument}"  FontFamily="Consolas" FontSize="10pt">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" >
+                    <Button x:Name="ParseInputFile" Content="Parse" Margin="5"></Button>
+                    <Button x:Name="SaveInputFile" Content="Save Changes" Margin="5"></Button>
+                </StackPanel>
+            <ae:TextEditor Name="PythonScriptTextBox" SyntaxHighlighting="C#" ShowLineNumbers="True" Document="{Binding ScriptDocument}"  FontFamily="Consolas" FontSize="10pt">            
             </ae:TextEditor>
+            </DockPanel>
         </TabItem>
         <TabItem Header="Pure Component Constants">
             <DockPanel>
