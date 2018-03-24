@@ -80,7 +80,8 @@ namespace OpenFMSL.Core.Thermodynamics
                 case EquilibriumApproach.PhiPhi:
                     throw new NotSupportedException("Only Gamma-Phi allowed");
             }
-            K.Subscript = system.Components[index].ID;
+            if(String.IsNullOrEmpty(K.Subscript))
+                K.Subscript = system.Components[index].ID;
             K.BindTo(liquidPart/vaporPart);
             return K;
         }

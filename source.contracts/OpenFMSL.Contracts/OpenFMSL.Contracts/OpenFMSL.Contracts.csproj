@@ -43,6 +43,7 @@
     <Compile Include="Documents\AddNewDocumentMessage.cs" />
     <Compile Include="Documents\IChartViewModelFactory.cs" />
     <Compile Include="Documents\IDocumentEditorViewModel.cs" />
+    <Compile Include="Documents\IFlowsheetEntityEditorFactory.cs" />
     <Compile Include="Documents\IPythonScriptDocumentViewModel.cs" />
     <Compile Include="Documents\IPythonScriptViewModelFactory.cs" />
     <Compile Include="Documents\ISnapshotDocumentViewModel.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Documents\IThermodynamicSystemViewModel.cs" />
     <Compile Include="Entities\ChartEntity.cs" />
     <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Entities\Flowsheet.cs" />
     <Compile Include="Entities\Folder.cs" />
     <Compile Include="Entities\IEntityManager.cs" />
     <Compile Include="Entities\OpenRepositoryMessage.cs" />

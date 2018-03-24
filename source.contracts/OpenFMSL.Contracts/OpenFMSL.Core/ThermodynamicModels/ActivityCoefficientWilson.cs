@@ -16,8 +16,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
         Variable T;
         List<Variable> x;
-        Expression[,] tau;
-        Expression[,] G;
+       
         Expression _gammaExp;
         Expression _dgammaDt;
         Expression[] _dgammaDx;

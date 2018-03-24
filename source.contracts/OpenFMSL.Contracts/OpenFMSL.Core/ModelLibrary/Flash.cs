@@ -42,12 +42,13 @@ namespace OpenFMSL.Core.ModelLibrary
             }
             dp.LowerBound = -1e10;
             dp.ValueInSI = 0;
-            AddVariable(dp);
-            AddVariables(K);
+                        
             AddVariable(p);
             AddVariable(T);
             AddVariable(Q);
             AddVariable(VF);
+            AddVariable(dp);
+            AddVariables(K);
         }
 
         public override void FillEquationSystem(EquationSystem problem)
