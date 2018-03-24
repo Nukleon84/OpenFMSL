@@ -233,6 +233,16 @@ namespace EntityManagerControl.ViewModels
 
             }
         }
+        public void AddFlowsheet()
+        {
+            var folder = _currentEntity as EntityViewModel;
+            if (folder != null && folder.IconName == "Folder")
+            {
+                folder.AddChild(new EntityViewModel(new FlowsheetEntity("New Flowsheet")));
+
+            }
+        }
+
         public void RequestDetails(object args)
         {
             if (CurrentEntity != null)

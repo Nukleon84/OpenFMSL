@@ -29,6 +29,8 @@ namespace PythonEnvironment
         private readonly IEntityManagerViewModel _entityManager;
         private readonly IThermodynamicSystemImporter _importer;
         private readonly IChartViewModelFactory _chartFactory;
+        private readonly IFlowsheetEntityEditorFactory _flowsheetFactory;
+
         Action<string> _onWrite;
 
         private readonly ScriptEngine _pyEngine = null;
@@ -37,13 +39,17 @@ namespace PythonEnvironment
         Decomposer decomp;
         IpoptSolver ipopt;
 
-        public PythonEnvironmentModule(IEventAggregator aggregator, IEntityManagerViewModel entityManager, IThermodynamicSystemImporter importer, IChartViewModelFactory chartFactory)
+        public PythonEnvironmentModule(IEventAggregator aggregator, IEntityManagerViewModel entityManager,
+            IThermodynamicSystemImporter importer,
+            IChartViewModelFactory chartFactory,
+            IFlowsheetEntityEditorFactory flowsheetFactory
+            )
         {
             _aggregator = aggregator;
             _entityManager = entityManager;
             _importer = importer;
             _chartFactory = chartFactory;
-
+            _flowsheetFactory = flowsheetFactory;
             _pyEngine = Python.CreateEngine();
             _pyScope = _pyEngine.CreateScope();
 
@@ -76,7 +82,7 @@ namespace PythonEnvironment
             Run("CreateThermo= _host.LoadThermodynamicSystem");
 
             ipopt = new IpoptSolver();
-            ipopt.OnLog= (x) => Write("    " + x + Environment.NewLine);
+            ipopt.OnLog = (x) => Write("    " + x + Environment.NewLine);
             _pyScope.SetVariable("_ipopt", ipopt);
 
             newton = new Newton();
@@ -181,9 +187,19 @@ namespace PythonEnvironment
         public void Show(Snapshot snap)
         {
             //var vm = _chartFactory.Create(chart);
-            
-            _aggregator.PublishOnUIThread(new RequestEntityEditorMessage { Target=snap});
+
+            _aggregator.PublishOnUIThread(new RequestEntityEditorMessage { Target = snap });
         }
+
+        public void Show(Flowsheet flow)
+        {
+            //var vm = _flowsheetFactory.Create();
+            var entity = new FlowsheetEntity(flow.Name, flow);
+            _aggregator.PublishOnUIThread(new RequestEntityEditorMessage { Target = entity });
+            //_aggregator.PublishOnUIThread(new AddNewDocumentMessage { TimeStamp = DateTime.Now, Sender = this, Title = flow.Name, Parameter = vm });
+        }
+
+
 
         public void Report(ThermodynamicSystem system)
         {
@@ -356,14 +372,14 @@ namespace PythonEnvironment
             foreach (var stream in flowsheet.MaterialStreams)
             {
                 stream.FillEquationSystem(eqsys);
-                
-                var numberOfVariables = eqsys.Variables.Where(v=>v.DefiningExpression==null).Count()- lastVariables;
-                var numberOfFixedVariables = eqsys.Variables.Where(v => v.IsFixed).Count()- lastFixedVariables;
+
+                var numberOfVariables = eqsys.Variables.Where(v => v.DefiningExpression == null).Count() - lastVariables;
+                var numberOfFixedVariables = eqsys.Variables.Where(v => v.IsFixed).Count() - lastFixedVariables;
                 var numberOfEquations = eqsys.NumberOfEquations - numberOfFixedVariables - lastEquations;
 
 
                 WriteLine(String.Format("{0,-15} {1,-15} {2,6} {3,6} {4,6} {5,6}", stream.Name, stream.Class, numberOfVariables, numberOfEquations, numberOfFixedVariables, numberOfVariables - numberOfEquations - numberOfFixedVariables));
-                lastEquations = eqsys.NumberOfEquations ;
+                lastEquations = eqsys.NumberOfEquations;
                 lastVariables = eqsys.NumberOfVariables;
                 lastFixedVariables = eqsys.Variables.Where(v => v.IsFixed).Count();
             }
@@ -394,14 +410,14 @@ namespace PythonEnvironment
                 lastFixedVariables = eqsys.Variables.Where(v => v.IsFixed).Count();
             }
 
-            
+
 
             //foreach(var spec in flowsheet.DesignSpecifications)
-            var totalNumberOfVariables = lastVariables+flowsheet.Variables.Where(v=> v.DefiningExpression == null && !v.IsFixed).Count();
+            var totalNumberOfVariables = lastVariables + flowsheet.Variables.Where(v => v.DefiningExpression == null && !v.IsFixed).Count();
             var totalNumberOfFixedVars = lastFixedVariables + flowsheet.Variables.Where(v => v.IsFixed).Count();
-            var totalNumberOfEquations = lastEquations- totalNumberOfFixedVars + flowsheet.DesignSpecifications.Count();
+            var totalNumberOfEquations = lastEquations - totalNumberOfFixedVars + flowsheet.DesignSpecifications.Count();
             WriteLine("");
-            WriteLine(String.Format("{0,-15} {1,-15} {2,6} {3,6} {4,6} {5,6}", flowsheet.Name, "Flowsheet",  totalNumberOfVariables, totalNumberOfEquations, totalNumberOfFixedVars, totalNumberOfVariables - totalNumberOfEquations - totalNumberOfFixedVars));
+            WriteLine(String.Format("{0,-15} {1,-15} {2,6} {3,6} {4,6} {5,6}", flowsheet.Name, "Flowsheet", totalNumberOfVariables, totalNumberOfEquations, totalNumberOfFixedVars, totalNumberOfVariables - totalNumberOfEquations - totalNumberOfFixedVars));
 
 
         }
@@ -424,7 +440,7 @@ namespace PythonEnvironment
             WriteLine("Decisions");
             foreach (var variable in problem.DecisionVariables)
             {
-                WriteLine(String.Format("{0,12:G6} <= {1,10} = {2,12:G6} <= {3,12:G6} [{4}]",variable.LowerBound, variable.FullName, variable.ValueInSI, variable.UpperBound, variable.InternalUnit));
+                WriteLine(String.Format("{0,12:G6} <= {1,10} = {2,12:G6} <= {3,12:G6} [{4}]", variable.LowerBound, variable.FullName, variable.ValueInSI, variable.UpperBound, variable.InternalUnit));
             }
         }
 
@@ -552,7 +568,7 @@ namespace PythonEnvironment
                                 WriteLine(String.Format(lineFormat2, c.ID, unitFor(PhysicalDimension.MassFraction), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "wV[" + c.ID + "]")))));
                         }
                         WriteLine("");
-                      
+
                     }
                     WriteLine("");
 

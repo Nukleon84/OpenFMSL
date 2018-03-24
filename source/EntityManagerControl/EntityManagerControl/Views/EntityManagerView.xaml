@@ -22,6 +22,7 @@
                         <ContextMenu  DataContext="{Binding Path=PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                             <MenuItem Header="Add Script" cal:Message.Attach="AddScript"/>
                             <MenuItem Header="Add Thermo" cal:Message.Attach="AddThermoSystem"/>
+                            <MenuItem Header="Add Flowsheet" cal:Message.Attach="AddFlowsheet"/>
                             <MenuItem Header="Add Folder" cal:Message.Attach="AddFolder" />
                             <Separator></Separator>
                             <MenuItem Header="Rename" cal:Message.Attach="RenameEntity"/>

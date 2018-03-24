@@ -593,43 +593,7 @@ namespace OpenFMSL.Core.ModelLibrary
             foreach (var feed in _sidestream)
             {
                 if (feed.Phase == PhaseState.Liquid)
-                {
-                    /*
-                      if (sidestream.Phase == PhaseState.Liquid)
-                {
-                    //AddVariables(RL[sidestream.Stage]);
-
-                    if (sidestream.Factor.IsFixed == true)
-                    {
-                        if (!ModelInstance.Variables.Contains(W[sidestream.Stage]))
-                            AddVariables(W[sidestream.Stage]);
-                        RL[sidestream.Stage].Value = sidestream.Factor.Value;
-                    }
-                    else
-                    {
-                        AddVariables(W[sidestream.Stage]);
-                        AddVariables(RL[sidestream.Stage]);
-                        AddVariables(sidestream.Factor);
-                        AddConstraints(RL[sidestream.Stage].IsEqualTo(sidestream.Factor));
-
-                    }
-                    //                    RL[sidestream.Stage].IsFixed = false;
-                    sidestream.Stream.FixPhase(PhaseState.BubblePoint);
-
-                    AddConstraints(W[sidestream.Stage].IsEqualTo(RL[sidestream.Stage] * L[sidestream.Stage]));
-                    W[sidestream.Stage].Value = (RL[sidestream.Stage] * L[sidestream.Stage]).Eval();
-
-                    AddConstraints(sidestream.Stream.Mixed.Pressure.IsEqualTo(p[sidestream.Stage]));
-                    AddConstraints(sidestream.Stream.Mixed.Temperature.IsEqualTo(T[sidestream.Stage]));
-                    for (var comp = 0; comp < NC - 1; comp++)
-                    {
-                        AddConstraints(sidestream.Stream.Mixed.Components[comp].MolarFlow.IsEqualTo(W[sidestream.Stage] * x[sidestream.Stage][comp]));
-                    }
-                    AddConstraints(sidestream.Stream.Mixed.Molarflow.IsEqualTo(W[sidestream.Stage]));
-
-                }
-
-                     */
+                {                 
 
                     _trays[feed.Stage - 1].W.Unfix();
                     _trays[feed.Stage - 1].RL.Unfix();
@@ -645,25 +609,6 @@ namespace OpenFMSL.Core.ModelLibrary
                     {
                         AddEquationToEquationSystem(problem, feed.Stream.Mixed.ComponentMolarflow[comp].IsEqualTo(_trays[feed.Stage - 1].W * _trays[feed.Stage - 1].x[comp]));
                     }
-
-                    //_trays[feed.Stage - 1].HF.Unfix();
-                    //_trays[feed.Stage - 1].F.Unfix();
-                    //_trays[feed.Stage - 1].HF.IsConstant = false;
-                    //_trays[feed.Stage - 1].F.IsConstant = false;
-
-                    //_trays[feed.Stage - 1].HF.ValueInSI = feed.Stream.Mixed.SpecificEnthalpy.ValueInSI;
-                    //_trays[feed.Stage - 1].F.ValueInSI = feed.Stream.Mixed.TotalMolarflow.ValueInSI;
-
-                    //AddEquationToEquationSystem(problem, (_trays[feed.Stage - 1].F).IsEqualTo(feed.Stream.Mixed.TotalMolarflow));
-                    //AddEquationToEquationSystem(problem, (_trays[feed.Stage - 1].HF / 1e4).IsEqualTo(feed.Stream.Mixed.SpecificEnthalpy / 1e4));
-
-                    //for (var comp = 0; comp < NC; comp++)
-                    //{
-                    //    _trays[feed.Stage - 1].z[comp].Unfix();
-                    //    _trays[feed.Stage - 1].z[comp].IsConstant = false;
-                    //    AddEquationToEquationSystem(problem, (_trays[feed.Stage - 1].z[comp]).IsEqualTo(feed.Stream.Mixed.ComponentMolarFraction[comp]));
-                    //    _trays[feed.Stage - 1].z[comp].ValueInSI = feed.Stream.Mixed.ComponentMolarFraction[comp].ValueInSI;
-                    //}
                 }
             }
 

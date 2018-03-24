@@ -16,9 +16,7 @@ namespace OpenFMSL.Contracts.Infrastructure.Messaging
 
     public class LogMessage:BaseMessage
     {
-        public DateTime TimeStamp { get; set; }
-        public object Sender { get; set; }
-        public object Parameter { get; set; }
+        
         public LogChannels Channel { get; set; }
         public string MessageText { get; set; }
         public string CallbackCommandText { get; set; }
