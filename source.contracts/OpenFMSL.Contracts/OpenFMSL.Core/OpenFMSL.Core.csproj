@@ -61,6 +61,7 @@
     <Compile Include="Expressions\UnaryExpressions.cs" />
     <Compile Include="Expressions\Variable.cs" />
     <Compile Include="Flowsheeting\Flowsheet.cs" />
+    <Compile Include="Flowsheeting\FlowsheetIcon.cs" />
     <Compile Include="Flowsheeting\FlowsheetObject.cs" />
     <Compile Include="Flowsheeting\HeatStream.cs" />
     <Compile Include="Flowsheeting\MaterialStream.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Numerics\Solvers\Newton.cs" />
     <Compile Include="Numerics\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThermodynamicModels\ActivityCoefficientWilson.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientNRTL.cs" />
     <Compile Include="ThermodynamicModels\SafeLiquidDensity.cs" />
     <Compile Include="Thermodynamics\BinaryInteractionParameterSet.cs" />

@@ -1,0 +1,418 @@
+﻿<UserControl x:Class="FlowsheetEditorControl.Views.FlowsheetEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FlowsheetEditorControl.Views"
+                xmlns:cal="http://www.caliburnproject.org"
+               xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--<ResourceDictionary Source="/Resources/SharedFlowsheetIcons.xaml"/>-->
+                <ResourceDictionary Source="/Controls.FlowsheetEditor;component/Resources/SharedFlowsheetIcons.xaml"/>                
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        </ResourceDictionary>
+
+    </UserControl.Resources>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <CheckBox Margin="0,10,0,10" VerticalAlignment="Center" IsChecked="{Binding ShowGrid}" ToolTip="Show grid markers">Grid</CheckBox>
+            <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding SnapToGrid}" ToolTip="Snap objects to grid">Snap</CheckBox>
+            <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowTemperature}" ToolTip="Show Temperature">Temperature</CheckBox>
+            <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowPressure}" ToolTip="Show Pressure">Pressure</CheckBox>
+            <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowMassflow}" ToolTip="Show Total mass flow">Massflow</CheckBox>
+            <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowVapourFraction}" ToolTip="Show vapour fraction">Vapour Fraction</CheckBox>
+            <!--<TextBox  Margin="5,10,0,10"  VerticalAlignment="Center"   Text="{Binding CanvasColor}" Width="75" ToolTip="Change canvas background color"></TextBox>
+            <Button Margin="5,10,0,10" x:Name="ToggleActivationOfSelectedUnits">Toggle Activation</Button>-->
+        </StackPanel>
+        <Grid>
+            <Grid.Resources>
+                <VisualBrush 
+                          x:Key="GridBrush" 
+                          TileMode="Tile" Viewport="0,0,20,20" 
+                          ViewportUnits="Absolute" Viewbox="0,0,20,20"    
+                          ViewboxUnits="Absolute" >
+                    <VisualBrush.Visual>
+                        <Grid Background="{Binding CanvasColor}">
+                            <Rectangle Margin="18,18,0,0" Fill="LightGray" Width="2" Height="2" />
+                        </Grid>
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Grid.Resources>
+
+            <ScrollViewer Name="outerScrollViewer"                          
+                          HorizontalScrollBarVisibility="Visible"
+                          VerticalScrollBarVisibility="Visible"  KeyDown="theGrid_KeyDown" >
+                <Grid Name="theGrid"  AllowDrop="True" DragEnter="theGrid_DragEnter" Drop="theGrid_Drop">
+                    <Grid.LayoutTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="scaleTransform"/>
+                        </TransformGroup>
+                    </Grid.LayoutTransform>
+
+                    <Grid.Style>
+                        <Style  TargetType="{x:Type Grid}">
+                            <Setter Property="Background"  Value="{Binding CanvasColor}"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowGrid}" Value="true" >
+                                    <Setter Property="Background"  Value="{StaticResource GridBrush}">
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+
+                    <ItemsControl Name="connectionCanvas" Width="{Binding FlowsheetWidth}" Height="{Binding FlowsheetHeight}" ItemsSource="{Binding Path=Connections,UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="3" >
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas ></Canvas>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Canvas>
+
+                                    <!--<Polyline Stroke="White" StrokeThickness="10" Points="{Binding Path.Points}" StrokeEndLineCap="Triangle" StrokeStartLineCap="Round"></Polyline>-->
+                                    <Polyline Name="streamLine" Stroke="{Binding Color}" StrokeThickness="{Binding Thickness}" StrokeDashArray="{Binding DashArray}" Points="{Binding Path.Points}" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round" MouseDown="streamLine_MouseDown" ></Polyline>
+                                    <StackPanel  Canvas.Top="{Binding LabelPoint.Y}" Canvas.Left="{Binding LabelPoint.X}"  ToolTipService.ShowDuration="60000" MouseDown="streamLine_MouseDown">
+                                        <Border Name="labelBorder"  Background="DimGray" HorizontalAlignment="Left"  BorderThickness="1" CornerRadius="2" MinWidth="40" MinHeight="20"   cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Select()]"  >
+
+                                            <Grid>
+
+                                                <TextBlock Foreground="White" Name="textBlockName" Margin="3,0,3,0" Text="{Binding Name}" HorizontalAlignment="Center" ></TextBlock>
+                                                <TextBox Name="textBoxName" Margin="3,0,3,0" Text="{Binding Name}" HorizontalAlignment="Center" Visibility="Collapsed"></TextBox>
+                                            </Grid>
+
+                                        </Border>
+                                        <StackPanel Name="Temperature"  Orientation="Horizontal" Margin="3,0,3,0" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=DataContext.ShowTemperature, Converter={StaticResource BoolToVis}}" >
+                                            <TextBlock Text="{Binding Temperature.ValueInOutputUnit, StringFormat=G4}" HorizontalAlignment="Center" ></TextBlock>
+                                            <TextBlock Text="{Binding Temperature.OutputUnit.Symbol}" Margin="3,0,0,0"  HorizontalAlignment="Center" ></TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Name="Pressure"  Orientation="Horizontal" Margin="3,0,3,0" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=DataContext.ShowPressure, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{Binding Pressure.ValueInOutputUnit, StringFormat=G4}" HorizontalAlignment="Center" ></TextBlock>
+                                            <TextBlock Text="{Binding Pressure.OutputUnit.Symbol}"  Margin="3,0,0,0" HorizontalAlignment="Center" ></TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Name="MassFlow"  Orientation="Horizontal" Margin="3,0,3,0" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=DataContext.ShowMassflow, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{Binding Massflow.ValueInOutputUnit, StringFormat=G4}" HorizontalAlignment="Center" ></TextBlock>
+                                            <TextBlock Text="{Binding Massflow.OutputUnit.Symbol}" Margin="3,0,0,0" HorizontalAlignment="Center" ></TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Name="VapourFraction"  Orientation="Horizontal" Margin="3,0,3,0" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=DataContext.ShowVapourFraction, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{Binding VapourFraction.ValueInOutputUnit, StringFormat=G4}" HorizontalAlignment="Center" ></TextBlock>
+                                            <TextBlock Text="{Binding VapourFraction.OutputUnit.Symbol}" Margin="3,0,0,0" HorizontalAlignment="Center" ></TextBlock>
+                                        </StackPanel>
+                                        <StackPanel.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock FontFamily="Consolas" Text="{Binding Report}"></TextBlock>
+                                            </ToolTip>
+                                        </StackPanel.ToolTip>
+                                    </StackPanel>
+                                </Canvas>
+
+                                <DataTemplate.Triggers>
+
+
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="true">
+                                        <Setter TargetName="textBoxName" Property="Visibility" Value="Visible"></Setter>
+                                        <Setter TargetName="textBlockName" Property="Visibility" Value="Collapsed"></Setter>
+                                        <Setter TargetName="streamLine" Property="Effect" >
+                                            <Setter.Value>
+                                                <DropShadowEffect Opacity="0.8" BlurRadius="15"></DropShadowEffect>
+                                            </Setter.Value>
+                                        </Setter>
+
+                                    </DataTrigger>
+
+
+
+                                    <Trigger SourceName="labelBorder" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="streamLine" Property="Stroke" Value="Black"></Setter>
+
+                                    </Trigger>
+                                    <Trigger SourceName="streamLine" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="streamLine" Property="Stroke" Value="Black"></Setter>
+
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+
+
+                    <ItemsControl Name="NodeCanvas" ItemsSource="{Binding Items}" Width="{Binding FlowsheetWidth}" Height="{Binding FlowsheetHeight}">
+
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid >
+
+
+                                    <StackPanel  Name="itemPanel" MouseMove="itemPanel_MouseMove" MouseDown="itemPanel_MouseDown" ToolTipService.ShowDuration="60000" >
+                                        <Grid >
+
+                                            <ContentControl Content="{Binding }" HorizontalAlignment="Left"  Name="nodeIcon">
+                                                <ContentControl.Style>
+                                                    <Style TargetType="{x:Type ContentControl}">
+                                                        <Setter Property="ContentTemplate" Value="{DynamicResource BlockTemplate}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Block">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource  BlockTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Vessel">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource VesselTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Column">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource ColumnTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="ColumnSection">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource ColumnSectionTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource StreamTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="TwoPhaseFlash">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource TwoPhaseFlashTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="ThreePhaseFlash">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource HorizontalVesselTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Decanter">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource HorizontalVesselTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Mixer">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource MixerTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Splitter">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource SplitterTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="HeatExchanger">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource HeatExchangerTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Heater">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource HeaterTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="FallingFilm">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource VerticalHeatExchangerTemplate}" />
+                                                            </DataTrigger>
+
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Valve">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource ValveTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Pump">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource PumpTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Compressor">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource CompressorTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Thermodynamics">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource ThermodynamicsTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Script">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource ScriptTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Text">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource TextTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Button">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource ButtonTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Spreadsheet">
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource SpreadsheetTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Breaker">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource RecycleBreakerTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="Variable">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource VariableTemplate}" />
+                                                            </DataTrigger>
+                                                            <!--<DataTrigger Binding="{Binding DisplayIcon}" Value="Equation">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource EquationTemplate}" />
+                                                            </DataTrigger>-->
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="PIAdapter">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource PIAdapterTemplate}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ContentControl.Style>
+                                            </ContentControl>
+
+                                            <ItemsControl Name="connectorLayer"  ItemsSource="{Binding Connectors}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+
+                                                        <ContentControl Content="{Binding }" Name="connectorIcon"  MouseDown="connectorIcon_MouseDown" MouseUp="connectorIcon_MouseUp"></ContentControl>
+                                                        <!--<Rectangle Name="connectorIcon" Stroke="Red" Fill="White" Width="10" Height="10" MouseDown="connectorIcon_MouseDown" MouseUp="connectorIcon_MouseUp">
+                                                            <Rectangle.ToolTip>
+                                                                <ToolTip>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Name}"></TextBlock>
+                                                                        <TextBlock Text="{Binding Type}"></TextBlock>
+                                                                    </StackPanel>
+                                                                </ToolTip>
+                                                            </Rectangle.ToolTip>
+                                                            
+                                                        </Rectangle>-->
+
+                                                        <DataTemplate.Triggers>
+                                                            <DataTrigger Binding="{Binding IconType}" Value="Box">
+                                                                <Setter TargetName="connectorIcon" Property="ContentTemplate" Value="{DynamicResource BoxConnector}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IconType}" Value="NozzleLeft">
+                                                                <Setter TargetName="connectorIcon" Property="ContentTemplate" Value="{DynamicResource NozzleLeftConnector}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IconType}" Value="NozzleRight">
+                                                                <Setter TargetName="connectorIcon" Property="ContentTemplate" Value="{DynamicResource NozzleRightConnector}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IconType}" Value="NozzleBottom">
+                                                                <Setter TargetName="connectorIcon" Property="ContentTemplate" Value="{DynamicResource NozzleBottomConnector}" />
+                                                            </DataTrigger>
+                                                        </DataTemplate.Triggers>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <Canvas></Canvas>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+
+                                                <ItemsControl.ItemContainerStyle>
+                                                    <Style TargetType="ContentPresenter">
+                                                        <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                                        <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                                    </Style>
+                                                </ItemsControl.ItemContainerStyle>
+
+                                            </ItemsControl>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                                <!--<Image Name="isDeactivatedIcon" Source="/Controls.FlowsheetEditorControl;component/Resources/Breakall_6323.png"  Visibility="Collapsed"></Image>-->
+                                                <Border  Width="20" Height="20"  CornerRadius="10" Name ="RequiresInputIcon" Background="LightBlue" ToolTip="Unit is locally unbalanced and may require more fixed input variables">
+                                                    <materialDesign:PackIcon Kind="CommentQuestionOutline" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"   />
+                                                </Border>
+                                                <Border  Width="20" Height="20" CornerRadius="10" Name ="RequiresRebuildIcon" Background="Tomato"  ToolTip="Structural parameters of this unit changed and it requires rebuilding">
+                                                    <materialDesign:PackIcon  Kind="Wrench"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                                                </Border>
+                                                <Border  Width="20" Height="20" CornerRadius="10" Name ="RequiresRecalculationIcon" Background="Gold" ToolTip="Model needs to be recalculated">
+                                                    <materialDesign:PackIcon  Kind="Calculator"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"   />
+                                                </Border>
+                                                <Border  Width="20" Height="20" CornerRadius="10" Name ="IsDeactivatedIcon" Background="Gainsboro" ToolTip="Model is deactivated">
+                                                    <materialDesign:PackIcon Kind="BlockHelper"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"   />
+                                                </Border>
+
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Margin ="0,5,0,0" Name="textBlockName" HorizontalAlignment="Center" Text="{Binding Name}" FontSize="14" FontFamily="Calibri" Foreground="Black" ></TextBlock>
+                                        <TextBox Margin ="0,5,0,0"  Name="textBoxName" HorizontalAlignment="Center"  Text="{Binding Name}" FontSize="14" FontFamily="Calibri"></TextBox>
+
+                                        <StackPanel.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock FontFamily="Consolas" Text="{Binding Report}"></TextBlock>
+                                            </ToolTip>
+                                        </StackPanel.ToolTip>
+                                    </StackPanel>
+                                </Grid>
+                                <DataTemplate.Triggers>
+
+                                    <DataTrigger Binding="{Binding IsActive}" Value="false">
+                                        <Setter TargetName="IsDeactivatedIcon" Property="Visibility" Value="Visible"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsActive}" Value="true">
+                                        <Setter TargetName="IsDeactivatedIcon" Property="Visibility" Value="Hidden"></Setter>
+                                        <Setter TargetName="IsDeactivatedIcon" Property="Width" Value="0"></Setter>
+                                    </DataTrigger>
+
+
+                                    <DataTrigger Binding="{Binding RequiresRebuild}" Value="true">
+                                        <Setter TargetName="RequiresRebuildIcon" Property="Visibility" Value="Visible"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RequiresInput}" Value="true">
+                                        <Setter TargetName="RequiresInputIcon" Property="Visibility" Value="Visible"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RequiresRecalculation}" Value="true">
+                                        <Setter TargetName="RequiresRecalculationIcon" Property="Visibility" Value="Visible"></Setter>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding RequiresRebuild}" Value="false">
+                                        <Setter TargetName="RequiresRebuildIcon" Property="Visibility" Value="Hidden"></Setter>
+                                        <Setter TargetName="RequiresRebuildIcon" Property="Width" Value="0"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RequiresInput}" Value="false">
+                                        <Setter TargetName="RequiresInputIcon" Property="Visibility" Value="Hidden"></Setter>
+                                        <Setter TargetName="RequiresInputIcon" Property="Width" Value="0"></Setter>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding RequiresRecalculation}" Value="false">
+                                        <Setter TargetName="RequiresRecalculationIcon" Property="Visibility" Value="Hidden"></Setter>
+                                        <Setter TargetName="RequiresRecalculationIcon" Property="Width" Value="0"></Setter>
+                                    </DataTrigger>
+
+
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="true">
+
+                                        <Setter TargetName="textBoxName" Property="Visibility" Value="Visible"></Setter>
+                                        <Setter TargetName="textBlockName" Property="Visibility" Value="Collapsed"></Setter>
+                                        <Setter TargetName="nodeIcon" Property="Effect" >
+                                            <Setter.Value>
+                                                <DropShadowEffect Opacity="0.8" BlurRadius="15"></DropShadowEffect>
+                                            </Setter.Value>
+                                        </Setter>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="false">
+                                        <Setter TargetName="textBoxName" Property="Visibility" Value="Collapsed"></Setter>
+                                        <Setter TargetName="textBlockName" Property="Visibility" Value="Visible"></Setter>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding IsLabelVisible}" Value="false">
+                                        <Setter TargetName="textBoxName" Property="Visibility" Value="Collapsed"></Setter>
+                                        <Setter TargetName="textBlockName" Property="Visibility" Value="Collapsed"></Setter>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding DisplayIcon}" Value="Text">
+                                        <Setter TargetName="textBoxName" Property="Visibility" Value="Collapsed"></Setter>
+                                        <Setter TargetName="textBlockName" Property="Visibility" Value="Collapsed"></Setter>
+                                    </DataTrigger>
+
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas AllowDrop="True"></Canvas>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                    </ItemsControl>
+
+                    <Canvas Name="selectionOverlay"  Width="{Binding FlowsheetWidth}" Height="{Binding FlowsheetHeight}" Grid.ColumnSpan="3">
+                        <Rectangle Name="selectionBox" Visibility="Collapsed" Stroke="Red" StrokeThickness="2" >
+                            <Rectangle.Fill>
+                                <SolidColorBrush Color="#7FF0F0F0"/>
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                    </Canvas>
+
+
+                </Grid>
+            </ScrollViewer>
+
+        </Grid>
+    </DockPanel>
+</UserControl>

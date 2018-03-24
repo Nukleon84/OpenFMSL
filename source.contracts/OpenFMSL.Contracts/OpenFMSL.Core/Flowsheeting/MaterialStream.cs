@@ -178,6 +178,8 @@ namespace OpenFMSL.Core.Flowsheeting
 
                 }
 
+                AddVariable(Vfmolar);
+                AddVariable(Beta);
                 foreach (var vari in Mixed.Variables)
                     vari.Group = "Mixed";
                 foreach (var vari in Liquid.Variables)
@@ -190,10 +192,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 Variables.AddRange(Vapor.Variables);
                 Variables.AddRange(KValues);
                 Variables.AddRange(gamma);
-                AddVariable(Vfmolar);
-
-                
-                AddVariable(Beta);
+             
                 Variables.Remove(Liquid.Temperature);
                 Variables.Remove(Vapor.Temperature);
                 Variables.Remove(Liquid.Pressure);

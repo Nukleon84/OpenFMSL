@@ -66,17 +66,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             var types = Enum.GetValues(typeof(EvaluatedProperties));
             foreach (var type in types.OfType<EvaluatedProperties>())
                 AvailableFunctionTypes.Add(type);
-            try
-            {
-                CurrentSystem = _importer.ImportNeutralFile(_source.SourceCode);
-                ComponentsForPureAnalysis = CurrentSystem.Components.Select(c => new CheckableComponent() { Data = c }).ToList();
-
-                
-            }
-            catch (Exception e)
-            {
-                _aggregator.PublishOnUIThread(new LogMessage { Sender = this, TimeStamp = DateTime.Now, Channel = LogChannels.Error, MessageText = e.Message });
-            }
+            ParseInputFile();
 
         }
 
@@ -394,6 +384,24 @@ namespace ThermodynamicSystemEditor.ViewModels
                 _componentsForPureAnalysis = value;
             }
         }
+        public void SaveInputFile()
+        {
+            Source.SourceCode = ScriptDocument.Text;
+        }
+
+        public void ParseInputFile()
+        {
+            try
+            {
+                CurrentSystem = _importer.ImportNeutralFile(_source.SourceCode);
+                ComponentsForPureAnalysis = CurrentSystem.Components.Select(c => new CheckableComponent() { Data = c }).ToList();
+
+            }
+            catch (Exception e)
+            {
+                _aggregator.PublishOnUIThread(new LogMessage { Sender = this, TimeStamp = DateTime.Now, Channel = LogChannels.Error, MessageText = e.Message });
+            }
+        }
 
         public void RedrawBinaryAnalysisChart()
         {
@@ -402,7 +410,7 @@ namespace ThermodynamicSystemEditor.ViewModels
 
             Task.Factory.StartNew(() => RedrawBinaryAnalysisCharts());
         }
-
+       
         void RedrawBinaryAnalysisCharts()
         {
             var chart = new ChartModel();
@@ -664,7 +672,7 @@ namespace ThermodynamicSystemEditor.ViewModels
         }
         public void Handle(PersistChangesMessage message)
         {
-            Source.SourceCode = ScriptDocument.Text;
+            SaveInputFile();
         }
     }
 

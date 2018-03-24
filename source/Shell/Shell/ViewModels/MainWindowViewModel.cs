@@ -24,6 +24,7 @@ namespace Shell.ViewModels
         private readonly IThermodynamicSystemViewModelFactory _thermoEditorFactory;
         private readonly ISnapshotDocumentViewModelFactory _snapshotEditorFactory;
         private readonly IChartViewModelFactory _chartFactory;
+        private readonly IFlowsheetEntityEditorFactory _flowsheetFactory;
 
         private readonly IProjectStorage _projectStorage;
         string _currentFilename = "";
@@ -96,6 +97,7 @@ namespace Shell.ViewModels
             IThermodynamicSystemViewModelFactory thermoEditorFactory,
             ISnapshotDocumentViewModelFactory snapshotEditorFactory,
              IChartViewModelFactory chartFactory,
+              IFlowsheetEntityEditorFactory flowsheetFactory,
             IProjectStorage projectStorage)
         {
             _console = console;
@@ -108,6 +110,7 @@ namespace Shell.ViewModels
             _snapshotEditorFactory = snapshotEditorFactory;
             _chartFactory = chartFactory;
             _projectStorage = projectStorage;
+            _flowsheetFactory = flowsheetFactory;
             _aggregator.Subscribe(this);
             _aggregator.PublishOnUIThread(new AddNewDocumentMessage { TimeStamp = DateTime.Now, Sender = this, Title = "Welcome to Open FMSL", Parameter = new TestDocumentViewModel() });
         }
@@ -216,7 +219,11 @@ namespace Shell.ViewModels
                 var vm = _chartFactory.Create(message.Target as Chart);
                 _aggregator.PublishOnUIThread(new AddNewDocumentMessage { TimeStamp = DateTime.Now, Sender = this, Title = message.Target.Name, Parameter = vm });
             }
-
+            if (message.Target is FlowsheetEntity)
+            {
+                var vm = _flowsheetFactory.Create(message.Target as FlowsheetEntity);
+                _aggregator.PublishOnUIThread(new AddNewDocumentMessage { TimeStamp = DateTime.Now, Sender = this, Title = message.Target.Name, Parameter = vm });
+            }
         }
         public void ExecuteCurrentDocument()
         {
