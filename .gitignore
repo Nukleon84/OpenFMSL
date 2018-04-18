@@ -39,7 +39,7 @@
 
 
 # Build results
-
+bin.contracts/
 [Dd]ebug/
 [Rr]elease/
 x64/

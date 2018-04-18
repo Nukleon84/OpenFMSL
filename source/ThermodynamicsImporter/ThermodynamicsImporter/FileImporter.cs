@@ -88,6 +88,7 @@ namespace ThermodynamicsImporter
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalTemperature", 600, SI.K));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol/SI.cum));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J/SI.kmol));
 
             newComp.Functions.Add(new PropertyFunction()
             {
@@ -350,6 +351,9 @@ namespace ThermodynamicsImporter
                     break;
                 case "KIR1":
                     function.Type = FunctionType.Kirchhoff;
+                    break;
+                case "SUTH":
+                    function.Type = FunctionType.Sutherland;
                     break;
                 default:
                     throw new InvalidOperationException("Function type " + line[3] + " is not suppported.");

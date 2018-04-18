@@ -19,7 +19,7 @@ namespace OpenFMSL.Core.ModelLibrary
         public Splitter(string name, ThermodynamicSystem system) : base(name, system)
         {
             Class = "Splitter";
-
+            Icon.IconType = IconTypes.Splitter;
             MaterialPorts.Add(new Port<MaterialStream>("In", PortDirection.In, 1));
             MaterialPorts.Add(new Port<MaterialStream>("Out1", PortDirection.Out, 1));
             MaterialPorts.Add(new Port<MaterialStream>("Out2", PortDirection.Out, 1));

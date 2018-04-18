@@ -21,6 +21,8 @@
 
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <Button Margin="5,0,10,0" x:Name="Export"  VerticalAlignment="Center" >Export</Button>
+            
             <CheckBox Margin="0,10,0,10" VerticalAlignment="Center" IsChecked="{Binding ShowGrid}" ToolTip="Show grid markers">Grid</CheckBox>
             <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding SnapToGrid}" ToolTip="Snap objects to grid">Snap</CheckBox>
             <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowTemperature}" ToolTip="Show Temperature">Temperature</CheckBox>
@@ -29,6 +31,7 @@
             <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowVapourFraction}" ToolTip="Show vapour fraction">Vapour Fraction</CheckBox>
             <!--<TextBox  Margin="5,10,0,10"  VerticalAlignment="Center"   Text="{Binding CanvasColor}" Width="75" ToolTip="Change canvas background color"></TextBox>
             <Button Margin="5,10,0,10" x:Name="ToggleActivationOfSelectedUnits">Toggle Activation</Button>-->
+            
         </StackPanel>
         <Grid>
             <Grid.Resources>

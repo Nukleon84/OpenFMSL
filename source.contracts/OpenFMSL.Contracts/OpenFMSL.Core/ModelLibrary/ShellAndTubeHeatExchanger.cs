@@ -130,6 +130,7 @@ namespace OpenFMSL.Core.ModelLibrary
         public ShellAndTubeHeatExchanger(string name,  ThermodynamicSystem system, int passes, int discretization) : base(name, system)
         {
             Class = "Shell&Tube";
+            Icon.IconType = IconTypes.HeatExchanger;
             _numberOfPasses = passes;
             _discretization = discretization;
 

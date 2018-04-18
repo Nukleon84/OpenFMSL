@@ -19,7 +19,8 @@ namespace OpenFMSL.Core.Thermodynamics
         Dippr117,
         PolynomialIntegrated,
         Dippr102,
-        Kirchhoff
+        Kirchhoff,
+        Sutherland
     }
 
 
@@ -33,7 +34,8 @@ namespace OpenFMSL.Core.Thermodynamics
         AcentricFactor,
         UniquacQ,
         UniquacQP,
-        UniquacR
+        UniquacR,
+        HeatOfFormation
     }
 
     public enum EvaluatedProperties

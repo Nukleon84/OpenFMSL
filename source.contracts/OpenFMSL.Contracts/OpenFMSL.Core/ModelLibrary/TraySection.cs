@@ -222,6 +222,7 @@ namespace OpenFMSL.Core.ModelLibrary
         {
             Class = "TraySection";
             NumberOfTrays = numberOfTrays;
+            Icon.IconType = IconTypes.ColumnSection;
 
             MaterialPorts.Add(new Port<MaterialStream>("Feeds", PortDirection.In, -1));
             MaterialPorts.Add(new Port<MaterialStream>("VIn", PortDirection.In, 1));

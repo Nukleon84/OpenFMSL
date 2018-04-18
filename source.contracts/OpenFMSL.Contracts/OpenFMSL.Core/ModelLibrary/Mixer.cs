@@ -18,6 +18,7 @@ namespace OpenFMSL.Core.ModelLibrary
         public Mixer(string name, ThermodynamicSystem system) : base(name, system)
         {
             Class = "Mixer";
+            Icon.IconType = IconTypes.Mixer;
 
             MaterialPorts.Add(new Port<MaterialStream>("In", PortDirection.In, -1));
             MaterialPorts.Add(new Port<MaterialStream>("Out", PortDirection.Out, 1));

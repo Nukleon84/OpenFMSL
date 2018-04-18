@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace FlowsheetEditorControl.ViewModels
@@ -440,6 +442,30 @@ namespace FlowsheetEditorControl.ViewModels
                 //      _aggregator.Raise<FlowsheetElementAddedMessage>(new FlowsheetElementAddedMessage { TimeStamp = DateTime.Now, Sender = this, Parameter = item });
             }
         }
+        public void Export()
+        {
+            var exportText = "";
+            foreach(var unit in Flowsheet.Items)
+            {
+                exportText += unit.Name + ".SetIcon(IconTypes." + unit.DisplayIcon + ", " + unit.X + "," + unit.y + ")"+Environment.NewLine;
+            }
 
+            var window = new Window();
+            var textBox=new TextBox();
+            textBox.VerticalAlignment = VerticalAlignment.Stretch;
+            textBox.Text = exportText;
+            textBox.AcceptsReturn = true;
+            textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+            window.Content = textBox;
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            window.Width = 550;
+            window.Height = 400;
+            window.ShowActivated = true;
+            window.Title = "Export";
+            window.WindowStyle = WindowStyle.ToolWindow;
+            window.Owner = Application.Current.MainWindow;
+            window.Show();
+
+        }
     }
 }

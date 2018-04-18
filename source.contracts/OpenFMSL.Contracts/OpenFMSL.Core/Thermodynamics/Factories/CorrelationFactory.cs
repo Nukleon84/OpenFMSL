@@ -148,6 +148,13 @@ namespace OpenFMSL.Core.Thermodynamics
                         expr = (Sym.Exp(func.Coefficients[0] - func.Coefficients[1] / T + func.Coefficients[2] * Sym.Ln(T)));
                         break;
                     }
+                case FunctionType.Sutherland:
+                    {
+                        EnsureCoefficients(func.Coefficients, 2);
+
+                        expr = (func.Coefficients[0] * Sym.Sqrt(T)) / (1 + func.Coefficients[1] / T);
+                        break;
+                    }
                 default:
                     throw new InvalidOperationException("Unknown function type" + typeToCreate);
             }

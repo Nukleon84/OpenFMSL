@@ -165,7 +165,7 @@ namespace FlowsheetEditor.Factory
                  
                         var inlet = new Connector
                         {
-                            Name = "Inlet[0]",
+                            Name = "In",
                             Type = "Material",
                             X = newItem.Width - 5,
 
@@ -178,7 +178,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet1 = new Connector
                         {
-                            Name = "Outlet[0]",
+                            Name = "Out",
                             Type = "Material",
                             X = -5,
                             Y = (int)(newItem.Height / 2) - 5,
@@ -252,7 +252,7 @@ namespace FlowsheetEditor.Factory
                                              
                            var inlet = new Connector
                         {
-                            Name = "Inlet[0]",
+                            Name = "In",
                             Type = "Material",
                             X = newItem.Width / 2 - 5,
                             Y = -5,
@@ -265,7 +265,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet1 = new Connector
                         {
-                            Name = "Outlet[0]",
+                            Name = "Vap",
                             Type = "Material",
                             X = -5,
                             Y = newItem.Height - 20,
@@ -278,7 +278,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet2 = new Connector
                         {
-                            Name = "Outlet[1]",
+                            Name = "Liq",
                             Type = "Material",
                             X = newItem.Width / 2 - 5,
                             Y = newItem.Height - 5,
@@ -456,7 +456,7 @@ namespace FlowsheetEditor.Factory
                   
                         var inlet = new Connector
                         {
-                            Name = "In]",
+                            Name = "In",
                             Type = "Material",
                             X = -5,
                             Y = (int)(newItem.Height / 2.0) - 5,
@@ -497,7 +497,7 @@ namespace FlowsheetEditor.Factory
                         //  newItem.SimulationObject = ModelFactory.Create(system, newItem);
                         var inlet = new Connector
                         {
-                            Name = "Inlet[0]",
+                            Name = "In",
                             Type = "Material",
                             X = -5,
                             Y = (int)(newItem.Height / 2) - 5,
@@ -507,7 +507,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet1 = new Connector
                         {
-                            Name = "Outlet[0]",
+                            Name = "Out1",
                             Type = "Material",
                             X = newItem.Width - 5,
                             Y = 5,
@@ -517,7 +517,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet2 = new Connector
                         {
-                            Name = "Outlet[1]",
+                            Name = "Out2",
                             Type = "Material",
                             X = newItem.Width - 5,
                             Y = newItem.Height - 15,
@@ -779,7 +779,7 @@ namespace FlowsheetEditor.Factory
                         newItem.DisplayIcon = IconTypes.Valve;                 
                         var inlet = new Connector
                         {
-                            Name = "Inlet[0]",
+                            Name = "In",
                             Type = "Material",
                             X = -5,
                             Y = (int)(newItem.Height / 2.0) - 5,
@@ -791,7 +791,7 @@ namespace FlowsheetEditor.Factory
 
                         var outlet1 = new Connector
                         {
-                            Name = "Outlet[0]",
+                            Name = "Out",
                             Type = "Material",
                             X = newItem.Width - 5,
                             Y = (int)(newItem.Height / 2.0) - 5,

@@ -22,6 +22,7 @@ namespace OpenFMSL.Core.ModelLibrary
         public Flash(string name, ThermodynamicSystem system) : base(name, system)
         {
             Class = "Flash";
+            Icon.IconType = IconTypes.TwoPhaseFlash;
 
             MaterialPorts.Add(new Port<MaterialStream>("In", PortDirection.In, 1));
             MaterialPorts.Add(new Port<MaterialStream>("Vap", PortDirection.Out, 1));
