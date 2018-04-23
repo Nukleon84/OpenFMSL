@@ -22,13 +22,15 @@ Disclaimer: This is my first real GitHub project. I apologize for any things tha
 
 ## Quick Start
 
-In the \install folder you will find a precompiled version of the project. You can just unzip and run it directly. You will need the .net-Framework 4.5 installed.
+In the \install folder you will find a precompiled version of the project. You can just unzip and run it directly. You will need the .net-Framework 4.5.2 installed.
 https://github.com/Nukleon84/OpenFMSL/tree/master/install
 
 ## Prerequisites
-* Visual Studio
-* MSBuild
-* Nuget Package Manager
+* Visual Studio 2015 (Community edition is free to use for open-source software)
+* MSBuild 14.0
+* Nuget Package Manager Commandline Program
+
+In some parts features from C# 6.0 (e.g. null-coalescing operator) are used.
 
 ## Set up
 As the build script is still hard-coded to my development computer, you must build everything manually for the moment. The project is setup using an enterprise component architecture model, so building from scratch is rather simple. Just follow the steps given below.
