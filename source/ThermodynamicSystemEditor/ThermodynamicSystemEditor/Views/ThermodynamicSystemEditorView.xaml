@@ -20,6 +20,17 @@
             </ae:TextEditor>
             </DockPanel>
         </TabItem>
+        <TabItem Header="Summary">
+            <DataGrid ItemsSource="{Binding AvailableComponents}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ID}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Name"  Binding="{Binding Name}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="CAS" Binding="{Binding CasNumber}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Molar Weight" Binding="{Binding MolarWeight.ValueInSI}"></DataGridTextColumn>
+                    <DataGridCheckBoxColumn Header="Inert" Binding="{Binding IsInert}"></DataGridCheckBoxColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </TabItem>
         <TabItem Header="Pure Component Constants">
             <DockPanel>
                 <ListView DockPanel.Dock="Left" MinWidth="100" ItemsSource="{Binding AvailableComponents}" SelectedItem="{Binding SelectedComponent}" DisplayMemberPath="ID" ></ListView>

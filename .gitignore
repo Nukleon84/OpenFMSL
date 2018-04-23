@@ -67,3 +67,5 @@ Help/
 *.vsp
 *.vspx
 buildscripts/build.log
+buildscripts/build.log
+buildscripts/build.log

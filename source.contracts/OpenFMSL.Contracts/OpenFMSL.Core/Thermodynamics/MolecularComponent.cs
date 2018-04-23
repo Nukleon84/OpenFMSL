@@ -14,7 +14,8 @@ namespace OpenFMSL.Core.Thermodynamics
         string _identifier;
         List<Variable> _constants = new List<Variable>();
         List<PropertyFunction> _functions = new List<PropertyFunction>();
-        
+        bool _isInert = false;
+
         /// <summary>
         /// Systematic name of the component
         /// </summary>
@@ -91,6 +92,29 @@ namespace OpenFMSL.Core.Thermodynamics
             {
                 _functions = value;
             }
+        }
+        /// <summary>
+        /// The component is treated as an inert in vapor/liquid equilibrium using Henry's law
+        /// </summary>
+        public bool IsInert
+        {
+            get
+            {
+                return _isInert;
+            }
+
+            set
+            {
+                _isInert = value;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve the variable holding the molar weight
+        /// </summary>
+        public Variable MolarWeight
+        {
+            get { return GetConstant(ConstantProperties.MolarWeight); }
         }
 
         /// <summary>

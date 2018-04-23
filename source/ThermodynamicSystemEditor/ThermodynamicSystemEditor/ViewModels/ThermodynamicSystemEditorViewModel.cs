@@ -392,8 +392,8 @@ namespace ThermodynamicSystemEditor.ViewModels
         public void ParseInputFile()
         {
             try
-            {
-                CurrentSystem = _importer.ImportNeutralFile(_source.SourceCode);
+            {                
+                CurrentSystem = _importer.ImportNeutralFile(ScriptDocument.Text);
                 ComponentsForPureAnalysis = CurrentSystem.Components.Select(c => new CheckableComponent() { Data = c }).ToList();
 
             }

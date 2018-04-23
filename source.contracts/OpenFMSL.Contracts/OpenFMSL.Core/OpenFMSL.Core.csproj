@@ -91,6 +91,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientWilson.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientNRTL.cs" />
+    <Compile Include="ThermodynamicModels\MixtureHenryCoefficient.cs" />
     <Compile Include="ThermodynamicModels\SafeLiquidDensity.cs" />
     <Compile Include="Thermodynamics\BinaryInteractionParameterSet.cs" />
     <Compile Include="Thermodynamics\EnthalpyCalculationMethod.cs" />

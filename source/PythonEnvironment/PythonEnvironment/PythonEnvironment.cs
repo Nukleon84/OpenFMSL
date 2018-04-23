@@ -214,6 +214,7 @@ namespace PythonEnvironment
             WriteLine("VLEQ Method      : " + system.EquilibriumMethod.EquilibriumApproach);
             WriteLine("Activity Method  : " + system.EquilibriumMethod.Activity);
             WriteLine("Fugacity Method  : " + system.EquilibriumMethod.Fugacity);
+            WriteLine("Henry Method     : " + system.EquilibriumMethod.AllowHenryComponents);
 
             WriteLine("");
             WriteLine("Unit of Measure");
@@ -230,13 +231,14 @@ namespace PythonEnvironment
             WriteLine("Components");
             WriteLine("");
 
-            WriteLine(String.Format("{0,-25} {1,-15} {2,-15} {3,-15} {4,-15} {5,-15}", "Name", "ID", "CAS-No", "MOLW", "TC", "PC"));
+            WriteLine(String.Format("{0,-25} {1,-15} {2,-15} {3,-15} {4,-15} {5,-15} {6,-15}", "Name", "ID", "CAS-No", "Inert", "MOLW", "TC", "PC"));
             foreach (var comp in system.Components)
             {
-                WriteLine(String.Format("{0,-25} {1,-15} {2,-15} {3,-15} {4,-15} {5,-15}",
+                WriteLine(String.Format("{0,-25} {1,-15} {2,-15} {3,-15} {4,-15} {5,-15} {6,-15}",
                     comp.Name,
                     comp.ID,
                     comp.CasNumber,
+                    comp.IsInert,
                     comp.GetConstant(ConstantProperties.MolarWeight).ValueInSI.ToString("G6", System.Globalization.NumberFormatInfo.InvariantInfo),
                     comp.GetConstant(ConstantProperties.CriticalTemperature).ValueInSI.ToString("G6", System.Globalization.NumberFormatInfo.InvariantInfo),
                     comp.GetConstant(ConstantProperties.CriticalPressure).ValueInSI.ToString("G6", System.Globalization.NumberFormatInfo.InvariantInfo)));

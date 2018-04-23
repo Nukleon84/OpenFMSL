@@ -64,7 +64,7 @@ namespace ThermodynamicsImporter
                 case "KLIQ":
                 case "KVAP":
                 case "ST":
-                case "DENL":               
+                case "DENL":
                     return true;
                 default:
                     return false;
@@ -87,8 +87,8 @@ namespace ThermodynamicsImporter
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("MolarWeight", 18.17, SI.kg / SI.kmol));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalTemperature", 600, SI.K));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol/SI.cum));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J/SI.kmol));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol / SI.cum));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J / SI.kmol));
 
             newComp.Functions.Add(new PropertyFunction()
             {
@@ -278,7 +278,7 @@ namespace ThermodynamicsImporter
                     return SI.W / SI.m / SI.K;
                 case "VISL":
                 case "VISV":
-                    return SI.Pa *  SI.s;
+                    return SI.Pa * SI.s;
                 default:
                     throw new InvalidOperationException("Property type " + prop + " is not suppported.");
 
@@ -414,7 +414,25 @@ namespace ThermodynamicsImporter
                     _currentSystem.EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
                     break;
             }
+            switch (line[5])
+            {
+                case "POYN":
+                    _currentSystem.EquilibriumMethod.PoyntingCorrection = true;
+                    break;
+                default:
+                    _currentSystem.EquilibriumMethod.PoyntingCorrection = false;
+                    break;
+            }
 
+            switch (line[5])
+            {
+                case "HENR":
+                    _currentSystem.EquilibriumMethod.AllowHenryComponents = true;
+                    break;
+                default:
+                    _currentSystem.EquilibriumMethod.AllowHenryComponents = false;
+                    break;
+            }
         }
 
         void ParseNRTL(string[] line)
@@ -479,9 +497,12 @@ namespace ThermodynamicsImporter
             if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "HENRY") == 0)
                 _currentSystem.BinaryParameters.Add(new HENRY(_currentSystem));
 
+            if (Math.Abs(aij) > 1e-8)
+                comp1.IsInert = true;
+
             var currentNRTL = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "HENRY");
             switch (line[1])
-            {    
+            {
                 case "A":
                     currentNRTL.SetParam("A", comp1, comp2, aij);
                     currentNRTL.SetParam("A", comp2, comp1, aji);
@@ -494,13 +515,13 @@ namespace ThermodynamicsImporter
                     currentNRTL.SetParam("C", comp1, comp2, aij);
                     currentNRTL.SetParam("C", comp2, comp1, aji);
                     break;
-                case "D":               
+                case "D":
                     currentNRTL.SetParam("D", comp1, comp2, aij);
                     currentNRTL.SetParam("D", comp2, comp1, aji);
                     break;
                 default:
                     _aggregator.PublishOnUIThread(new LogMessage { MessageText = "Parameter " + line[1] + " is not allowed for Henry." });
-                    break;                
+                    break;
             }
 
         }
@@ -511,7 +532,7 @@ namespace ThermodynamicsImporter
             int j = ParseInteger(line[3]);
             double aij = ParseDouble(line[4]);
             double aji = ParseDouble(line[5]);
-          
+
             var comp1 = _currentSystem.Components[i - 1];
             var comp2 = _currentSystem.Components[j - 1];
 
