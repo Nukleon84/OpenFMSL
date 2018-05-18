@@ -373,8 +373,22 @@ namespace FlowsheetEditorControl.Views
             {
                 if (node != null)
                 {
-                  //  var msg = new FlowsheetConnectionDoubleClickedMessage { Sender = vm, Parameter = node };
-                 //   vm.RaiseStreamDetailsRequested(msg);
+                    //  var msg = new FlowsheetConnectionDoubleClickedMessage { Sender = vm, Parameter = node };
+                    //   vm.RaiseStreamDetailsRequested(msg);
+                    var inspector = new ModelInspectorView();
+                    inspector.DataContext = new ModelInspectorViewModel(node.Model);
+                    var window = new Window();
+                    window.Content = inspector;
+                    window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    window.Width = 550;
+                    window.Height = 400;
+                    window.ShowActivated = true;
+                    window.Title = node.Name;
+                    window.WindowStyle = WindowStyle.ToolWindow;
+                    window.Owner = Application.Current.MainWindow;
+                    window.Show();
+
+
                 }
                 e.Handled = false;
             }

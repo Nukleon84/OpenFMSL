@@ -310,7 +310,7 @@ namespace FlowsheetEditorControl.ViewModels
                 if (source == null && sink != null)
                 {
                     var visualUnit = ItemFactory.Create(IconTypes.Feed, stream.Icon.X, stream.Icon.Y);
-                    visualUnit.Name = stream.Name;
+                    visualUnit.Name = "Source_" + stream.Name;
                     visualUnit.BorderColor = stream.Icon.BorderColor;
                     visualUnit.FillColor = stream.Icon.FillColor;
                     visualUnit.Model = stream;
@@ -320,8 +320,10 @@ namespace FlowsheetEditorControl.ViewModels
                     var sinkVisualCon = sinkVisual?.GetConnectorByName(sink.MaterialPorts.Where(p => p.Streams.Contains(stream)).FirstOrDefault().Name);
                     if (sinkVisualCon != null)
                     {
-                        var connection=Connect(visualUnit.GetConnectorByName("Stream"), sinkVisualCon);
+                        var connection = Connect(visualUnit.GetConnectorByName("Stream"), sinkVisualCon);
                         connection.Model = stream;
+                        connection.Name = stream.Name;
+                        connection.Report = WriteStreamReport(stream);
                     }
                 }
 
@@ -329,7 +331,7 @@ namespace FlowsheetEditorControl.ViewModels
                 if (source != null && sink == null)
                 {
                     var visualUnit = ItemFactory.Create(IconTypes.Product, stream.Icon.X, stream.Icon.Y);
-                    visualUnit.Name = stream.Name;
+                    visualUnit.Name = "Sink_" + stream.Name;
                     visualUnit.BorderColor = stream.Icon.BorderColor;
                     visualUnit.FillColor = stream.Icon.FillColor;
                     visualUnit.Model = stream;
@@ -340,8 +342,10 @@ namespace FlowsheetEditorControl.ViewModels
                     var sourceVisualCon = sourceVisual?.GetConnectorByName(source.MaterialPorts.Where(p => p.Streams.Contains(stream)).FirstOrDefault().Name);
                     if (sourceVisualCon != null)
                     {
-                        var connection=Connect(sourceVisualCon, visualUnit.GetConnectorByName("Stream"));
+                        var connection = Connect(sourceVisualCon, visualUnit.GetConnectorByName("Stream"));
                         connection.Model = stream;
+                        connection.Name = stream.Name;
+                        connection.Report = WriteStreamReport(stream);
                     }
                 }
 
@@ -353,13 +357,135 @@ namespace FlowsheetEditorControl.ViewModels
                     var sourceVisualCon = sourceVisual?.GetConnectorByName(source.MaterialPorts.Where(p => p.Streams.Contains(stream)).FirstOrDefault().Name);
                     if (sourceVisualCon != null && sinkVisualCon != null)
                     {
-                        var connection=Connect(sourceVisualCon, sinkVisualCon);
+                        var connection = Connect(sourceVisualCon, sinkVisualCon);
                         connection.Model = stream;
+                        connection.Name = stream.Name;
+                        connection.Report = WriteStreamReport(stream);
                     }
                 }
             }
 
         }
+
+
+        string WriteStreamReport(MaterialStream stream)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Material Stream: " + stream.Name);
+            sb.AppendLine();
+            sb.AppendLine(stream.Vfmolar.WriteReport());
+            sb.AppendLine(stream.Mixed.Temperature.WriteReport());           
+            sb.AppendLine(stream.Mixed.Pressure.WriteReport());
+            sb.AppendLine(stream.Mixed.SpecificEnthalpy.WriteReport());
+            sb.AppendLine(stream.Mixed.TotalEnthalpy.WriteReport());
+            //sb.AppendLine(stream.Mixed.TotalMolarflow.WriteReport());
+            //sb.AppendLine(stream.Mixed.TotalMassflow.WriteReport());
+            sb.AppendLine(stream.Mixed.TotalVolumeflow.WriteReport());
+            sb.AppendLine(String.Format("{0,-25} = {1, 12}", "Phase", stream.State));
+            sb.AppendLine("");
+            sb.AppendLine("Mixed");
+            sb.Append(String.Format("{0,-12}", "Component"));
+            sb.Append(String.Format("{0,15}", "Mole Flow"));
+            sb.Append(String.Format("{0,15}", "Mole Fraction"));
+            sb.Append(String.Format("{0,15}", "Mass Flow"));
+            sb.AppendLine(String.Format("{0,15}", "Mass Fraction"));
+
+            sb.Append(String.Format("{0,-12}", ""));
+            sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol));
+            sb.Append(String.Format("{0,15}", "%"));
+            sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol));
+            sb.AppendLine(String.Format("{0,15}", "w-%"));
+
+
+            for (int i = 0; i < stream.Mixed.ComponentMassflow.Count; i++)
+            {
+                if (stream.Mixed.ComponentMolarflow[i].ValueInOutputUnit < 1e-10)
+                    continue;
+                
+                sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
+                sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
+                sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
+                sb.AppendLine(String.Format("{0,15}", stream.Mixed.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));
+            }
+            sb.Append(String.Format("  {0,-10}", "Sum"));
+            sb.Append(String.Format("{0,15}", stream.Mixed.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));
+            sb.Append(String.Format("{0,15}", ""));
+            sb.AppendLine(String.Format("{0,15}", stream.Mixed.TotalMassflow.ValueInOutputUnit.ToString("0.0000")));
+
+            if (stream.Vapor.TotalMolarflow.ValueInSI > 1e-6)
+            {
+                sb.AppendLine("");
+                sb.AppendLine("Vapor");
+                sb.Append(String.Format("{0,-12}", "Component"));
+                sb.Append(String.Format("{0,15}", "Mole Flow"));
+                sb.Append(String.Format("{0,15}", "Mole Fraction"));
+                sb.Append(String.Format("{0,15}", "Mass Flow"));
+                sb.AppendLine(String.Format("{0,15}", "Mass Fraction"));
+
+                sb.Append(String.Format("{0,-12}", ""));
+                sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol));
+                sb.Append(String.Format("{0,15}", "%"));
+                sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol));
+                sb.AppendLine(String.Format("{0,15}", "w-%"));
+
+
+                for (int i = 0; i < stream.Mixed.ComponentMassflow.Count; i++)
+                {
+                    if (stream.Vapor.ComponentMolarflow[i].ValueInOutputUnit < 1e-10)
+                        continue;
+
+                    sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
+                    sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
+                    sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                    sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
+                    sb.AppendLine(String.Format("{0,15}", stream.Vapor.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));                 
+                }
+                sb.Append(String.Format("  {0,-10}", "Sum"));
+                sb.Append(String.Format("{0,15}", stream.Vapor.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));
+                sb.Append(String.Format("{0,15}", ""));
+                sb.AppendLine(String.Format("{0,15}", stream.Vapor.TotalMassflow.ValueInOutputUnit.ToString("0.0000")));
+
+            }
+
+            if (stream.Liquid.TotalMolarflow.ValueInSI > 1e-6)
+            {
+                sb.AppendLine("");
+                sb.AppendLine("Liquid");
+                sb.Append(String.Format("{0,-12}", "Component"));
+                sb.Append(String.Format("{0,15}", "Mole Flow"));
+                sb.Append(String.Format("{0,15}", "Mole Fraction"));
+                sb.Append(String.Format("{0,15}", "Mass Flow"));
+                sb.AppendLine(String.Format("{0,15}", "Mass Fraction"));
+
+                sb.Append(String.Format("{0,-12}", ""));
+                sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol));
+                sb.Append(String.Format("{0,15}", "%"));
+                sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol));
+                sb.AppendLine(String.Format("{0,15}", "w-%"));
+
+
+
+                for (int i = 0; i < stream.Liquid.ComponentMassflow.Count; i++)
+                {
+                    if (stream.Liquid.ComponentMolarflow[i].ValueInOutputUnit < 1e-10)
+                        continue;
+
+                    sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
+                    sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
+                    sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                    sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
+                    sb.AppendLine(String.Format("{0,15}", stream.Liquid.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));
+                }
+                sb.Append(String.Format("  {0,-10}", "Sum"));
+                sb.Append(String.Format("{0,15}", stream.Liquid.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));
+                sb.Append(String.Format("{0,15}", ""));
+                sb.AppendLine(String.Format("{0,15}", stream.Liquid.TotalMassflow.ValueInOutputUnit.ToString("0.0000")));
+            }
+            return sb.ToString();
+        }
+
         void ToggleActivationOfSelectedUnits()
         {
             foreach (var unit in SelectedItems)
@@ -445,13 +571,13 @@ namespace FlowsheetEditorControl.ViewModels
         public void Export()
         {
             var exportText = "";
-            foreach(var unit in Flowsheet.Items)
+            foreach (var unit in Flowsheet.Items)
             {
-                exportText += unit.Name + ".SetIcon(IconTypes." + unit.DisplayIcon + ", " + unit.X + "," + unit.y + ")"+Environment.NewLine;
+                exportText += unit.Name + ".SetIcon(IconTypes." + unit.DisplayIcon + ", " + unit.X + "," + unit.y + ")" + Environment.NewLine;
             }
 
             var window = new Window();
-            var textBox=new TextBox();
+            var textBox = new TextBox();
             textBox.VerticalAlignment = VerticalAlignment.Stretch;
             textBox.Text = exportText;
             textBox.AcceptsReturn = true;
