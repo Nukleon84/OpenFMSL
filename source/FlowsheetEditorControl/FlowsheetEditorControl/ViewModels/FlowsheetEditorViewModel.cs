@@ -393,9 +393,9 @@ namespace FlowsheetEditorControl.ViewModels
 
             sb.Append(String.Format("{0,-12}", ""));
             sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol));
-            sb.Append(String.Format("{0,15}", "%"));
+            sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFraction].Symbol));
             sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol));
-            sb.AppendLine(String.Format("{0,15}", "w-%"));
+            sb.AppendLine(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFraction].Symbol));
 
 
             for (int i = 0; i < stream.Mixed.ComponentMassflow.Count; i++)
@@ -405,9 +405,9 @@ namespace FlowsheetEditorControl.ViewModels
                 
                 sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
                 sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
-                sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMolarFraction[i].ValueInOutputUnit.ToString("0.0000")));
                 sb.Append(String.Format("{0,15}", stream.Mixed.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
-                sb.AppendLine(String.Format("{0,15}", stream.Mixed.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));
+                sb.AppendLine(String.Format("{0,15}", stream.Mixed.ComponentMassFraction[i].ValueInOutputUnit.ToString("0.0000")));
             }
             sb.Append(String.Format("  {0,-10}", "Sum"));
             sb.Append(String.Format("{0,15}", stream.Mixed.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));
@@ -426,9 +426,9 @@ namespace FlowsheetEditorControl.ViewModels
 
                 sb.Append(String.Format("{0,-12}", ""));
                 sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol));
-                sb.Append(String.Format("{0,15}", "%"));
+                sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MolarFraction].Symbol));
                 sb.Append(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol));
-                sb.AppendLine(String.Format("{0,15}", "w-%"));
+                sb.AppendLine(String.Format("{0,15}", stream.System.VariableFactory.Output.UnitDictionary[OpenFMSL.Core.UnitsOfMeasure.PhysicalDimension.MassFraction].Symbol));
 
 
                 for (int i = 0; i < stream.Mixed.ComponentMassflow.Count; i++)
@@ -438,9 +438,9 @@ namespace FlowsheetEditorControl.ViewModels
 
                     sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
                     sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
-                    sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                    sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMolarFraction[i].ValueInOutputUnit.ToString("0.0000")));
                     sb.Append(String.Format("{0,15}", stream.Vapor.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
-                    sb.AppendLine(String.Format("{0,15}", stream.Vapor.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));                 
+                    sb.AppendLine(String.Format("{0,15}", stream.Vapor.ComponentMassFraction[i].ValueInOutputUnit.ToString("0.0000")));                 
                 }
                 sb.Append(String.Format("  {0,-10}", "Sum"));
                 sb.Append(String.Format("{0,15}", stream.Vapor.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));
@@ -474,9 +474,9 @@ namespace FlowsheetEditorControl.ViewModels
 
                     sb.Append(String.Format("  {0,-10}", stream.System.Components[i].ID));
                     sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMolarflow[i].ValueInOutputUnit.ToString("0.0000")));
-                    sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMolarFraction[i].ValueInOutputUnit.ToString("P2")));
+                    sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMolarFraction[i].ValueInOutputUnit.ToString("0.0000")));
                     sb.Append(String.Format("{0,15}", stream.Liquid.ComponentMassflow[i].ValueInOutputUnit.ToString("0.0000")));
-                    sb.AppendLine(String.Format("{0,15}", stream.Liquid.ComponentMassFraction[i].ValueInOutputUnit.ToString("P2")));
+                    sb.AppendLine(String.Format("{0,15}", stream.Liquid.ComponentMassFraction[i].ValueInOutputUnit.ToString("0.0000")));
                 }
                 sb.Append(String.Format("  {0,-10}", "Sum"));
                 sb.Append(String.Format("{0,15}", stream.Liquid.TotalMolarflow.ValueInOutputUnit.ToString("0.0000")));

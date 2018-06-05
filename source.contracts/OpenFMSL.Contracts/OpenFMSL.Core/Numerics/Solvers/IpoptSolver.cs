@@ -91,24 +91,31 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 cLB,
                 cUB,
                 ProblemData.Jacobian.Count,
-                0,
+                 ProblemData.HessianStructure.Count,
                 eval_f, eval_g, eval_grad_f, eval_jac_g, eval_h))
             {
 
                 evaluator = new Evaluator();
-                problem.AddOption("hessian_approximation", "limited-memory");
-                problem.AddOption("tol", 1e-5);
-                problem.AddOption("max_iter", 250);
+                if (problemData.UseHessian)
+                    problem.AddOption("hessian_approximation", "exact");
+                else
+                    problem.AddOption("hessian_approximation", "limited-memory");
+               // problem.AddOption("tol", 1e-8);
+                problem.AddOption("max_iter", 150);
                 problem.AddOption("max_cpu_time", 30);
-                problem.AddOption("mu_strategy", "adaptive");
-              //  problem.AddOption("derivative_test", "first-order");
+               // problem.AddOption("mu_strategy", "adaptive");
+                //  problem.AddOption("derivative_test", "first-order");
+              //    problem.AddOption("derivative_test", "second-order");
                 problem.AddOption("output_file", "ipopt.out");
                 problem.AddOption("linear_solver", "ma27");
                 problem.AddOption("print_user_options", "yes");
-                // problem.AddOption("bound_relax_factor", 1e-8);
-                  problem.AddOption("bound_frac" , 1e-8);
-                   problem.AddOption("bound_push" ,1e-8);
-                  problem.AddOption("constr_viol_tol", 1e-5);
+                //problem.AddOption("bound_relax_factor", 1e-8);
+                //problem.AddOption("bound_frac", 1e-8);
+                //problem.AddOption("bound_push", 1e-8);
+                problem.AddOption("constr_viol_tol", 1e-5);
+               // problem.AddOption("nlp_scaling_method", "gradient-based");
+               // problem.AddOption("nlp_scaling_method", "equilibration-based");
+                
 
 
                 problem.SetIntermediateCallback(intermediate);
@@ -258,7 +265,48 @@ namespace OpenFMSL.Core.Numerics.Solvers
                     int nele_hess, int[] iRow, int[] jCol,
                     double[] values)
         {
-            return false;
+            if (!problemData.UseHessian)
+                return false;
+            else
+            {
+                if (values == null)
+                {
+                    for (int i = 0; i < ProblemData.HessianStructure.Count; i++)
+                    {
+                        iRow[i] = ProblemData.HessianStructure[i].Var1;
+                        jCol[i] = ProblemData.HessianStructure[i].Var2;
+                    }
+                }
+                else
+                {
+                    if (new_x)
+                    {
+                        UpdateProblem(x);
+                        evaluator.Reset();
+                    }
+
+                    for (int i = 0; i < ProblemData.HessianStructure.Count; i++)
+                        values[i] = 0;
+
+                    for (int i = 0; i < ProblemData.ObjectiveHessian.Count; i++)
+                    {
+                        values[ProblemData.ObjectiveHessian[i].StructuralIndex] = obj_factor * ProblemData.ObjectiveHessian[i].Expression.Diff(evaluator, problemData.Variables[ProblemData.ObjectiveHessian[i].Variable2Index]);
+                    }
+
+
+                    for (int i = 0; i < ProblemData.Hessian.Count; i++)
+                    {
+                        if (lambda[ProblemData.Hessian[i].EquationIndex] != 0.0)
+                        {
+                            values[ProblemData.Hessian[i].StructuralIndex] += lambda[ProblemData.Hessian[i].EquationIndex] * ProblemData.Hessian[i].Expression.Diff(evaluator, problemData.Variables[ProblemData.Hessian[i].Variable2Index]);
+                        }
+                    }
+
+                }
+                return true;
+            }
+
+
         }
         #endregion
 

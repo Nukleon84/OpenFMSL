@@ -70,6 +70,7 @@ namespace PythonEnvironment
             Run("from OpenFMSL.Core.Numerics import *");
             Run("from OpenFMSL.Core.UnitsOfMeasure import *");
             Run("from OpenFMSL.Core.ModelLibrary import *");
+            Run("from OpenFMSL.Core.Thermodynamics import *");
 
             Run("from OpenFMSL.Contracts.Entities import *");
             Run("from OpenFMSL.Contracts.Infrastructure.Reporting import *");

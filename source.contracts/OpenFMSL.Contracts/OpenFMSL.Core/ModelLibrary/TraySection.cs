@@ -304,9 +304,9 @@ namespace OpenFMSL.Core.ModelLibrary
 
         }
 
-        public TraySection ConnectFeed(MaterialStream stream, int stage)
+        public TraySection ConnectFeed(MaterialStream stream, int stage, PhaseState phase = PhaseState.LiquidVapor)
         {
-            _feeds.Add(new TrayConnectivity() { Stage = stage, Stream = stream, Phase = PhaseState.LiquidVapor });
+            _feeds.Add(new TrayConnectivity() { Stage = stage, Stream = stream, Phase = phase });
             Connect("Feeds", stream);
             return this;
         }
@@ -444,8 +444,8 @@ namespace OpenFMSL.Core.ModelLibrary
                 {
                     // tray.TV.Unbind();
                     if (i < NumberOfTrays - 1)
-                    {                     
-                        AddEquationToEquationSystem(problem, (tray.TV).IsEqualTo(_trays[i + 1].TV + tray.eps * Sym.Par(_trays[i].T - _trays[i + 1].TV)));                      
+                    {
+                        AddEquationToEquationSystem(problem, (tray.TV).IsEqualTo(_trays[i + 1].TV + tray.eps * Sym.Par(_trays[i].T - _trays[i + 1].TV)));
                     }
                     else
                         AddEquationToEquationSystem(problem, (tray.TV).IsEqualTo(VIn.Mixed.Temperature + tray.eps * Sym.Par(_trays[i].T - VIn.Mixed.Temperature)));
@@ -455,8 +455,8 @@ namespace OpenFMSL.Core.ModelLibrary
                         tray.yeq[comp].Unbind();
                         if (!IgnoredComponents.Contains(System.Components[comp]))
                         {
-                            if (i < NumberOfTrays - 1)                            
-                                AddEquationToEquationSystem(problem, (tray.y[comp]).IsEqualTo(_trays[i + 1].y[comp] + tray.eps * Sym.Par(_trays[i].yeq[comp] - _trays[i + 1].y[comp])));                            
+                            if (i < NumberOfTrays - 1)
+                                AddEquationToEquationSystem(problem, (tray.y[comp]).IsEqualTo(_trays[i + 1].y[comp] + tray.eps * Sym.Par(_trays[i].yeq[comp] - _trays[i + 1].y[comp])));
                             else
                                 AddEquationToEquationSystem(problem, (tray.y[comp]).IsEqualTo(VIn.Mixed.ComponentMolarFraction[comp] + tray.eps * Sym.Par(_trays[i].yeq[comp] - VIn.Mixed.ComponentMolarFraction[comp])));
                         }
@@ -470,12 +470,11 @@ namespace OpenFMSL.Core.ModelLibrary
                     {
                         Expression TIN = _trays[i + 1].TV;
 
-                        if (_feeds.Any(f => f.Stage == i + 2))
+                        if (_feeds.Any(f => f.Stage == i + 1 && f.Phase == PhaseState.Vapour))
                         {
-                            var nextFeed = _feeds.FirstOrDefault(f => f.Stage == i + 2);
+                            var nextFeed = _feeds.FirstOrDefault(f => f.Stage == i + 1 && f.Phase == PhaseState.Vapour);
                             TIN = (_trays[i + 1].T * _trays[i + 1].V + nextFeed.Stream.Mixed.Temperature * _trays[i].F) / (_trays[i + 1].V + _trays[i].F);
                         }
-                        //AddEquationToEquationSystem(problem, (tray.TV).IsEqualTo(_trays[i + 1].TV + tray.eps * Sym.Par(_trays[i].T - _trays[i + 1].TV)));
                         AddEquationToEquationSystem(problem, (tray.TV).IsEqualTo(TIN + tray.eps * Sym.Par(_trays[i].T - TIN)));
                     }
                     else
@@ -490,12 +489,10 @@ namespace OpenFMSL.Core.ModelLibrary
                             {
                                 Expression yIN = _trays[i + 1].y[comp];
 
-                                if (_feeds.Any(f => f.Stage == i + 2))
+                                if (_feeds.Any(f => f.Stage == i + 1 && f.Phase == PhaseState.Vapour))
                                 {
                                     yIN = (_trays[i + 1].y[comp] * _trays[i + 1].V + _trays[i].z[comp] * _trays[i].F) / (_trays[i + 1].V + _trays[i].F);
                                 }
-
-                                //AddEquationToEquationSystem(problem, (tray.y[comp]).IsEqualTo(_trays[i + 1].y[comp] + tray.eps * Sym.Par(_trays[i].yeq[comp] - _trays[i + 1].y[comp])));
                                 AddEquationToEquationSystem(problem, (tray.y[comp]).IsEqualTo(yIN + tray.eps * Sym.Par(_trays[i].yeq[comp] - yIN)));
                             }
                             else
@@ -507,7 +504,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
                 //Pressure profile
                 if (i == NumberOfTrays - 1)
-                    AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo((VIn.Mixed.Pressure - _trays[i].DP) / pscale));
+                    AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo((VIn.Mixed.Pressure - _trays[NumberOfTrays - 1].DP) / pscale));
                 else
                     AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo(Sym.Par(_trays[i + 1].p - _trays[i].DP) / pscale));
 
@@ -520,7 +517,8 @@ namespace OpenFMSL.Core.ModelLibrary
             }
 
             // AddEquationToEquationSystem(problem, VOut.Mixed.Temperature.IsEqualTo(_trays[0].TV));
-            AddEquationToEquationSystem(problem, VOut.Mixed.SpecificEnthalpy.IsEqualTo(_trays[0].HV));
+            AddEquationToEquationSystem(problem, (VOut.Mixed.SpecificEnthalpy/1e6).IsEqualTo(_trays[0].HV / 1e6));
+            //AddEquationToEquationSystem(problem, VOut.Mixed.Pressure.IsEqualTo(_trays[0].p - _trays[0].DP));
             AddEquationToEquationSystem(problem, VOut.Mixed.Pressure.IsEqualTo(_trays[0].p));
             AddEquationToEquationSystem(problem, LOut.Mixed.Temperature.IsEqualTo(_trays[NumberOfTrays - 1].T));
             AddEquationToEquationSystem(problem, LOut.Mixed.Pressure.IsEqualTo(_trays[NumberOfTrays - 1].p));
@@ -536,7 +534,7 @@ namespace OpenFMSL.Core.ModelLibrary
                 _trays[feed.Stage - 1].HF.ValueInSI = feed.Stream.Liquid.SpecificEnthalpy.ValueInSI;
                 _trays[feed.Stage - 1].F.ValueInSI = feed.Stream.Liquid.TotalMolarflow.ValueInSI;
 
-                if (feed.Stage > 1)
+                if (feed.Stage > 1 && feed.Phase == PhaseState.LiquidVapor)
                 {
                     _trays[feed.Stage - 2].HF.Unfix();
                     _trays[feed.Stage - 2].F.Unfix();
@@ -571,7 +569,7 @@ namespace OpenFMSL.Core.ModelLibrary
                     _trays[feed.Stage - 1].z[comp].IsConstant = false;
 
 
-                    if (feed.Stage > 1)
+                    if (feed.Stage > 1 && feed.Phase == PhaseState.LiquidVapor)
                     {
                         _trays[feed.Stage - 2].z[comp].Unfix();
                         _trays[feed.Stage - 2].z[comp].IsConstant = false;
@@ -594,7 +592,7 @@ namespace OpenFMSL.Core.ModelLibrary
             foreach (var feed in _sidestream)
             {
                 if (feed.Phase == PhaseState.Liquid)
-                {                 
+                {
 
                     _trays[feed.Stage - 1].W.Unfix();
                     _trays[feed.Stage - 1].RL.Unfix();
@@ -763,6 +761,7 @@ namespace OpenFMSL.Core.ModelLibrary
             for (int i = 0; i < NumberOfTrays; i++)
             {
                 _trays[i].T.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
+                _trays[i].TV.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
 
                 if (i == 0)
                     _trays[i].L.ValueInSI = LIn.Streams[0].Mixed.TotalMolarflow.ValueInSI;
@@ -844,7 +843,7 @@ namespace OpenFMSL.Core.ModelLibrary
             for (int i = 0; i < NumberOfTrays; i++)
             {
                 _trays[i].T.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
-
+                _trays[i].TV.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
                 if (i == 0)
                     _trays[i].L.ValueInSI = In.Streams[0].Mixed.TotalMolarflow.ValueInSI * 0.5;
                 else

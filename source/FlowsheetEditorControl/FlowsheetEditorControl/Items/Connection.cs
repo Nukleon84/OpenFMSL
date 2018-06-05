@@ -464,7 +464,7 @@ namespace FlowsheetEditorControl.Items
         {
             get
             {
-                 return _model?.GetVariable("n"); 
+                 return _model?.GetVariable("m"); 
             }
                         
         }

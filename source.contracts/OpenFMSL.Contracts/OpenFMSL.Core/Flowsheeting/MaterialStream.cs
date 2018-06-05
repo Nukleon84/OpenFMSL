@@ -21,6 +21,10 @@ namespace OpenFMSL.Core.Flowsheeting
         Variable vfmolar;
         Variable vfmass;
         Variable Beta;
+
+        Variable MinVfBeta;
+        Variable MaxVfBeta;
+
         Variable[] K;
         Variable[] gamma;
 
@@ -158,6 +162,13 @@ namespace OpenFMSL.Core.Flowsheeting
                 Beta = new Variable("d", 0.5, -10, 10, SI.nil, "Phase equilibrium defect");
                 Beta.Group = "Equilibrium";
 
+                MinVfBeta = new Variable("d2", 0.1, -100, 100, SI.nil, "min(Vapor fraction,Beta)");
+                MinVfBeta.Group = "Equilibrium";
+                MaxVfBeta = new Variable("d3", 0.1, -100, 100, SI.nil, "max(Vapor fraction, beta)");
+                MaxVfBeta.Group = "Equilibrium";
+                AddVariable(MinVfBeta);
+                AddVariable(MaxVfBeta);
+
                 gamma = new Variable[System.Components.Count];
 
                 KValues = new Variable[System.Components.Count];
@@ -174,7 +185,7 @@ namespace OpenFMSL.Core.Flowsheeting
                     gamma[i].Subscript = System.Components[i].ID;
                     gamma[i].Group = "Equilibrium";
                     gamma[i].ValueInSI = 1.4;
-                    System.EquationFactory.ActivityCoefficient(System, gamma[i], Mixed.Temperature,Liquid.ComponentMolarFraction, i);
+                    System.EquationFactory.ActivityCoefficient(System, gamma[i], Mixed.Temperature, Liquid.ComponentMolarFraction, i);
 
                 }
 
@@ -192,7 +203,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 Variables.AddRange(Vapor.Variables);
                 Variables.AddRange(KValues);
                 Variables.AddRange(gamma);
-             
+
                 Variables.Remove(Liquid.Temperature);
                 Variables.Remove(Vapor.Temperature);
                 Variables.Remove(Liquid.Pressure);
@@ -202,7 +213,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 {
                     Variables.Remove(Mixed.ComponentMolarVolume[i]);
                     Variables.Remove(Mixed.ComponentEnthalpy[i]);
-                    
+
                 }
             }
             else
@@ -236,7 +247,15 @@ namespace OpenFMSL.Core.Flowsheeting
             }
             return this;
         }
-
+        public MaterialStream InitMolarFlowFromMassFlows()
+        {
+            ;
+            for (var i = 0; i < System.Components.Count; i++)
+            {
+                Mixed.ComponentMolarflow[i].ValueInSI = Mixed.ComponentMassflow[i].ValueInSI / System.Components[i].MolarWeight.ValueInSI;
+            }
+            return this;
+        }
         public MaterialStream FlashPT()
         {
             FlashRoutines calc = new FlashRoutines(new Numerics.Solvers.Newton());
@@ -297,9 +316,9 @@ namespace OpenFMSL.Core.Flowsheeting
 
                 Vapor.ComponentMassflow[i].BindTo(Vapor.ComponentMolarflow[i] * Sym.Convert(System.Components[i].GetConstant(ConstantProperties.MolarWeight), SI.kg / SI.mol));
                 Vapor.ComponentMassFraction[i].BindTo(Vapor.ComponentMassflow[i] / Sym.Max(1e-12, Vapor.TotalMassflow));
-                
+
                 Vapor.ComponentMolarVolume[i].BindTo((1.0 / System.EquationFactory.GetVaporDensityExpression(System, System.Components[i], Mixed.Temperature, Mixed.Pressure)));
-                Vapor.ComponentEnthalpy[i].BindTo(System.EquationFactory.GetVaporEnthalpyExpression(System, i, Mixed.Temperature));                
+                Vapor.ComponentEnthalpy[i].BindTo(System.EquationFactory.GetVaporEnthalpyExpression(System, i, Mixed.Temperature));
             }
 
             Mixed.TotalEnthalpy.BindTo(((Mixed.TotalMolarflow * Mixed.SpecificEnthalpy)));
@@ -317,24 +336,24 @@ namespace OpenFMSL.Core.Flowsheeting
 
             for (int i = 0; i < NC; i++)
             {
-               // AddEquationToEquationSystem(problem, (Mixed.ComponentMolarFraction[i] * Mixed.TotalMolarflow).IsEqualTo(Liquid.ComponentMolarFraction[i] * Liquid.TotalMolarflow + Vapor.ComponentMolarFraction[i] * Vapor.TotalMolarflow));
-               AddEquationToEquationSystem(problem, (Mixed.ComponentMolarflow[i]).IsEqualTo(Liquid.ComponentMolarflow[i] + Vapor.ComponentMolarflow[i] ));
-               // Mixed.ComponentMolarflow[i].BindTo(Liquid.ComponentMolarflow[i] + Vapor.ComponentMolarflow[i]);
+                // AddEquationToEquationSystem(problem, (Mixed.ComponentMolarFraction[i] * Mixed.TotalMolarflow).IsEqualTo(Liquid.ComponentMolarFraction[i] * Liquid.TotalMolarflow + Vapor.ComponentMolarFraction[i] * Vapor.TotalMolarflow));
+                AddEquationToEquationSystem(problem, (Mixed.ComponentMolarflow[i]).IsEqualTo(Liquid.ComponentMolarflow[i] + Vapor.ComponentMolarflow[i]));
+                // Mixed.ComponentMolarflow[i].BindTo(Liquid.ComponentMolarflow[i] + Vapor.ComponentMolarflow[i]);
             }
             for (int i = 0; i < NC; i++)
             {
-               AddEquationToEquationSystem(problem, (Mixed.ComponentMolarFraction[i] * Mixed.TotalMolarflow).IsEqualTo(Mixed.ComponentMolarflow[i]));
+                AddEquationToEquationSystem(problem, (Mixed.ComponentMolarFraction[i] * Mixed.TotalMolarflow).IsEqualTo(Mixed.ComponentMolarflow[i]));
                 //Mixed.ComponentMolarFraction[i].BindTo(Mixed.ComponentMolarflow[i]/ Mixed.TotalMolarflow);
             }
             for (int i = 0; i < NC; i++)
             {
                 AddEquationToEquationSystem(problem, (Liquid.ComponentMolarFraction[i] * Liquid.TotalMolarflow).IsEqualTo(Liquid.ComponentMolarflow[i]));
-               //Liquid.ComponentMolarFraction[i].BindTo(Liquid.ComponentMolarflow[i] / Sym.Max(1e-12, Liquid.TotalMolarflow));
+                //Liquid.ComponentMolarFraction[i].BindTo(Liquid.ComponentMolarflow[i] / Sym.Max(1e-12, Liquid.TotalMolarflow));
             }
             for (int i = 0; i < NC; i++)
             {
                 AddEquationToEquationSystem(problem, (Vapor.ComponentMolarFraction[i] * Vapor.TotalMolarflow).IsEqualTo(Vapor.ComponentMolarflow[i]));
-              // Vapor.ComponentMolarFraction[i].BindTo(Vapor.ComponentMolarflow[i] / Sym.Max(1e-12, Vapor.TotalMolarflow));
+                // Vapor.ComponentMolarFraction[i].BindTo(Vapor.ComponentMolarflow[i] / Sym.Max(1e-12, Vapor.TotalMolarflow));
             }
 
             AddEquationToEquationSystem(problem, (Vfmolar * Mixed.TotalMolarflow).IsEqualTo((Vapor.TotalMolarflow)), "Vapor Fraction");
@@ -345,22 +364,36 @@ namespace OpenFMSL.Core.Flowsheeting
                     AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                     AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
                     AddEquationToEquationSystem(problem, Liquid.TotalMolarflow.IsEqualTo(Sym.Sum(Liquid.ComponentMolarflow)), "Mass Balance");
+                    AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
+                    AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
                     break;
                 case PhaseState.DewPoint:
                     AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                     AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
                     AddEquationToEquationSystem(problem, Vapor.TotalMolarflow.IsEqualTo(Sym.Sum(Vapor.ComponentMolarflow)), "Mass Balance");
+                    AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
+                    AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
                     break;
                 default:
                     if (Vfmolar.IsFixed)
                     {
                         AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                         AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
+
+                        AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
+                        AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
+
+
                     }
                     else
                     {
                         AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
-                        AddEquationToEquationSystem(problem, Sym.Max(Sym.Min(Vfmolar, Beta), Sym.Min(Sym.Max(Vfmolar, Beta), Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
+
+                        AddEquationToEquationSystem(problem, (Sym.Min(Vfmolar, Beta)).IsEqualTo(MinVfBeta), "Equilibrium");
+                        AddEquationToEquationSystem(problem,( Sym.Max(Vfmolar, Beta)).IsEqualTo(MaxVfBeta), "Equilibrium");
+
+                        //AddEquationToEquationSystem(problem, Sym.Max(Sym.Min(Vfmolar, Beta), Sym.Min(Sym.Max(Vfmolar, Beta), Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
+                        AddEquationToEquationSystem(problem, Sym.Max(MinVfBeta, Sym.Min(MaxVfBeta, Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
                     }
                     AddEquationToEquationSystem(problem, (Mixed.TotalMolarflow).IsEqualTo(Vapor.TotalMolarflow + Liquid.TotalMolarflow), "Mass Balance");
                     break;
@@ -369,7 +402,7 @@ namespace OpenFMSL.Core.Flowsheeting
             for (int i = 0; i < NC; i++)
             {
                 System.EquationFactory.EquilibriumCoefficient(System, KValues[i], Mixed.Temperature, Mixed.Pressure, Liquid.ComponentMolarFraction, Vapor.ComponentMolarFraction, i);
-                 AddEquationToEquationSystem(problem, Vapor.ComponentMolarFraction[i].IsEqualTo(KValues[i] * Liquid.ComponentMolarFraction[i]), "Equilibrium");
+                AddEquationToEquationSystem(problem, Vapor.ComponentMolarFraction[i].IsEqualTo(KValues[i] * Liquid.ComponentMolarFraction[i]), "Equilibrium");
                 //Vapor.ComponentMolarFraction[i].BindTo(KValues[i] * Liquid.ComponentMolarFraction[i]);
             }
 
