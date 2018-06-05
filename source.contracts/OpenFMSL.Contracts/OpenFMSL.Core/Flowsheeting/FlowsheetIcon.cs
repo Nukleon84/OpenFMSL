@@ -40,7 +40,9 @@ namespace OpenFMSL.Core.Flowsheeting
         PIAdapter,
         None,
         UserModel,
-        ComponentSplitter
+        ComponentSplitter,
+        RateBasedSection,
+        FeedStage
     }
 
 

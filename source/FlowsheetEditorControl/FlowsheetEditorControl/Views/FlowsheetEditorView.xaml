@@ -178,6 +178,9 @@
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="ColumnSection">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource ColumnSectionTemplate}" />
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="RateBasedSection">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource RateBasedSectionTemplate}" />
+                                                            </DataTrigger>
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource StreamTemplate}" />
                                                             </DataTrigger>

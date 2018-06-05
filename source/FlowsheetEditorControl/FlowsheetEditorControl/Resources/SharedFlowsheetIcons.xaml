@@ -538,6 +538,38 @@
 
     </DataTemplate>
 
+
+    <DataTemplate x:Key="RateBasedSectionTemplate" DataType="{x:Type items:VisualUnit}">
+        <Grid  Width="{Binding Width}" Height="{Binding Height}" >
+            <Grid.Resources>
+                <VisualBrush 
+                          x:Key="HatchBrush" 
+                          TileMode="Tile" Viewport="0,0,10,10" 
+                          ViewportUnits="Absolute" Viewbox="0,0,10,10"    
+                          ViewboxUnits="Absolute">
+                    <VisualBrush.Visual>
+                        <Canvas>
+                            <Rectangle Fill="White" Width="10" Height="10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 0 l 10 10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 10 l 10 -10" />
+                        </Canvas>
+                    </VisualBrush.Visual>
+                </VisualBrush>               
+            </Grid.Resources>
+
+
+            <Rectangle RadiusX="30" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
+            
+            <!--<Rectangle Margin="0,35,0,30" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>-->
+
+            <Ellipse HorizontalAlignment="Stretch" Height="30" VerticalAlignment="Top" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2" ></Ellipse>
+            
+        </Grid>
+
+    </DataTemplate>
+    
+    
+
     <DataTemplate DataType="{x:Type items:ToolboxItem}">
         <!--<Border   Margin="5" BorderBrush="DimGray" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" BorderThickness="1">-->
         <StackPanel Orientation="Horizontal" ToolTip="{Binding ModelName}">
@@ -564,6 +596,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="ColumnSection">
                                     <Setter Property="ContentTemplate" Value="{StaticResource ColumnSectionTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DisplayIcon}" Value="RateBasedSection">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RateBasedSectionTemplate}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                     <Setter Property="ContentTemplate" Value="{StaticResource StreamTemplate}" />

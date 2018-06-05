@@ -198,6 +198,11 @@ namespace FlowsheetEditorControl.Items
                       //  if (startPoint.X > endPoint.X && startPoint.Y > endPoint.Y)
                             connectionRoute = 10;
                     }
+                    if (Source.Direction == ConnectorDirection.Right && Sink.Direction == ConnectorDirection.Down)
+                    {
+                        //  if (startPoint.X > endPoint.X && startPoint.Y > endPoint.Y)
+                        connectionRoute = 10;
+                    }
 
                     if (Source.Direction == ConnectorDirection.Right && Sink.Direction == ConnectorDirection.Left)
                     {
