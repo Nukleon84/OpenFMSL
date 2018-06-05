@@ -109,10 +109,13 @@ namespace OpenFMSL.Core.ModelLibrary
         }
     }
 
+    public enum MassTransferModel { NoContact,Simple,StefanMaxwell, User};
+
     public class RateBasedSection : ProcessUnit
     {
         int _numberOfElements = -1;
         TrayEfficiencyType _efficiencyType = TrayEfficiencyType.None;
+        MassTransferModel _transferModel = MassTransferModel.NoContact;
 
         List<NonEquilibriumTray> _trays = new List<NonEquilibriumTray>();
         List<MolecularComponent> _ignoredComponents = new List<MolecularComponent>();
@@ -141,11 +144,26 @@ namespace OpenFMSL.Core.ModelLibrary
             }
         }
 
+       
+
+        public MassTransferModel MassRateApproach
+        {
+            get
+            {
+                return _transferModel;
+            }
+
+            set
+            {
+                _transferModel = value;
+            }
+        }
+
         public RateBasedSection(string name, ThermodynamicSystem system, int numberOfElements) : base(name, system)
         {
-            Class = "TraySection";
+            Class = "RateSection";
             NumberOfElements = numberOfElements;
-            Icon.IconType = IconTypes.ColumnSection;
+            Icon.IconType = IconTypes.RateBasedSection;
 
             MaterialPorts.Add(new Port<MaterialStream>("VIn", PortDirection.In, 1));
             MaterialPorts.Add(new Port<MaterialStream>("LIn", PortDirection.In, 1));
@@ -201,7 +219,7 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 AddVariables(_trays[i].N);
             }
-            
+
         }
 
         public RateBasedSection MakeAdiabatic()
@@ -213,7 +231,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
             return this;
         }
-        
+
         public RateBasedSection MakeIsobaric()
         {
             foreach (var tray in _trays)
@@ -279,7 +297,7 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 var tray = _trays[i];
 
-                //Component Massbalance
+                //Component (M)assbalance
                 for (var comp = 0; comp < NC; comp++)
                 {
                     if (!IgnoredComponents.Contains(System.Components[comp]))
@@ -308,24 +326,34 @@ namespace OpenFMSL.Core.ModelLibrary
                     System.EquationFactory.EquilibriumCoefficient(System, tray.K[comp], tray.TI, tray.p, tray.xI.ToList(), tray.yI.ToList(), comp);
                     if (!IgnoredComponents.Contains(System.Components[comp]))
                     {
-                        AddEquationToEquationSystem(problem, (tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));
-                    }
-
-                    AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(0));
-
-                    AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
-                   //AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
+                        AddEquationToEquationSystem(problem, (tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));                                               
+                    }                  
                 }
+
+
+                //(R)ate Equation
+                for (var comp = 0; comp < NC; comp++)
+                {
+                    if (!IgnoredComponents.Contains(System.Components[comp]))
+                    {                      
+                        if (MassRateApproach == MassTransferModel.NoContact)
+                        {
+                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(0));
+                            AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
+                        }
+                    }                  
+                }
+
 
                 //(S)ummation                
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
-
-                //AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TL));
-               // AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo( _trays[i].TV));
-
-                AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
-                AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
+                                
+                if (MassRateApproach == MassTransferModel.NoContact)
+                {
+                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
+                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
+                }
 
                 //Ent(H)alpy
                 tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.TL)));
@@ -333,12 +361,12 @@ namespace OpenFMSL.Core.ModelLibrary
 
 
                 if (i == 0)
-                {                    
+                {
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - L0 * LIn.Mixed.SpecificEnthalpy - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
                 else if (i == NumberOfElements - 1)
-                {                    
+                {
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - VNT * VIn.Mixed.SpecificEnthalpy + _trays[i].E) / hscale).IsEqualTo(0));
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
@@ -347,7 +375,7 @@ namespace OpenFMSL.Core.ModelLibrary
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
-                
+
                 //Pressure profile
                 if (i == NumberOfElements - 1)
                     AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo((VIn.Mixed.Pressure - _trays[NumberOfElements - 1].DP) / pscale));
@@ -389,7 +417,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
             for (int i = 0; i < NumberOfElements; i++)
             {
-                _trays[i].TL.ValueInSI = TTop ;
+                _trays[i].TL.ValueInSI = TTop;
                 _trays[i].TV.ValueInSI = TBot;
 
                 if (i == 0)
@@ -454,7 +482,7 @@ namespace OpenFMSL.Core.ModelLibrary
                 LOut.Streams[0].Mixed.ComponentMolarflow[j].ValueInSI = _trays[NumberOfElements - 1].L.ValueInSI * _trays[NumberOfElements - 1].x[j].ValueInSI;
             }
             var flash = new FlashRoutines(new Numerics.Solvers.Newton());
-                        
+
             flash.CalculateTP(VOut.Streams[0]);
             flash.CalculateTP(LOut.Streams[0]);
 
