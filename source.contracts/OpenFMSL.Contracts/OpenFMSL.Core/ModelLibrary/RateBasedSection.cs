@@ -42,6 +42,12 @@ namespace OpenFMSL.Core.ModelLibrary
         public Variable[] K;
 
         public Variable DP;
+
+        public Variable h;
+        public Variable d;
+        public Variable aspez;
+        public Variable aeff;
+
         int _number = -1;
         ThermodynamicSystem _system;
 
@@ -63,6 +69,17 @@ namespace OpenFMSL.Core.ModelLibrary
             _system = system;
             Number = number;
             var numString = number.ToString();
+
+            h = system.VariableFactory.CreateVariable("h", numString, "Packing height", PhysicalDimension.Length);
+            d = system.VariableFactory.CreateVariable("d", numString, "Packing diameter", PhysicalDimension.Length);
+            aspez = system.VariableFactory.CreateVariable("aspec", numString, "Specific Area", PhysicalDimension.SpecificArea);
+            aeff = system.VariableFactory.CreateVariable("aeff",  numString, "Effective Area", PhysicalDimension.Area);
+            h.ValueInSI = 3;
+            d.ValueInSI = 0.7;
+            aspez.ValueInSI = 250;
+            aeff.ValueInSI = 100;
+
+
             TL = system.VariableFactory.CreateVariable("TL", numString, "Liquid Temperature", PhysicalDimension.Temperature);
             TI = system.VariableFactory.CreateVariable("TI", numString, "Interphase Temperature", PhysicalDimension.Temperature);
             TV = system.VariableFactory.CreateVariable("TV", numString, "Vapor Temperature", PhysicalDimension.Temperature);
@@ -109,16 +126,17 @@ namespace OpenFMSL.Core.ModelLibrary
         }
     }
 
-    public enum MassTransferModel { NoContact,Simple,StefanMaxwell, User};
+    public enum MassTransferModel { NoContact, Equilibrium, Simple, StefanMaxwell, User };
 
     public class RateBasedSection : ProcessUnit
     {
         int _numberOfElements = -1;
-        TrayEfficiencyType _efficiencyType = TrayEfficiencyType.None;
         MassTransferModel _transferModel = MassTransferModel.NoContact;
 
         List<NonEquilibriumTray> _trays = new List<NonEquilibriumTray>();
         List<MolecularComponent> _ignoredComponents = new List<MolecularComponent>();
+
+
         public List<MolecularComponent> IgnoredComponents
         {
             get
@@ -144,7 +162,7 @@ namespace OpenFMSL.Core.ModelLibrary
             }
         }
 
-       
+
 
         public MassTransferModel MassRateApproach
         {
@@ -170,6 +188,7 @@ namespace OpenFMSL.Core.ModelLibrary
             MaterialPorts.Add(new Port<MaterialStream>("VOut", PortDirection.Out, 1));
             MaterialPorts.Add(new Port<MaterialStream>("LOut", PortDirection.Out, 1));
 
+
             for (int i = 0; i < NumberOfElements; i++)
             {
                 var tray = new NonEquilibriumTray(i + 1, system);
@@ -189,7 +208,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
             AddVariables(_trays.Select(t => t.HL).ToArray());
             AddVariables(_trays.Select(t => t.HV).ToArray());
-
+            AddVariables(_trays.Select(t => t.aeff).ToArray());
 
             for (int i = 0; i < NumberOfElements; i++)
             {
@@ -326,8 +345,8 @@ namespace OpenFMSL.Core.ModelLibrary
                     System.EquationFactory.EquilibriumCoefficient(System, tray.K[comp], tray.TI, tray.p, tray.xI.ToList(), tray.yI.ToList(), comp);
                     if (!IgnoredComponents.Contains(System.Components[comp]))
                     {
-                        AddEquationToEquationSystem(problem, (tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));                                               
-                    }                  
+                        AddEquationToEquationSystem(problem, (tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));
+                    }
                 }
 
 
@@ -335,25 +354,53 @@ namespace OpenFMSL.Core.ModelLibrary
                 for (var comp = 0; comp < NC; comp++)
                 {
                     if (!IgnoredComponents.Contains(System.Components[comp]))
-                    {                      
+                    {
                         if (MassRateApproach == MassTransferModel.NoContact)
                         {
                             AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(0));
                             AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
                         }
-                    }                  
+
+                        if (MassRateApproach == MassTransferModel.Equilibrium)
+                        {
+
+                            AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
+                            AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
+                        }
+
+                        if (MassRateApproach == MassTransferModel.Simple)
+                        {
+                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(_trays[i].aeff * 10 * Sym.Par(_trays[i].y[comp] - _trays[i].yI[comp])));
+                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo((_trays[i].aeff * 2 * Sym.Par(_trays[i].xI[comp] - _trays[i].x[comp]))));
+                        }
+                    }
                 }
 
 
                 //(S)ummation                
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
-                                
+
                 if (MassRateApproach == MassTransferModel.NoContact)
                 {
                     AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
                     AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
                 }
+
+                if (MassRateApproach == MassTransferModel.Equilibrium)
+                {
+                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TV));
+                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TL));
+                }
+                if (MassRateApproach == MassTransferModel.Simple)
+                {
+                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
+                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(_trays[i].aeff * Sym.Sum(0, NC, (j) => 10 * Sym.Par(_trays[i].y[j] - _trays[i].yI[j]) * System.EquationFactory.GetVaporEnthalpyExpression(System, j, tray.TV))));
+                }
+
+                //Hydraulics
+                AddEquationToEquationSystem(problem, _trays[i].aeff.IsEqualTo(_trays[i].h / NumberOfElements * Math.PI / 4 * Sym.Pow(_trays[i].d, 2) * _trays[i].aspez));
+
 
                 //Ent(H)alpy
                 tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.TL)));
@@ -401,6 +448,30 @@ namespace OpenFMSL.Core.ModelLibrary
             base.FillEquationSystem(problem);
         }
 
+        public RateBasedSection SetHeight(double height, Unit uom, int start = 1, int end = 1000)
+        {
+            for (int i = start - 1; i < (end < NumberOfElements ? end : NumberOfElements); i++)
+            {
+                _trays[i].h.SetValue(height / ((double)NumberOfElements), uom);
+            }
+            return this;
+        }
+        public RateBasedSection SetSpecificArea(double specificArea, Unit uom, int start = 1, int end = 1000)
+        {
+            for (int i = start - 1; i < (end < NumberOfElements ? end : NumberOfElements); i++)
+            {
+                _trays[i].aspez.SetValue(specificArea, uom);
+            }
+            return this;
+        }
+        public RateBasedSection SetDiameter(double diameter, Unit uom, int start = 1, int end = 1000)
+        {
+            for (int i = start - 1; i < (end < NumberOfElements ? end : NumberOfElements); i++)
+            {
+                _trays[i].d.SetValue(diameter, uom);
+            }
+            return this;
+        }
 
         #region Initialization
         void InitAbsorber()

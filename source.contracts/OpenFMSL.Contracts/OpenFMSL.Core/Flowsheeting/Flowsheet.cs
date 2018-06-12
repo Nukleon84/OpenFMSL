@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenFMSL.Core.Numerics;
 using OpenFMSL.Core.Expressions;
+using OpenFMSL.Core.Flowsheeting.Documentation;
 
 namespace OpenFMSL.Core.Flowsheeting
 {
@@ -15,6 +16,7 @@ namespace OpenFMSL.Core.Flowsheeting
         List<MaterialStream> _materialStreams = new List<MaterialStream>();
         List<HeatStream> _heatStreams = new List<HeatStream>();
         List<Equation> _designSpecifications = new List<Equation>();
+        List<DocumentationElement> _documentation = new List<DocumentationElement>();
 
         public List<ProcessUnit> Units
         {
@@ -65,6 +67,19 @@ namespace OpenFMSL.Core.Flowsheeting
             set
             {
                 _designSpecifications = value;
+            }
+        }
+
+        public List<DocumentationElement> Documentation
+        {
+            get
+            {
+                return _documentation;
+            }
+
+            set
+            {
+                _documentation = value;
             }
         }
 
@@ -132,6 +147,23 @@ namespace OpenFMSL.Core.Flowsheeting
                 DesignSpecifications.Remove(eq);
             return this;
         }
+
+        public Flowsheet AddDocumentation(params DocumentationElement[] units)
+        {
+            foreach (var unit in units)
+                AddDocumentation(unit);
+
+            return this;
+        }
+        public Flowsheet AddDocumentation(DocumentationElement unit)
+        {
+            if (!Documentation.Contains(unit))
+                Documentation.Add(unit);
+            else
+                throw new InvalidOperationException("Documentation " + unit.Name + " already included in flowsheet");
+            return this;
+        }
+
 
         public Flowsheet AddUnits(params ProcessUnit[] units)
         {

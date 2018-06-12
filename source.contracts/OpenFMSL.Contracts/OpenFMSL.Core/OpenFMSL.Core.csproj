@@ -60,6 +60,10 @@
     <Compile Include="Expressions\Trigonometric.cs" />
     <Compile Include="Expressions\UnaryExpressions.cs" />
     <Compile Include="Expressions\Variable.cs" />
+    <Compile Include="Flowsheeting\BaseFlowsheetObject.cs" />
+    <Compile Include="Flowsheeting\Documentation\DocumentationElement.cs" />
+    <Compile Include="Flowsheeting\Documentation\StreamTableElement.cs" />
+    <Compile Include="Flowsheeting\Documentation\TextElement.cs" />
     <Compile Include="Flowsheeting\Flowsheet.cs" />
     <Compile Include="Flowsheeting\FlowsheetIcon.cs" />
     <Compile Include="Flowsheeting\FlowsheetObject.cs" />

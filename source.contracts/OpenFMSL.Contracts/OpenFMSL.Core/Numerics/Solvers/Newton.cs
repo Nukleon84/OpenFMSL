@@ -418,7 +418,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 else
                     flags += "_";
 
-              
+
 
                 Func<Vector, Double> FuncLineSearch = ((r) => r.ToDouble().Max(s => Math.Abs(s)));
                 var F0 = FuncLineSearch(b);
@@ -515,15 +515,15 @@ namespace OpenFMSL.Core.Numerics.Solvers
 
                     vari.ValueInSI += step;
 
-                    if (vari.ValueInSI < 0)
+                    if (vari.ValueInSI < vari.LowerBound)
                         vari.ValueInSI = oldValue * 0.01;
 
-                    if (vari.ValueInSI < 1e-10)
+                    if (vari.LowerBound == 0.0 && vari.ValueInSI < 1e-10)
                         vari.ValueInSI = 0;
 
                     BoundVariable(vari);
                 }
-                else if (vari.Dimension==PhysicalDimension.MolarFraction)
+                else if (vari.Dimension == PhysicalDimension.MolarFraction)
                 {
                     var oldValue = vari.ValueInSI;
 

@@ -42,7 +42,8 @@ namespace OpenFMSL.Core.Flowsheeting
         UserModel,
         ComponentSplitter,
         RateBasedSection,
-        FeedStage
+        FeedStage,
+        StreamTable
     }
 
 
@@ -50,6 +51,8 @@ namespace OpenFMSL.Core.Flowsheeting
     {
         double _x=100;
         double _y=100;
+        double _width = 100;
+        double _height = 40;
         IconTypes _iconType=IconTypes.Block;
         string _borderColor = "DimGray";
         string _fillColor = "White";
@@ -116,6 +119,32 @@ namespace OpenFMSL.Core.Flowsheeting
             set
             {
                 _borderColor = value;
+            }
+        }
+
+        public double Width
+        {
+            get
+            {
+                return _width;
+            }
+
+            set
+            {
+                _width = value;
+            }
+        }
+
+        public double Height
+        {
+            get
+            {
+                return _height;
+            }
+
+            set
+            {
+                _height = value;
             }
         }
     }

@@ -104,6 +104,7 @@ namespace OpenFMSL.Core.UnitsOfMeasure
 
             set.UnitDictionary.Add(PhysicalDimension.MolarFraction, SI.mol / SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassFraction, SI.kg / SI.kg);
+            set.UnitDictionary.Add(PhysicalDimension.SpecificArea, SI.sqm / SI.cum);
             return set;
         }
 
@@ -142,6 +143,8 @@ namespace OpenFMSL.Core.UnitsOfMeasure
 
             set.UnitDictionary.Add(PhysicalDimension.MolarFraction, SI.mol / SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassFraction, SI.kg / SI.kg);
+
+            set.UnitDictionary.Add(PhysicalDimension.SpecificArea, SI.sqm / SI.cum);
 
             return set;
         }

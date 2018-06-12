@@ -44,7 +44,8 @@
         HeatConductivity,
         DiffusionCoefficient,
         MolarFraction,
-        MassFraction
+        MassFraction,
+        SpecificArea
 
 
     }

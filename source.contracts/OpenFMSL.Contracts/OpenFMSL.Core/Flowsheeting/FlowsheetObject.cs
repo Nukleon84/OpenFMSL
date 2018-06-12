@@ -10,29 +10,17 @@ using System.Threading.Tasks;
 
 namespace OpenFMSL.Core.Flowsheeting
 {
-    public abstract class FlowsheetObject
+    public abstract class FlowsheetObject:BaseFlowsheetObject
     {
-        string _name;
+    
         string _description;
         string _class;
-        FlowsheetIcon _icon = new FlowsheetIcon();
-
+      
         Guid _id;
         private readonly ThermodynamicSystem _system;
         List<Variable> _variables = new List<Variable>();
 
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-
-            set
-            {
-                _name = value;
-            }
-        }
+       
 
         public Guid Id
         {
@@ -94,18 +82,7 @@ namespace OpenFMSL.Core.Flowsheeting
             }
         }
 
-        public FlowsheetIcon Icon
-        {
-            get
-            {
-                return _icon;
-            }
-
-            set
-            {
-                _icon = value;
-            }
-        }
+       
 
         public FlowsheetObject()
         {
@@ -175,19 +152,9 @@ namespace OpenFMSL.Core.Flowsheeting
             return Variables.FirstOrDefault(v => v.FullName == name);
         }
 
-        public FlowsheetObject SetIcon(IconTypes type, double x, double y)
-        {
-            Icon.IconType = type;
-            Icon.X = x;
-            Icon.Y = y;
-            return this;
-        }
-        public FlowsheetObject SetIconColors(string border, string fill)
-        {
-            Icon.BorderColor = border;
-            Icon.FillColor = fill;       
-            return this;
-        }
+
+
+
         public FlowsheetObject Specify(string variable, double value)
         {
             Specify(variable, value, null);

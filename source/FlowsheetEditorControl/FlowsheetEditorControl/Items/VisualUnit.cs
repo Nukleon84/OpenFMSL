@@ -23,8 +23,8 @@ namespace FlowsheetEditorControl.Items
         private bool _requiresInput = false;
         private bool _requiresRecalculation = false;
          string _report = "";
-        FlowsheetObject _model;
-
+        BaseFlowsheetObject _model;
+     
         #endregion
 
 
@@ -114,7 +114,7 @@ namespace FlowsheetEditorControl.Items
               }
         }
 
-        public FlowsheetObject Model
+        public BaseFlowsheetObject Model
         {
             get
             {
@@ -127,6 +127,8 @@ namespace FlowsheetEditorControl.Items
                 NotifyOfPropertyChange(() => Model);
             }
         }
+
+      
 
         #endregion
 

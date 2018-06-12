@@ -67,6 +67,7 @@ namespace PythonEnvironment
 
             Run("from OpenFMSL.Core.Expressions import *");
             Run("from OpenFMSL.Core.Flowsheeting import *");
+            Run("from OpenFMSL.Core.Flowsheeting.Documentation import *");
             Run("from OpenFMSL.Core.Numerics import *");
             Run("from OpenFMSL.Core.UnitsOfMeasure import *");
             Run("from OpenFMSL.Core.ModelLibrary import *");
