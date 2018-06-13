@@ -45,7 +45,10 @@
         DiffusionCoefficient,
         MolarFraction,
         MassFraction,
-        SpecificArea
+        SpecificArea,
+        MassTransferCoefficient,
+        DynamicViscosity,
+        Velocity
 
 
     }

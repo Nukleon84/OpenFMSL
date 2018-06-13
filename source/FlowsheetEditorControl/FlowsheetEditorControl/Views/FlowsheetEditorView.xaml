@@ -181,6 +181,10 @@
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="RateBasedSection">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource RateBasedSectionTemplate}" />
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="FeedStage">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource FeedStageTemplate}" />
+                                                            </DataTrigger>
+                                                            
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource StreamTemplate}" />
                                                             </DataTrigger>

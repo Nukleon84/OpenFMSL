@@ -564,6 +564,28 @@ namespace ThermodynamicsImporter
                     break;
             }
         }
+
+        void ParseDIFV(string[] line)
+        {
+
+            int i = ParseInteger(line[1]);
+            int j = ParseInteger(line[2]);
+            double aij = ParseDouble(line[3]);
+            double aji = ParseDouble(line[4]);
+
+            var comp1 = _currentSystem.Components[i - 1];
+            var comp2 = _currentSystem.Components[j - 1];
+            
+            if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "DIJ") == 0)
+                _currentSystem.BinaryParameters.Add(new DiffusionCoefficients(_currentSystem));
+
+            var currentParameterSet = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "DIJ");
+
+            currentParameterSet.SetParam("A", comp1, comp2, aij);
+            currentParameterSet.SetParam("A", comp2, comp1, aji);
+        }
+
+
         int ParseInteger(string token)
         {
             int value = -1;
@@ -628,6 +650,9 @@ namespace ThermodynamicsImporter
                         return true;
                     case "WILS":
                         ParseWilson(line);
+                        return true;
+                    case "DIFV":
+                        ParseDIFV(line);
                         return true;
                     case "VP":
                         ParsePureFunction(line, c => c.GetFunction(EvaluatedProperties.VaporPressure));

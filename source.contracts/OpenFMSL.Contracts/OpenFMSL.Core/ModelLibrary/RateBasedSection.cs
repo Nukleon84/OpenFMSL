@@ -45,8 +45,15 @@ namespace OpenFMSL.Core.ModelLibrary
 
         public Variable h;
         public Variable d;
+
         public Variable aspez;
         public Variable aeff;
+
+        public Variable dhyd;
+        public Variable uV;
+        public Variable ReV;
+
+        public Variable[,] Beta;
 
 
         int _number = -1;
@@ -75,10 +82,21 @@ namespace OpenFMSL.Core.ModelLibrary
             d = system.VariableFactory.CreateVariable("d", numString, "Packing diameter", PhysicalDimension.Length);
             aspez = system.VariableFactory.CreateVariable("aspec", numString, "Specific Area", PhysicalDimension.SpecificArea);
             aeff = system.VariableFactory.CreateVariable("aeff", numString, "Effective Area", PhysicalDimension.Area);
+
+            dhyd = system.VariableFactory.CreateVariable("dhyd", numString, "Hydrodynamic diameter", PhysicalDimension.Length);
+            uV = system.VariableFactory.CreateVariable("uV", numString, "Superficial velocity", PhysicalDimension.Velocity);
+            ReV = system.VariableFactory.CreateVariable("ReV", numString, "Reynolds number vapor", PhysicalDimension.Dimensionless);
+
+            dhyd.ValueInSI = 0.00723;
+
             h.ValueInSI = 3;
             d.ValueInSI = 0.7;
             aspez.ValueInSI = 250;
             aeff.ValueInSI = 100;
+            h.IsFixed = true;
+            d.IsFixed = true;
+            aspez.IsFixed = true;
+            dhyd.IsFixed = true;
 
 
             TL = system.VariableFactory.CreateVariable("TL", numString, "Liquid Temperature", PhysicalDimension.Temperature);
@@ -108,6 +126,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
             N = new Variable[system.Components.Count];
 
+            Beta = new Variable[system.Components.Count, system.Components.Count];
 
             for (int i = 0; i < system.Components.Count; i++)
             {
@@ -122,7 +141,13 @@ namespace OpenFMSL.Core.ModelLibrary
                 N[i].LowerBound = -1e6;
                 N[i].ValueInSI = 0.0;
 
-
+                for (int j = 0; j < system.Components.Count; j++)
+                {
+                    Beta[i, j] = system.VariableFactory.CreateVariable("Beta", numString + ", " + system.Components[i].ID + ", " + system.Components[j].ID, "Masstransfer coefficient)", PhysicalDimension.MassTransferCoefficient);
+                    Beta[i, j].IsFixed = true;
+                    if (i != j)
+                        Beta[i, j].ValueInSI = 0.02;
+                }
             }
         }
     }
@@ -185,6 +210,7 @@ namespace OpenFMSL.Core.ModelLibrary
             Class = "RateSection";
             NumberOfElements = numberOfElements;
             Icon.IconType = IconTypes.RateBasedSection;
+            var NC = system.Components.Count;
 
             MaterialPorts.Add(new Port<MaterialStream>("VIn", PortDirection.In, 1));
             MaterialPorts.Add(new Port<MaterialStream>("LIn", PortDirection.In, 1));
@@ -212,6 +238,14 @@ namespace OpenFMSL.Core.ModelLibrary
             AddVariables(_trays.Select(t => t.HL).ToArray());
             AddVariables(_trays.Select(t => t.HV).ToArray());
             AddVariables(_trays.Select(t => t.aeff).ToArray());
+
+            AddVariables(_trays.Select(t => t.aspez).ToArray());
+            AddVariables(_trays.Select(t => t.d).ToArray());
+            AddVariables(_trays.Select(t => t.h).ToArray());
+            AddVariables(_trays.Select(t => t.dhyd).ToArray());
+
+            AddVariables(_trays.Select(t => t.ReV).ToArray());
+            AddVariables(_trays.Select(t => t.uV).ToArray());
 
             for (int i = 0; i < NumberOfElements; i++)
             {
@@ -242,6 +276,16 @@ namespace OpenFMSL.Core.ModelLibrary
                 AddVariables(_trays[i].N);
             }
 
+            for (int n = 0; n < NumberOfElements; n++)
+            {
+                for (int i = 0; i < NC; i++)
+                {
+                    for (int j = 0; j < NC; j++)
+                    {
+                        AddVariables(_trays[n].Beta[i, j]);
+                    }
+                }
+            }
         }
 
         public RateBasedSection MakeAdiabatic()
@@ -388,7 +432,25 @@ namespace OpenFMSL.Core.ModelLibrary
                             if (!_massTransferResistanceOnLiquid)
                                 AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
                             if (!_massTransferResistanceOnVapor)
+                            {
                                 AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
+                            }
+                            else
+                            {
+                                //Simplified Stefan-Maxwell Equation for Film model
+                                var y = _trays[i].y;
+                                var yI = _trays[i].yI;
+                                var n = _trays[i].N;
+                                var ii = comp;
+                                var TV = _trays[i].TV;
+                                var p = _trays[i].p;
+                                var nu = Sym.Sum(0, NC, j => 1 / System.EquationFactory.GetVaporDensityExpression(System, System.Components[j], TV, p) * _trays[i].y[j]);
+                                AddEquationToEquationSystem(problem,
+                                    (1 / nu * _trays[i].aeff * Sym.Par(_trays[i].y[comp] - _trays[i].yI[comp])).IsEqualTo(
+                                        Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(y[j] + yI[j]) * n[ii] - 0.5 * Sym.Par(y[ii] + yI[ii]) * n[j]) / _trays[i].Beta[ii, j])
+                                        )
+                                        );
+                            }
                         }
                     }
                 }
@@ -417,7 +479,10 @@ namespace OpenFMSL.Core.ModelLibrary
 
 
                 //Hydraulics
-                AddEquationToEquationSystem(problem, _trays[i].aeff.IsEqualTo(_trays[i].h / NumberOfElements * Math.PI / 4 * Sym.Pow(_trays[i].d, 2) * _trays[i].aspez));
+                AddEquationToEquationSystem(problem, _trays[i].aeff.IsEqualTo(_trays[i].h * Math.PI / 4 * Sym.Pow(_trays[i].d, 2) * _trays[i].aspez));
+
+                AddEquationToEquationSystem(problem, _trays[i].uV.IsEqualTo(_trays[i].V / (System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p) * Math.PI / 4 * Sym.Pow(_trays[i].d, 2))));
+                AddEquationToEquationSystem(problem, _trays[i].ReV.IsEqualTo(System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p) * System.EquationFactory.GetAverageMolarWeightExpression(System, _trays[i].y)/1000 * _trays[i].uV * _trays[i].dhyd / System.EquationFactory.GetAverageVaporViscosityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p)));
 
 
                 //Ent(H)alpy

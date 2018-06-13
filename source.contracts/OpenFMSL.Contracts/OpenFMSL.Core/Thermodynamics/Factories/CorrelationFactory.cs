@@ -180,6 +180,10 @@ namespace OpenFMSL.Core.Thermodynamics
                     return "ST";
                 case EvaluatedProperties.VaporHeatConductivity:
                     return "KVAP";
+                case EvaluatedProperties.VaporViscosity:
+                    return "VISV";
+                case EvaluatedProperties.LiquidViscosity:
+                    return "VISL";
                 case EvaluatedProperties.VaporPressure:
                     return "VP";
                 default:
