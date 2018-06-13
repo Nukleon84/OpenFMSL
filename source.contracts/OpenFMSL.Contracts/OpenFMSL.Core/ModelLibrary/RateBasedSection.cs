@@ -48,6 +48,7 @@ namespace OpenFMSL.Core.ModelLibrary
         public Variable aspez;
         public Variable aeff;
 
+
         int _number = -1;
         ThermodynamicSystem _system;
 
@@ -73,7 +74,7 @@ namespace OpenFMSL.Core.ModelLibrary
             h = system.VariableFactory.CreateVariable("h", numString, "Packing height", PhysicalDimension.Length);
             d = system.VariableFactory.CreateVariable("d", numString, "Packing diameter", PhysicalDimension.Length);
             aspez = system.VariableFactory.CreateVariable("aspec", numString, "Specific Area", PhysicalDimension.SpecificArea);
-            aeff = system.VariableFactory.CreateVariable("aeff",  numString, "Effective Area", PhysicalDimension.Area);
+            aeff = system.VariableFactory.CreateVariable("aeff", numString, "Effective Area", PhysicalDimension.Area);
             h.ValueInSI = 3;
             d.ValueInSI = 0.7;
             aspez.ValueInSI = 250;
@@ -126,16 +127,20 @@ namespace OpenFMSL.Core.ModelLibrary
         }
     }
 
-    public enum MassTransferModel { NoContact, Equilibrium, Simple, StefanMaxwell, User };
 
     public class RateBasedSection : ProcessUnit
     {
         int _numberOfElements = -1;
-        MassTransferModel _transferModel = MassTransferModel.NoContact;
+
+        bool _heatTransferResistanceOnVapor = false;
+        bool _heatTransferResistanceOnLiquid = false;
+        bool _massTransferResistanceOnVapor = false;
+        bool _massTransferResistanceOnLiquid = false;
+
 
         List<NonEquilibriumTray> _trays = new List<NonEquilibriumTray>();
         List<MolecularComponent> _ignoredComponents = new List<MolecularComponent>();
-
+        bool _noContact = true;
 
         public List<MolecularComponent> IgnoredComponents
         {
@@ -162,18 +167,16 @@ namespace OpenFMSL.Core.ModelLibrary
             }
         }
 
-
-
-        public MassTransferModel MassRateApproach
+        public bool NoContact
         {
             get
             {
-                return _transferModel;
+                return _noContact;
             }
 
             set
             {
-                _transferModel = value;
+                _noContact = value;
             }
         }
 
@@ -257,6 +260,26 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 tray.DP.FixValue(0);
             }
+            return this;
+        }
+
+        public RateBasedSection SetModel(bool massTransferResistanceOnVapor, bool massTransferResistanceOnLiquid, bool heatTransferResistanceOnVapor, bool heatTransferResistanceOnLiquid)
+        {
+            _massTransferResistanceOnVapor = massTransferResistanceOnVapor;
+            _massTransferResistanceOnLiquid = massTransferResistanceOnLiquid;
+            _heatTransferResistanceOnVapor = heatTransferResistanceOnVapor;
+            _heatTransferResistanceOnLiquid = heatTransferResistanceOnLiquid;
+            return this;
+        }
+
+        public RateBasedSection SetInitMode()
+        {
+            NoContact = true;
+            return this;
+        }
+        public RateBasedSection SetSolveMode()
+        {
+            NoContact = false;
             return this;
         }
 
@@ -350,30 +373,41 @@ namespace OpenFMSL.Core.ModelLibrary
                 }
 
 
-                //(R)ate Equation
+                //(R)ate Equation - Intefacial Mass Transfer
                 for (var comp = 0; comp < NC; comp++)
                 {
                     if (!IgnoredComponents.Contains(System.Components[comp]))
                     {
-                        if (MassRateApproach == MassTransferModel.NoContact)
+                        if (NoContact)
                         {
                             AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(0));
                             AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
                         }
-
-                        if (MassRateApproach == MassTransferModel.Equilibrium)
+                        else
                         {
-
-                            AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
-                            AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
-                        }
-
-                        if (MassRateApproach == MassTransferModel.Simple)
-                        {
-                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(_trays[i].aeff * 10 * Sym.Par(_trays[i].y[comp] - _trays[i].yI[comp])));
-                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo((_trays[i].aeff * 2 * Sym.Par(_trays[i].xI[comp] - _trays[i].x[comp]))));
+                            if (!_massTransferResistanceOnLiquid)
+                                AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
+                            if (!_massTransferResistanceOnVapor)
+                                AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
                         }
                     }
+                }
+
+
+
+                //(R)ate Equation - Intefacial Heat Transfer
+
+                if (NoContact)
+                {
+                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
+                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * Sym.Par(_trays[i].TL + _trays[i].TV)));
+                }
+                else
+                {
+                    if (!_heatTransferResistanceOnLiquid)
+                        AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TL));
+                    if (!_heatTransferResistanceOnVapor)
+                        AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TV));
                 }
 
 
@@ -381,22 +415,6 @@ namespace OpenFMSL.Core.ModelLibrary
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
 
-                if (MassRateApproach == MassTransferModel.NoContact)
-                {
-                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
-                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
-                }
-
-                if (MassRateApproach == MassTransferModel.Equilibrium)
-                {
-                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TV));
-                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TL));
-                }
-                if (MassRateApproach == MassTransferModel.Simple)
-                {
-                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * (_trays[i].TL + _trays[i].TV)));
-                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(_trays[i].aeff * Sym.Sum(0, NC, (j) => 10 * Sym.Par(_trays[i].y[j] - _trays[i].yI[j]) * System.EquationFactory.GetVaporEnthalpyExpression(System, j, tray.TV))));
-                }
 
                 //Hydraulics
                 AddEquationToEquationSystem(problem, _trays[i].aeff.IsEqualTo(_trays[i].h / NumberOfElements * Math.PI / 4 * Sym.Pow(_trays[i].d, 2) * _trays[i].aspez));

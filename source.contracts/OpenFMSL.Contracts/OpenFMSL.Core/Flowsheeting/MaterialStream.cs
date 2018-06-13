@@ -247,15 +247,24 @@ namespace OpenFMSL.Core.Flowsheeting
             }
             return this;
         }
-        public MaterialStream InitMolarFlowFromMassFlows()
+        public MaterialStream FixMolarFlows()
         {
-            ;
             for (var i = 0; i < System.Components.Count; i++)
             {
-                Mixed.ComponentMolarflow[i].ValueInSI = Mixed.ComponentMassflow[i].ValueInSI / System.Components[i].MolarWeight.ValueInSI;
+                Mixed.ComponentMolarflow[i].IsFixed = true;
             }
             return this;
         }
+
+        public MaterialStream InitMolarFlowFromMassFlows()
+        {            
+            for (var i = 0; i < System.Components.Count; i++)
+            {
+                Mixed.ComponentMolarflow[i].ValueInSI = 1000*Mixed.ComponentMassflow[i].ValueInSI / System.Components[i].MolarWeight.ValueInSI;
+            }
+            return this;
+        }
+
         public MaterialStream FlashPT()
         {
             FlashRoutines calc = new FlashRoutines(new Numerics.Solvers.Newton());
