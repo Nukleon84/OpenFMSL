@@ -17,6 +17,7 @@ namespace OpenFMSL.Core.ModelLibrary
         private Variable p;
         private Variable T;
         private Variable Q;
+        private Variable[] DHR;
         private Variable[] R;
         double[,] _stochiometry;
 
@@ -31,17 +32,23 @@ namespace OpenFMSL.Core.ModelLibrary
             MaterialPorts.Add(new Port<MaterialStream>("Out", PortDirection.Out, 1));
 
             R = new Variable[_numberOfReactions];
+            DHR = new Variable[_numberOfReactions];
             _stochiometry = new double[_numberOfReactions, System.Components.Count];
 
             for (int i = 0; i < _numberOfReactions; i++)
             {
                 R[i] = system.VariableFactory.CreateVariable("R", (i + 1).ToString(), "Converted Molar Flow for reaction " + (i + 1).ToString(), PhysicalDimension.MolarFlow);
+                DHR[i] = system.VariableFactory.CreateVariable("DHR", (i + 1).ToString(), "Reaction enthalpy", PhysicalDimension.SpecificMolarEnthalpy);
+                DHR[i].ValueInSI = 0;
+                DHR[i].IsFixed = true;
             }
 
             dp = system.VariableFactory.CreateVariable("DP", "Pressure Drop", PhysicalDimension.Pressure);
             p = system.VariableFactory.CreateVariable("P", "Pressure in heater outlet", PhysicalDimension.Pressure);
             T = system.VariableFactory.CreateVariable("T", "Temperature in heater outlet", PhysicalDimension.Temperature);
             Q = system.VariableFactory.CreateVariable("Q", "Heat Duty", PhysicalDimension.HeatFlow);
+
+
             dp.LowerBound = -1e9;
             dp.ValueInSI = 0;
             AddVariable(dp);
@@ -49,10 +56,11 @@ namespace OpenFMSL.Core.ModelLibrary
             AddVariable(T);
             AddVariables(R);
             AddVariable(Q);
+            AddVariables(DHR);
         }
         public BlackBoxReactor DefineRateEquation(int reactionNumber, Expression rate)
         {
-            if(reactionNumber>0 && reactionNumber< _numberOfReactions+1)
+            if (reactionNumber > 0 && reactionNumber < _numberOfReactions + 1)
             {
                 R[reactionNumber - 1].BindTo(rate);
             }
@@ -76,6 +84,8 @@ namespace OpenFMSL.Core.ModelLibrary
             var In = FindMaterialPort("In");
             var Out = FindMaterialPort("Out");
 
+            Expression DHRtotal = 0;
+
             for (int i = 0; i < NC; i++)
             {
                 var cindex = i;
@@ -84,11 +94,18 @@ namespace OpenFMSL.Core.ModelLibrary
                 for (int j = 0; j < _numberOfReactions; j++)
                 {
                     if (Math.Abs(_stochiometry[j, i]) > 1e-16)
+                    {
                         reactingMoles += _stochiometry[j, i] * R[j];
+
+                        if (Math.Abs(DHR[j].ValueInSI) > 1e-16)
+                        {
+                            DHRtotal += reactingMoles * DHR[j];
+                        }
+                    }
                 }
 
                 AddEquationToEquationSystem(problem,
-                    Sym.Sum(0, In.NumberOfStreams, (j) => In.Streams[j].Mixed.ComponentMolarflow[cindex]+ reactingMoles)
+                    Sym.Sum(0, In.NumberOfStreams, (j) => In.Streams[j].Mixed.ComponentMolarflow[cindex] + reactingMoles)
                         .IsEqualTo(Sym.Sum(0, Out.NumberOfStreams, (j) => Out.Streams[j].Mixed.ComponentMolarflow[cindex])), "Mass Balance");
 
             }
@@ -103,7 +120,7 @@ namespace OpenFMSL.Core.ModelLibrary
             }
 
             AddEquationToEquationSystem(problem,
-          ((Sym.Sum(0, In.NumberOfStreams, (i) => In.Streams[i].Mixed.SpecificEnthalpy * In.Streams[i].Mixed.TotalMolarflow + Q) / 1e4))
+          ((Sym.Sum(0, In.NumberOfStreams, (i) => In.Streams[i].Mixed.SpecificEnthalpy * In.Streams[i].Mixed.TotalMolarflow + Q + DHRtotal) / 1e4))
           .IsEqualTo(Sym.Par(Sym.Sum(0, Out.NumberOfStreams, (i) => Out.Streams[i].Mixed.SpecificEnthalpy * Out.Streams[i].Mixed.TotalMolarflow)) / 1e4), "Heat Balance");
 
             base.FillEquationSystem(problem);
