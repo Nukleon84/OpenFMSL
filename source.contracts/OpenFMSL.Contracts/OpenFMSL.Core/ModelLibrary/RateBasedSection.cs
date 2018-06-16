@@ -167,7 +167,7 @@ namespace OpenFMSL.Core.ModelLibrary
         List<MolecularComponent> _ignoredComponents = new List<MolecularComponent>();
         bool _noContact = true;
         bool _betaIsConstant = true;
-        public double[] SherwoodParameter= { 0.0348, 0.77, 1.0 / 3.0 };
+        public double[] SherwoodParameter = { 0.0348, 0.77, 1.0 / 3.0 };
 
         public List<MolecularComponent> IgnoredComponents
         {
@@ -426,9 +426,27 @@ namespace OpenFMSL.Core.ModelLibrary
 
             ApplyIgnoredComponents();
 
+            Action<Equation> EQ = (x) => AddEquationToEquationSystem(problem, x);
+
             for (var i = 0; i < NumberOfElements; i++)
             {
                 var tray = _trays[i];
+
+                //Calculate average properties on  stage, Divide molar weight by 1000 because unit is kg/kmol and not kg/mol as would be SI
+                var rhoVMolar = System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p);
+                var rhoV = rhoVMolar * System.EquationFactory.GetAverageMolarWeightExpression(System, _trays[i].y)/1000;
+                var etaV = System.EquationFactory.GetAverageVaporViscosityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p);
+                var TV = tray.TV;
+                var p = tray.p;
+                //Hydraulics 
+                //Effective exchange area
+                EQ(tray.aeff.IsEqualTo(tray.h * Math.PI / 4 * Sym.Pow(tray.d, 2) * tray.aspez));
+                //Superficial velocity
+                EQ(tray.uV.IsEqualTo(tray.V / (System.EquationFactory.GetAverageVaporDensityExpression(System, tray.y, TV, p) * Math.PI / 4 * Sym.Pow(tray.d, 2))));
+                //Reynolds number
+                tray.ReV.BindTo(rhoV * tray.uV * tray.dhyd / etaV);
+              
+
 
                 //Component (M)assbalance
                 for (var comp = 0; comp < NC; comp++)
@@ -437,18 +455,18 @@ namespace OpenFMSL.Core.ModelLibrary
                     {
                         if (i == 0)
                         {
-                            AddEquationToEquationSystem(problem, (_trays[i].V * _trays[i].y[comp] - _trays[i + 1].V * _trays[i + 1].y[comp] + _trays[i].N[comp]).IsEqualTo(0));
-                            AddEquationToEquationSystem(problem, (_trays[i].L * _trays[i].x[comp] - L0 * x0[comp] - _trays[i].N[comp]).IsEqualTo(0));
+                            EQ((tray.V * tray.y[comp] - _trays[i + 1].V * _trays[i + 1].y[comp] + tray.N[comp]).IsEqualTo(0));
+                            EQ((tray.L * tray.x[comp] - L0 * x0[comp] - _trays[i].N[comp]).IsEqualTo(0));
                         }
                         else if (i == NumberOfElements - 1)
                         {
-                            AddEquationToEquationSystem(problem, (_trays[i].V * _trays[i].y[comp] - VNT * yNT[comp] + _trays[i].N[comp]).IsEqualTo(0));
-                            AddEquationToEquationSystem(problem, (_trays[i].L * _trays[i].x[comp] - _trays[i - 1].L * _trays[i - 1].x[comp] - _trays[i].N[comp]).IsEqualTo(0));
+                            EQ((tray.V * tray.y[comp] - VNT * yNT[comp] + _trays[i].N[comp]).IsEqualTo(0));
+                            EQ((tray.L * tray.x[comp] - _trays[i - 1].L * _trays[i - 1].x[comp] - tray.N[comp]).IsEqualTo(0));
                         }
                         else
                         {
-                            AddEquationToEquationSystem(problem, (_trays[i].V * _trays[i].y[comp] - _trays[i + 1].V * _trays[i + 1].y[comp] + _trays[i].N[comp]).IsEqualTo(0));
-                            AddEquationToEquationSystem(problem, (_trays[i].L * _trays[i].x[comp] - _trays[i - 1].L * _trays[i - 1].x[comp] - _trays[i].N[comp]).IsEqualTo(0));
+                            EQ((tray.V * tray.y[comp] - _trays[i + 1].V * _trays[i + 1].y[comp] + tray.N[comp]).IsEqualTo(0));
+                            EQ((tray.L * tray.x[comp] - _trays[i - 1].L * _trays[i - 1].x[comp] - tray.N[comp]).IsEqualTo(0));
                         }
                     }
                 }
@@ -456,14 +474,13 @@ namespace OpenFMSL.Core.ModelLibrary
                 //(E)quilibrium
                 for (var comp = 0; comp < NC; comp++)
                 {
-                    System.EquationFactory.EquilibriumCoefficient(System, tray.K[comp], tray.TI, tray.p, tray.xI.ToList(), tray.yI.ToList(), comp);
+                    System.EquationFactory.EquilibriumCoefficient(System, tray.K[comp], tray.TI, p, tray.xI.ToList(), tray.yI.ToList(), comp);
                     if (!IgnoredComponents.Contains(System.Components[comp]))
                     {
-                        AddEquationToEquationSystem(problem, (tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));
+                        EQ((tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));
                     }
                 }
-
-
+         
                 //(R)ate Equation - Intefacial Mass Transfer
                 for (var comp = 0; comp < NC; comp++)
                 {
@@ -471,95 +488,79 @@ namespace OpenFMSL.Core.ModelLibrary
                     {
                         if (NoContact)
                         {
-                            AddEquationToEquationSystem(problem, (_trays[i].N[comp]).IsEqualTo(0));
-                            AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
+                            EQ((_trays[i].N[comp]).IsEqualTo(0));
+                            EQ((_trays[i].xI[comp]).IsEqualTo(tray.x[comp]));
                         }
                         else
                         {
                             if (!_massTransferResistanceOnLiquid)
-                                AddEquationToEquationSystem(problem, (_trays[i].xI[comp]).IsEqualTo(_trays[i].x[comp]));
+                                EQ((_trays[i].xI[comp]).IsEqualTo(tray.x[comp]));
                             if (!_massTransferResistanceOnVapor)
                             {
-                                AddEquationToEquationSystem(problem, (_trays[i].yI[comp]).IsEqualTo(_trays[i].y[comp]));
+                                EQ((_trays[i].yI[comp]).IsEqualTo(tray.y[comp]));
                             }
                             else
                             {
                                 //Simplified Stefan-Maxwell Equation for Film model
-                                var y = _trays[i].y;
-                                var yI = _trays[i].yI;
-                                var n = _trays[i].N;
-                                var ii = comp;
-                                var TV = _trays[i].TV;
-                                var p = _trays[i].p;
-                                var nu = Sym.Sum(0, NC, j => 1 / System.EquationFactory.GetVaporDensityExpression(System, System.Components[j], TV, p) * _trays[i].y[j]);
-                                AddEquationToEquationSystem(problem,
-                                    (1 / nu * _trays[i].aeff * Sym.Par(_trays[i].y[comp] - _trays[i].yI[comp])).IsEqualTo(
-                                        Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(y[j] + yI[j]) * n[ii] - 0.5 * Sym.Par(y[ii] + yI[ii]) * n[j]) / _trays[i].Beta[ii, j])
-                                        )
-                                        );
+                                var y = tray.y;
+                                var yI = tray.yI;
+                                var n = tray.N;
+                                var ii = comp;                            
+                                var yiiq = 0.5 * Sym.Par(y[ii] + yI[ii]);                       
+                                EQ((rhoVMolar * _trays[i].aeff * Sym.Par(tray.y[comp] - tray.yI[comp])).IsEqualTo(Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(y[j] + yI[j]) * n[ii] - yiiq * n[j]) / tray.Beta[ii, j])));
                             }
                         }
                     }
                 }
 
                 if (!BetaIsConstant)
-                {
+                {               
                     for (int k = 0; k < NC; k++)
                     {
                         for (int j = 0; j < NC; j++)
                         {
-
                             if (k != j)
                             {
-                                var parameterSet = System.BinaryParameters.FirstOrDefault(ps => ps.Name == "DIJ");
+                                var parameterSet = System.BinaryParameters.FirstOrDefault(ps => ps.Name == "DVIJ0");
                                 if (parameterSet == null)
                                     throw new ArgumentNullException("No Diffusion coefficients defined");
 
-                                var DVij = parameterSet.Matrices["A"][k, j];
-
-                                var rhoV = System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p) * System.EquationFactory.GetAverageMolarWeightExpression(System, _trays[i].y) / 1000;
-                                var etaV = System.EquationFactory.GetAverageVaporViscosityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p);
-                                var Scij = etaV / (rhoV * DVij);
-                                var Shij = SherwoodParameter[0] * Sym.Pow(_trays[i].ReV, SherwoodParameter[1]) * Sym.Pow(Scij, SherwoodParameter[2]);
-                                AddEquationToEquationSystem(problem, _trays[i].Beta[k, j].IsEqualTo(Shij * DVij / _trays[i].dhyd));
+                                //Estimate Diffusion coefficient at system temperature and pressure using the approach by Fuller, Schettler, Giddings
+                                var DVij0 = parameterSet.Matrices["A"][k, j];
+                                var DVij = Sym.Pow(Sym.Par(TV / 273.15), 1.75) * (p / 1e5) * DVij0;
+                              
+                                //Schmidt Number
+                                var Scij = etaV / Sym.Par(rhoV * DVij);
+                                //Sherwood Number
+                                var Shij = SherwoodParameter[0] * Sym.Pow(tray.ReV, SherwoodParameter[1]) * Sym.Pow(Scij, SherwoodParameter[2]);                                
+                                tray.Beta[k, j].BindTo(Shij * DVij / tray.dhyd);
                             }
                             else
-                                AddEquationToEquationSystem(problem, _trays[i].Beta[k, j].IsEqualTo(0));
+                                tray.Beta[k, j].BindTo(0);
+                           
                         }
                     }
                 }
 
-
-
-
                 //(R)ate Equation - Intefacial Heat Transfer
-
                 if (NoContact)
                 {
-                    AddEquationToEquationSystem(problem, (_trays[i].E).IsEqualTo(0));
-                    AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(0.5 * Sym.Par(_trays[i].TL + _trays[i].TV)));
+                    EQ((tray.E).IsEqualTo(0));
+                    EQ((tray.TI).IsEqualTo(0.5 * Sym.Par(tray.TL + tray.TV)));
                 }
                 else
                 {
                     if (!_heatTransferResistanceOnLiquid)
-                        AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TL));
+                        EQ((tray.TI).IsEqualTo(tray.TL));
                     if (!_heatTransferResistanceOnVapor)
-                        AddEquationToEquationSystem(problem, (_trays[i].TI).IsEqualTo(_trays[i].TV));
+                        EQ((tray.TI).IsEqualTo(tray.TV));
                 }
 
-
                 //(S)ummation                
-                AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
-                AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
+                EQ(Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
+                EQ(Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
 
-
-                //Hydraulics
-                AddEquationToEquationSystem(problem, _trays[i].aeff.IsEqualTo(_trays[i].h * Math.PI / 4 * Sym.Pow(_trays[i].d, 2) * _trays[i].aspez));
-
-                AddEquationToEquationSystem(problem, _trays[i].uV.IsEqualTo(_trays[i].V / (System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p) * Math.PI / 4 * Sym.Pow(_trays[i].d, 2))));
-                AddEquationToEquationSystem(problem, _trays[i].ReV.IsEqualTo(System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p) * System.EquationFactory.GetAverageMolarWeightExpression(System, _trays[i].y) / 1000 * _trays[i].uV * _trays[i].dhyd / System.EquationFactory.GetAverageVaporViscosityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p)));
-
-
+              
                 //Ent(H)alpy
                 tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.TL)));
                 tray.HV.BindTo(Sym.Sum(0, NC, (idx) => tray.y[idx] * System.EquationFactory.GetVaporEnthalpyExpression(System, idx, tray.TV)));
@@ -567,40 +568,39 @@ namespace OpenFMSL.Core.ModelLibrary
 
                 if (i == 0)
                 {
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - L0 * LIn.Mixed.SpecificEnthalpy - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].L * _trays[i].HL - L0 * LIn.Mixed.SpecificEnthalpy - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
                 else if (i == NumberOfElements - 1)
                 {
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - VNT * VIn.Mixed.SpecificEnthalpy + _trays[i].E) / hscale).IsEqualTo(0));
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].V * _trays[i].HV - VNT * VIn.Mixed.SpecificEnthalpy + _trays[i].E) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
                 else
                 {
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
-                    AddEquationToEquationSystem(problem, (Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].V * _trays[i].HV - _trays[i + 1].V * _trays[i + 1].HV + _trays[i].E) / hscale).IsEqualTo(0));
+                    EQ((Sym.Par(_trays[i].L * _trays[i].HL - _trays[i - 1].L * _trays[i - 1].HL - _trays[i].E + tray.Q) / hscale).IsEqualTo(0));
                 }
 
                 //Pressure profile
                 if (i == NumberOfElements - 1)
-                    AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo((VIn.Mixed.Pressure - _trays[NumberOfElements - 1].DP) / pscale));
+                    EQ((tray.p / pscale).IsEqualTo((VIn.Mixed.Pressure - _trays[NumberOfElements - 1].DP) / pscale));
                 else
-                    AddEquationToEquationSystem(problem, (tray.p / pscale).IsEqualTo(Sym.Par(_trays[i + 1].p - _trays[i].DP) / pscale));
+                    EQ((tray.p / pscale).IsEqualTo(Sym.Par(_trays[i + 1].p - _trays[i].DP) / pscale));
 
             }
 
+            //Setting outlet stream conditions
             for (var comp = 0; comp < NC; comp++)
             {
-                AddEquationToEquationSystem(problem, VOut.Mixed.ComponentMolarflow[comp].IsEqualTo(_trays[0].V * _trays[0].y[comp]));
-                AddEquationToEquationSystem(problem, LOut.Mixed.ComponentMolarflow[comp].IsEqualTo(_trays[NumberOfElements - 1].L * _trays[NumberOfElements - 1].x[comp]));
+                EQ(VOut.Mixed.ComponentMolarflow[comp].IsEqualTo(_trays[0].V * _trays[0].y[comp]));
+                EQ(LOut.Mixed.ComponentMolarflow[comp].IsEqualTo(_trays[NumberOfElements - 1].L * _trays[NumberOfElements - 1].x[comp]));
             }
 
-            AddEquationToEquationSystem(problem, (VOut.Mixed.SpecificEnthalpy / 1e6).IsEqualTo(_trays[0].HV / 1e6));
-
-            // AddEquationToEquationSystem(problem, VOut.Mixed.Temperature.IsEqualTo(_trays[0].TV));
-            AddEquationToEquationSystem(problem, VOut.Mixed.Pressure.IsEqualTo(_trays[0].p));
-            AddEquationToEquationSystem(problem, LOut.Mixed.Temperature.IsEqualTo(_trays[NumberOfElements - 1].TL));
-            AddEquationToEquationSystem(problem, LOut.Mixed.Pressure.IsEqualTo(_trays[NumberOfElements - 1].p));
+            EQ((VOut.Mixed.SpecificEnthalpy / 1e6).IsEqualTo(_trays[0].HV / 1e6));
+            EQ(VOut.Mixed.Pressure.IsEqualTo(_trays[0].p));
+            EQ(LOut.Mixed.Temperature.IsEqualTo(_trays[NumberOfElements - 1].TL));
+            EQ(LOut.Mixed.Pressure.IsEqualTo(_trays[NumberOfElements - 1].p));
 
 
             base.FillEquationSystem(problem);

@@ -411,8 +411,7 @@ namespace OpenFMSL.Core.Flowsheeting
             for (int i = 0; i < NC; i++)
             {
                 System.EquationFactory.EquilibriumCoefficient(System, KValues[i], Mixed.Temperature, Mixed.Pressure, Liquid.ComponentMolarFraction, Vapor.ComponentMolarFraction, i);
-                AddEquationToEquationSystem(problem, Vapor.ComponentMolarFraction[i].IsEqualTo(KValues[i] * Liquid.ComponentMolarFraction[i]), "Equilibrium");
-                //Vapor.ComponentMolarFraction[i].BindTo(KValues[i] * Liquid.ComponentMolarFraction[i]);
+                AddEquationToEquationSystem(problem, Vapor.ComponentMolarFraction[i].IsEqualTo(KValues[i] * Liquid.ComponentMolarFraction[i]), "Equilibrium");         
             }
 
             base.FillEquationSystem(problem);

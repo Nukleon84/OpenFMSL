@@ -576,10 +576,10 @@ namespace ThermodynamicsImporter
             var comp1 = _currentSystem.Components[i - 1];
             var comp2 = _currentSystem.Components[j - 1];
             
-            if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "DIJ") == 0)
+            if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "DVIJ0") == 0)
                 _currentSystem.BinaryParameters.Add(new DiffusionCoefficients(_currentSystem));
 
-            var currentParameterSet = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "DIJ");
+            var currentParameterSet = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "DVIJ0");
 
             currentParameterSet.SetParam("A", comp1, comp2, aij);
             currentParameterSet.SetParam("A", comp2, comp1, aji);

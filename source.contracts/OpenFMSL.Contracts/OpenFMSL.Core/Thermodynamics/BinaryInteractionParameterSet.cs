@@ -13,7 +13,7 @@ namespace OpenFMSL.Core.Thermodynamics
             _system = system;
             NC = _system.Components.Count;
 
-            Name = "DIJ";
+            Name = "DVIJ0";
             Matrices.Add("A", new double[NC, NC]);
         }
     }
