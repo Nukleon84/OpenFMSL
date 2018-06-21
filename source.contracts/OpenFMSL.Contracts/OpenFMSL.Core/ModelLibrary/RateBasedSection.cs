@@ -53,7 +53,8 @@ namespace OpenFMSL.Core.ModelLibrary
         public Variable uV;
         public Variable ReV;
 
-        public Variable[,] Beta;
+        public Variable[,] BetaV;
+        public Variable[,] BetaL;
 
 
         int _number = -1;
@@ -126,7 +127,8 @@ namespace OpenFMSL.Core.ModelLibrary
 
             N = new Variable[system.Components.Count];
 
-            Beta = new Variable[system.Components.Count, system.Components.Count];
+            BetaV = new Variable[system.Components.Count, system.Components.Count];
+            BetaL = new Variable[system.Components.Count, system.Components.Count];
 
             for (int i = 0; i < system.Components.Count; i++)
             {
@@ -143,10 +145,16 @@ namespace OpenFMSL.Core.ModelLibrary
 
                 for (int j = 0; j < system.Components.Count; j++)
                 {
-                    Beta[i, j] = system.VariableFactory.CreateVariable("Beta", numString + ", " + system.Components[i].ID + ", " + system.Components[j].ID, "Masstransfer coefficient)", PhysicalDimension.MassTransferCoefficient);
-                    Beta[i, j].IsFixed = true;
+                    BetaV[i, j] = system.VariableFactory.CreateVariable("BetaV", numString + ", " + system.Components[i].ID + ", " + system.Components[j].ID, "Vapor Mass-transfer coefficient)", PhysicalDimension.MassTransferCoefficient);
+                    BetaV[i, j].IsFixed = true;
                     if (i != j)
-                        Beta[i, j].ValueInSI = 0.02;
+                        BetaV[i, j].ValueInSI = 0.02;
+
+                    BetaL[i, j] = system.VariableFactory.CreateVariable("BetaL", numString + ", " + system.Components[i].ID + ", " + system.Components[j].ID, "Liquid Mass-transfer coefficient)", PhysicalDimension.MassTransferCoefficient);
+                    BetaL[i, j].IsFixed = true;
+                    if (i != j)
+                        BetaL[i, j].ValueInSI = 0.02;
+
                 }
             }
         }
@@ -167,6 +175,7 @@ namespace OpenFMSL.Core.ModelLibrary
         List<MolecularComponent> _ignoredComponents = new List<MolecularComponent>();
         bool _noContact = true;
         bool _betaIsConstant = true;
+        bool _betaLIsConstant = true;
         public double[] SherwoodParameter = { 0.0348, 0.77, 1.0 / 3.0 };
 
         public List<MolecularComponent> IgnoredComponents
@@ -207,7 +216,7 @@ namespace OpenFMSL.Core.ModelLibrary
             }
         }
 
-        public bool BetaIsConstant
+        public bool BetaVIsConstant
         {
             get
             {
@@ -217,6 +226,19 @@ namespace OpenFMSL.Core.ModelLibrary
             set
             {
                 _betaIsConstant = value;
+            }
+        }
+
+        public bool BetaLIsConstant
+        {
+            get
+            {
+                return _betaLIsConstant;
+            }
+
+            set
+            {
+                _betaLIsConstant = value;
             }
         }
 
@@ -297,7 +319,7 @@ namespace OpenFMSL.Core.ModelLibrary
                 {
                     for (int j = 0; j < NC; j++)
                     {
-                        AddVariables(_trays[n].Beta[i, j]);
+                        AddVariables(_trays[n].BetaV[i, j]);
                     }
                 }
             }
@@ -341,14 +363,19 @@ namespace OpenFMSL.Core.ModelLibrary
             NoContact = false;
             return this;
         }
-        public RateBasedSection EnableBetaCalculation()
+        public RateBasedSection EnableBetaVCalculation()
         {
-            BetaIsConstant = false;
-            ChangeAllBetaFixStateTo(false);
+            BetaVIsConstant = false;
+            ChangeAllBetaVFixStateTo(false);
             return this;
         }
-
-        private void ChangeAllBetaFixStateTo(bool newState)
+        public RateBasedSection DisableBetaVCalculation()
+        {
+            BetaVIsConstant = true;
+            ChangeAllBetaVFixStateTo(true);
+            return this;
+        }
+        private void ChangeAllBetaVFixStateTo(bool newState)
         {
             int NC = System.Components.Count;
 
@@ -360,17 +387,41 @@ namespace OpenFMSL.Core.ModelLibrary
                 {
                     for (int j = 0; j < NC; j++)
                     {
-                        _trays[t].Beta[i, j].IsFixed = newState;
+                        _trays[t].BetaV[i, j].IsFixed = newState;
                     }
                 }
             }
         }
 
-        public RateBasedSection DisableBetaCalculation()
+
+        public RateBasedSection EnableBetaLCalculation()
         {
-            BetaIsConstant = true;
-            ChangeAllBetaFixStateTo(true);
+            BetaLIsConstant = false;
+            ChangeAllBetaLFixStateTo(false);
             return this;
+        }
+        public RateBasedSection DisableBetaLCalculation()
+        {
+            BetaLIsConstant = true;
+            ChangeAllBetaLFixStateTo(true);
+            return this;
+        }
+        private void ChangeAllBetaLFixStateTo(bool newState)
+        {
+            int NC = System.Components.Count;
+
+            int NT = (int)(NumberOfElements);
+
+            for (int t = 0; t < NT; t++)
+            {
+                for (int i = 0; i < NC; i++)
+                {
+                    for (int j = 0; j < NC; j++)
+                    {
+                        _trays[t].BetaL[i, j].IsFixed = newState;
+                    }
+                }
+            }
         }
 
 
@@ -433,19 +484,20 @@ namespace OpenFMSL.Core.ModelLibrary
                 var tray = _trays[i];
 
                 //Calculate average properties on  stage, Divide molar weight by 1000 because unit is kg/kmol and not kg/mol as would be SI
-                var rhoVMolar = System.EquationFactory.GetAverageVaporDensityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p);
-                var rhoV = rhoVMolar * System.EquationFactory.GetAverageMolarWeightExpression(System, _trays[i].y)/1000;
-                var etaV = System.EquationFactory.GetAverageVaporViscosityExpression(System, _trays[i].y, _trays[i].TV, _trays[i].p);
                 var TV = tray.TV;
                 var p = tray.p;
+                var rhoVMolar = System.EquationFactory.GetAverageVaporDensityExpression(System, tray.y, TV, p);
+                var rhoV = rhoVMolar * System.EquationFactory.GetAverageMolarWeightExpression(System, tray.y) / 1000;
+                var etaV = System.EquationFactory.GetAverageVaporViscosityExpression(System, tray.y, TV, p);
+
+                var A = Math.PI / 4 * Sym.Pow(tray.d, 2);
                 //Hydraulics 
                 //Effective exchange area
-                EQ(tray.aeff.IsEqualTo(tray.h * Math.PI / 4 * Sym.Pow(tray.d, 2) * tray.aspez));
+                EQ(tray.aeff.IsEqualTo(tray.h * A * tray.aspez));
                 //Superficial velocity
-                EQ(tray.uV.IsEqualTo(tray.V / (System.EquationFactory.GetAverageVaporDensityExpression(System, tray.y, TV, p) * Math.PI / 4 * Sym.Pow(tray.d, 2))));
+                EQ(tray.uV.IsEqualTo(tray.V / (rhoVMolar * A)));
                 //Reynolds number
                 tray.ReV.BindTo(rhoV * tray.uV * tray.dhyd / etaV);
-              
 
 
                 //Component (M)assbalance
@@ -480,7 +532,7 @@ namespace OpenFMSL.Core.ModelLibrary
                         EQ((tray.yI[comp]).IsEqualTo(tray.K[comp] * tray.xI[comp]));
                     }
                 }
-         
+
                 //(R)ate Equation - Intefacial Mass Transfer
                 for (var comp = 0; comp < NC; comp++)
                 {
@@ -495,6 +547,16 @@ namespace OpenFMSL.Core.ModelLibrary
                         {
                             if (!_massTransferResistanceOnLiquid)
                                 EQ((_trays[i].xI[comp]).IsEqualTo(tray.x[comp]));
+                            else
+                            {
+                                var x = tray.x;
+                                var xI = tray.xI;
+                                var n = tray.N;
+                                var ii = comp;
+                                var xiiq = 0.5 * Sym.Par(x[ii] + xI[ii]);
+                                EQ((rhoVMolar * _trays[i].aeff * Sym.Par(tray.xI[ii] - tray.x[ii])).IsEqualTo(Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(x[j] + xI[j]) * n[ii] - xiiq * n[j]) / tray.BetaL[ii, j])));
+                            }
+
                             if (!_massTransferResistanceOnVapor)
                             {
                                 EQ((_trays[i].yI[comp]).IsEqualTo(tray.y[comp]));
@@ -505,16 +567,16 @@ namespace OpenFMSL.Core.ModelLibrary
                                 var y = tray.y;
                                 var yI = tray.yI;
                                 var n = tray.N;
-                                var ii = comp;                            
-                                var yiiq = 0.5 * Sym.Par(y[ii] + yI[ii]);                       
-                                EQ((rhoVMolar * _trays[i].aeff * Sym.Par(tray.y[comp] - tray.yI[comp])).IsEqualTo(Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(y[j] + yI[j]) * n[ii] - yiiq * n[j]) / tray.Beta[ii, j])));
+                                var ii = comp;
+                                var yiiq = 0.5 * Sym.Par(y[ii] + yI[ii]);
+                                EQ((rhoVMolar * _trays[i].aeff * Sym.Par(tray.y[ii] - tray.yI[ii])).IsEqualTo(Sym.SumX(0, NC, comp, j => (0.5 * Sym.Par(y[j] + yI[j]) * n[ii] - yiiq * n[j]) / tray.BetaV[ii, j])));
                             }
                         }
                     }
                 }
-
-                if (!BetaIsConstant)
-                {               
+                //Heat Transfer coefficient calcluation
+                if (!BetaVIsConstant)
+                {
                     for (int k = 0; k < NC; k++)
                     {
                         for (int j = 0; j < NC; j++)
@@ -527,22 +589,22 @@ namespace OpenFMSL.Core.ModelLibrary
 
                                 //Estimate Diffusion coefficient at system temperature and pressure using the approach by Fuller, Schettler, Giddings
                                 var DVij0 = parameterSet.Matrices["A"][k, j];
-                                var DVij = Sym.Pow(Sym.Par(TV / 273.15), 1.75) * (p / 1e5) * DVij0;
-                              
+                                var DVij = Sym.Pow(Sym.Par(TV / 273.15), 1.75) / (p / 1e5) * DVij0;
+
                                 //Schmidt Number
                                 var Scij = etaV / Sym.Par(rhoV * DVij);
                                 //Sherwood Number
-                                var Shij = SherwoodParameter[0] * Sym.Pow(tray.ReV, SherwoodParameter[1]) * Sym.Pow(Scij, SherwoodParameter[2]);                                
-                                tray.Beta[k, j].BindTo(Shij * DVij / tray.dhyd);
+                                var Shij = SherwoodParameter[0] * Sym.Pow(tray.ReV, SherwoodParameter[1]) * Sym.Pow(Scij, SherwoodParameter[2]);
+                                tray.BetaV[k, j].BindTo(Shij * DVij / tray.dhyd);
                             }
                             else
-                                tray.Beta[k, j].BindTo(0);
-                           
+                                tray.BetaV[k, j].BindTo(0);
+
                         }
                     }
                 }
 
-                //(R)ate Equation - Intefacial Heat Transfer
+                //(R)ate Equation - Interfacial Heat Transfer
                 if (NoContact)
                 {
                     EQ((tray.E).IsEqualTo(0));
@@ -560,7 +622,7 @@ namespace OpenFMSL.Core.ModelLibrary
                 EQ(Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j])).IsEqualTo(1));
                 EQ(Sym.Sum(0, NC, (j) => Sym.Par(tray.y[j])).IsEqualTo(1));
 
-              
+
                 //Ent(H)alpy
                 tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.TL)));
                 tray.HV.BindTo(Sym.Sum(0, NC, (idx) => tray.y[idx] * System.EquationFactory.GetVaporEnthalpyExpression(System, idx, tray.TV)));

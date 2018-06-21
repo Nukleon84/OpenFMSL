@@ -119,7 +119,7 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetAverageVaporViscosityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
         {
             var NC = system.Components.Count;
-            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight));
+            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight/1000) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000));
             Variable prop = new Variable("VISV" + "(" + T.FullName + ")", 1);
             prop.Subscript = "avg";
             prop.BindTo(visv);
