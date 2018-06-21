@@ -101,9 +101,15 @@ namespace OpenFMSL.Core.UnitsOfMeasure
             set.UnitDictionary.Add(PhysicalDimension.HeatCapacity, SI.J / SI.mol / SI.K);
 
             set.UnitDictionary.Add(PhysicalDimension.HeatTransferCoefficient, SI.W / SI.sqm / SI.K);
+            set.UnitDictionary.Add(PhysicalDimension.MassTransferCoefficient, SI.m / SI.s);
 
             set.UnitDictionary.Add(PhysicalDimension.MolarFraction, SI.mol / SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassFraction, SI.kg / SI.kg);
+            set.UnitDictionary.Add(PhysicalDimension.SpecificArea, SI.sqm / SI.cum);
+
+            set.UnitDictionary.Add(PhysicalDimension.DynamicViscosity, SI.Pa * SI.s);
+            set.UnitDictionary.Add(PhysicalDimension.Velocity, SI.m / SI.s);
+
             return set;
         }
 
@@ -139,10 +145,15 @@ namespace OpenFMSL.Core.UnitsOfMeasure
             set.UnitDictionary.Add(PhysicalDimension.HeatCapacity, SI.kJ / SI.kmol / SI.K);
 
             set.UnitDictionary.Add(PhysicalDimension.HeatTransferCoefficient, SI.W / SI.sqm / SI.K);
+            set.UnitDictionary.Add(PhysicalDimension.MassTransferCoefficient, SI.m / SI.s);
 
             set.UnitDictionary.Add(PhysicalDimension.MolarFraction, SI.mol / SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassFraction, SI.kg / SI.kg);
 
+            set.UnitDictionary.Add(PhysicalDimension.SpecificArea, SI.sqm / SI.cum);
+
+            set.UnitDictionary.Add(PhysicalDimension.DynamicViscosity, SI.Pa *SI.s);
+            set.UnitDictionary.Add(PhysicalDimension.Velocity, SI.m / SI.s);
             return set;
         }
 

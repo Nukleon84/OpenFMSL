@@ -80,6 +80,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factory\DocumentationIconFactory.cs" />
     <Compile Include="Factory\FlowsheetEditorControlFactory.cs" />
     <Compile Include="Factory\ItemFactory.cs" />
     <Compile Include="Items\Connection.cs" />

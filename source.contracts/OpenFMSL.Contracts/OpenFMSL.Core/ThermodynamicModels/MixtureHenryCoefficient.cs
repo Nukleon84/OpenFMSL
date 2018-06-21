@@ -87,6 +87,8 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
             _henry = Sym.Exp(_lnHenry);
 
+            _dhenryDx = new Expression[NC];
+
             DiffFunctional = (cache, v) => _henry.Diff(cache, v);
             EvalFunctional = (cache) => _henry.Eval(cache);
         }
@@ -105,6 +107,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             {
                 if (x[i] == var)
                 {
+
                     if (_dhenryDx[i] == null)
                         _dhenryDx[i] = _henry.SymbolicDiff(var);
                     return _dhenryDx[i];

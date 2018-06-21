@@ -130,7 +130,7 @@ namespace OpenFMSL.Core.Thermodynamics
                     break;
 
                 case PhysicalDimension.HeatTransferCoefficient:
-                    variable.LowerBound = 1;
+                    variable.LowerBound = 1e-6;
                     variable.UpperBound = 1e6;
                     break;
 

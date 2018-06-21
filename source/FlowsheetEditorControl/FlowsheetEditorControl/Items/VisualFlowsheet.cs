@@ -10,13 +10,13 @@ namespace FlowsheetEditorControl.Items
         double _flowsheetWidth = 3000;
 
         bool _snapToGrid = true;
-        bool _showGrid = true;
+        bool _showGrid = false;
         bool _showTemperature = true;
         bool _showPressure = true;
         bool _showMassflow = true;
         bool _showVapourFraction = false;
 
-        string _canvasColor = "GhostWhite";
+        string _canvasColor = "White";
 
         IList<VisualUnit> _items = new ObservableCollection<VisualUnit>();
         IList<Connection> _connections = new ObservableCollection<Connection>();

@@ -227,6 +227,23 @@
 
     </DataTemplate>
 
+    <DataTemplate x:Key="StreamTableTemplate" DataType="{x:Type items:VisualUnit}">
+        <Expander Header="{Binding Model.Name}" IsExpanded="True" BorderBrush="{Binding BorderColor}" Background="{Binding FillColor}">
+            <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
+                <DataGrid ItemsSource="{Binding Model.StreamTableView}" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"  IsReadOnly="True" CanUserReorderColumns="False"  Margin="5"  HeadersVisibility="Column" ClipboardCopyMode="IncludeHeader" Background="White">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                            <Setter Property="Margin" Value="5,0,5,0" />
+                            <Setter Property="TextElement.FontWeight" Value="Normal"></Setter>
+                        </Style>
+                    </DataGrid.Resources>
+                </DataGrid>
+            </Border>
+        </Expander>
+    </DataTemplate>
+    
+
     <DataTemplate x:Key="ButtonTemplate" DataType="{x:Type items:VisualUnit}">
         <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" MinWidth="{Binding Width}" MinHeight="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
             <Button Content="{Binding CodeProvider.ButtonLabel}" Command="{Binding CodeProvider.ButtonClickCommand}" Margin="5,20,5,20" MinHeight="20" Style="{x:Null}"></Button>
@@ -295,8 +312,8 @@
 
 
     <DataTemplate x:Key="TextTemplate" DataType="{x:Type items:VisualUnit}">
-        <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" HorizontalAlignment="Left" Width="{Binding Width}" MinHeight="{Binding Height}" SnapsToDevicePixels="True">
-            <TextBlock Margin ="5" FontSize="{Binding CodeProvider.FontSize}" Text="{Binding Report}" Foreground="{Binding CodeProvider.FontColor,FallbackValue=Black}" TextWrapping="WrapWithOverflow" ></TextBlock>
+        <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}"  Width="{Binding Width}" MinHeight="{Binding Height}" SnapsToDevicePixels="True">
+            <TextBlock Margin ="5" HorizontalAlignment="{Binding Model.HorizontalTextAlignment}" VerticalAlignment="{Binding Model.VerticalTextAlignment}" FontSize="{Binding Model.FontSize}" Text="{Binding Model.Text}" Foreground="{Binding Model.FontColor,FallbackValue=Black}" TextWrapping="WrapWithOverflow" ></TextBlock>
         </Border>
     </DataTemplate>
     <DataTemplate x:Key="StreamTemplate" DataType="{x:Type items:VisualUnit}">
@@ -538,6 +555,51 @@
 
     </DataTemplate>
 
+
+    <DataTemplate x:Key="RateBasedSectionTemplate" DataType="{x:Type items:VisualUnit}">
+        <Grid  Width="{Binding Width}" Height="{Binding Height}" >
+            <Grid.Resources>
+                <VisualBrush 
+                          x:Key="HatchBrush" 
+                          TileMode="Tile" Viewport="0,0,10,10" 
+                          ViewportUnits="Absolute" Viewbox="0,0,10,10"    
+                          ViewboxUnits="Absolute">
+                    <VisualBrush.Visual>
+                        <Canvas>
+                            <Rectangle Fill="White" Width="10" Height="10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 0 l 10 10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 10 l 10 -10" />
+                        </Canvas>
+                    </VisualBrush.Visual>
+                </VisualBrush>               
+            </Grid.Resources>
+
+
+            <Rectangle RadiusX="30" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
+            
+            <!--<Rectangle Margin="0,35,0,30" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>-->
+
+            <Ellipse HorizontalAlignment="Stretch" Height="30" VerticalAlignment="Top" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2" ></Ellipse>
+            
+        </Grid>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="FeedStageTemplate" DataType="{x:Type items:VisualUnit}">
+        <Grid  Width="{Binding Width}" Height="{Binding Height}" >
+        
+
+            <Rectangle RadiusX="30" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
+
+            <!--<Rectangle Margin="0,35,0,30" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>-->
+
+            <Ellipse HorizontalAlignment="Stretch" Height="30" VerticalAlignment="Top" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2" ></Ellipse>
+
+        </Grid>
+
+    </DataTemplate>
+
+
     <DataTemplate DataType="{x:Type items:ToolboxItem}">
         <!--<Border   Margin="5" BorderBrush="DimGray" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" BorderThickness="1">-->
         <StackPanel Orientation="Horizontal" ToolTip="{Binding ModelName}">
@@ -565,6 +627,13 @@
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="ColumnSection">
                                     <Setter Property="ContentTemplate" Value="{StaticResource ColumnSectionTemplate}" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding DisplayIcon}" Value="RateBasedSection">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RateBasedSectionTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DisplayIcon}" Value="FeedStage">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource FeedStageTemplate}" />
+                                </DataTrigger>
+                                
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                     <Setter Property="ContentTemplate" Value="{StaticResource StreamTemplate}" />
                                 </DataTrigger>
@@ -621,6 +690,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="Spreadsheet">
                                     <Setter Property="ContentTemplate" Value="{StaticResource SpreadsheetTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DisplayIcon}" Value="StreamTable">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource StreamTableTemplate}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="Breaker">
                                     <Setter Property="ContentTemplate" Value="{StaticResource RecycleBreakerTemplate}" />

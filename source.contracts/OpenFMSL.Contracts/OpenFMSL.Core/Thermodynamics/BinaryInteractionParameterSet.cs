@@ -6,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace OpenFMSL.Core.Thermodynamics
 {
+    public class DiffusionCoefficients : BinaryInteractionParameterSet
+    {
+        public DiffusionCoefficients(ThermodynamicSystem system)
+        {
+            _system = system;
+            NC = _system.Components.Count;
+
+            Name = "DVIJ0";
+            Matrices.Add("A", new double[NC, NC]);
+        }
+    }
+
     public class NRTL : BinaryInteractionParameterSet
     {
         public NRTL(ThermodynamicSystem system)

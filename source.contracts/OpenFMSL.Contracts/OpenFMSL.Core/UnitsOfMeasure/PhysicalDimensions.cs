@@ -44,7 +44,11 @@
         HeatConductivity,
         DiffusionCoefficient,
         MolarFraction,
-        MassFraction
+        MassFraction,
+        SpecificArea,
+        MassTransferCoefficient,
+        DynamicViscosity,
+        Velocity
 
 
     }

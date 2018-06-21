@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using FlowsheetEditor.Factory;
+using FlowsheetEditorControl.Factory;
 using FlowsheetEditorControl.Items;
 using OpenFMSL.Contracts.Documents;
 using OpenFMSL.Contracts.Entities;
@@ -301,6 +302,14 @@ namespace FlowsheetEditorControl.ViewModels
                 visualUnit.Model = unit;
                 Items.Add(visualUnit);
             }
+
+            foreach (var unit in _owner.Flowsheet.Documentation)
+            {
+                var visualUnit = DocumentationIconFactory.Create(unit, unit.Icon);
+                visualUnit.Name = unit.Name;                
+                Items.Add(visualUnit);
+            }
+
 
             foreach (var stream in _owner.Flowsheet.MaterialStreams)
             {

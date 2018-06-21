@@ -20,7 +20,12 @@ namespace OpenFMSL.Core.Thermodynamics
                 case EquilibriumApproach.GammaPhi:
                     switch (system.EquilibriumMethod.Activity)
                     {
-
+                        case ActivityMethod.UNIQUAC:
+                            {
+                                var gamma = new ActivityCoefficientUNIQUAC(system, T, x, index);
+                                liquidPart = gamma;
+                                break;
+                            }
                         case ActivityMethod.NRTL:
                             {
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);
@@ -53,7 +58,7 @@ namespace OpenFMSL.Core.Thermodynamics
             Expression liquidPart = null;
             Expression vaporPart = p;
 
-          
+
 
             var currentComponent = system.Components[index];
 
@@ -62,13 +67,21 @@ namespace OpenFMSL.Core.Thermodynamics
                 case EquilibriumApproach.GammaPhi:
                     switch (system.EquilibriumMethod.Activity)
                     {
-
+                        case ActivityMethod.UNIQUAC:
+                            {
+                                var gamma = new ActivityCoefficientUNIQUAC(system, T, x, index);
+                                if (currentComponent.IsInert)
+                                    liquidPart = new MixtureHenryCoefficient(system, T, x, index);
+                                else
+                                    liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                break;
+                            }
                         case ActivityMethod.NRTL:
                             {
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);
 
                                 if (currentComponent.IsInert)
-                                    liquidPart = new MixtureHenryCoefficient(system,T,x,index);
+                                    liquidPart = new MixtureHenryCoefficient(system, T, x, index);
                                 else
                                     liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
                                 break;
@@ -93,6 +106,41 @@ namespace OpenFMSL.Core.Thermodynamics
             K.BindTo(liquidPart / vaporPart);
             return K;
         }
+
+        public Variable GetAverageVaporDensityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
+        {
+            var NC = system.Components.Count;
+
+            var nu = Sym.Sum(0, NC, j => 1 / GetVaporDensityExpression(system, system.Components[j], T, p) * y[j]);
+
+            Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
+            prop.Subscript = "avg";
+            prop.BindTo(1 / nu);
+            return prop;
+        }
+
+        public Variable GetAverageMolarWeightExpression(ThermodynamicSystem system, Variable[] z)
+        {
+            var NC = system.Components.Count;
+            var molw = Sym.Sum(0, NC, j => system.Components[j].MolarWeight * z[j]);
+            Variable prop = new Variable("MOLW", 1);
+            prop.Subscript = "avg";
+            prop.BindTo(molw);
+            return prop;
+        }
+
+        public Variable GetAverageVaporViscosityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
+        {
+            var NC = system.Components.Count;
+            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight/1000) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000));
+            Variable prop = new Variable("VISV" + "(" + T.FullName + ")", 1);
+            prop.Subscript = "avg";
+            prop.BindTo(visv);
+            return prop;
+        }
+
+
+
 
 
 
@@ -125,6 +173,19 @@ namespace OpenFMSL.Core.Thermodynamics
         }
 
 
+        public Variable GetVaporViscosityExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable p)
+        {
+            var func = comp.GetFunction(EvaluatedProperties.VaporViscosity);
+            var expression = system.CorrelationFactory.CreateExpression(func.Type, func, T, null, null);
+            expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.DynamicViscosity]);
+
+            Variable prop = new Variable(system.CorrelationFactory.GetVariableNameForProperty(func.Property) + "(" + T.FullName + ")", 1);
+            prop.LowerBound = 0;
+            prop.Subscript = comp.ID;
+            prop.BindTo(expression);
+            return prop;
+        }
+
         public Variable GetVaporPressure(ThermodynamicSystem system, MolecularComponent comp, Variable T)
         {
             var func = comp.GetFunction(EvaluatedProperties.VaporPressure);
@@ -132,9 +193,8 @@ namespace OpenFMSL.Core.Thermodynamics
             var expr = system.CorrelationFactory.CreateExpression(func.Type, func, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
             expr *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.Pressure]);
 
-            var exprmax = system.CorrelationFactory.CreateExpression(func.Type, func, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
-
-            var maxVal = exprmax.Eval(new Evaluator());
+            //var exprmax = system.CorrelationFactory.CreateExpression(func.Type, func, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
+            //var maxVal = exprmax.Eval(new Evaluator());
 
 
             Variable prop = new Variable(system.CorrelationFactory.GetVariableNameForProperty(func.Property) + "(" + T.FullName + ")", 1);

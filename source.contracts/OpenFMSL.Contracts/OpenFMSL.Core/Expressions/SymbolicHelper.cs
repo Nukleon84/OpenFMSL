@@ -94,6 +94,16 @@ namespace OpenFMSL.Core.Expressions
             return new Max(left, right);
         }
 
+        public static Expression SumX(int start, int end, int excludedIndex, Func<int, Expression> mapping)
+        {
+            var sum = mapping(start);
+            for (var i = start + 1; i < end; i++)
+            {
+                if (i != excludedIndex)
+                    sum += mapping(i);
+            }
+            return Par(sum);
+        }
 
         public static Expression Sum(int start, int end, Func<int, Expression> mapping)
         {

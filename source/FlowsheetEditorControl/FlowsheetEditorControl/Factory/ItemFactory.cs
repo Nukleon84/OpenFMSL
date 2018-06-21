@@ -660,6 +660,133 @@ namespace FlowsheetEditor.Factory
 
                         return newItem;
                     }
+                case IconTypes.RateBasedSection:
+                    {
+                        var newItem = new VisualUnit();
+                        newItem.Name = "SEC01";
+                        newItem.Type = "RateBasedSection";
+                        newItem.X = x;
+                        newItem.Y = y;
+                        newItem.Height = 160;
+                        newItem.Width = 80;
+                        newItem.DisplayIcon = IconTypes.RateBasedSection;
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "LOut",
+                            Type = "Material",
+                            X = newItem.Width - 15,
+                            Y = newItem.Height - 10,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Down,
+                            Intent = ConnectorIntent.Outlet
+                        });
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "VOut",
+                            Type = "Material",
+                            X =  5,
+                            Y = 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Up,
+                            Intent = ConnectorIntent.Outlet
+                        });
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "LIn",
+                            Type = "Material",
+                            X = newItem.Width - 15,
+                            Y = 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Up,
+                            Intent = ConnectorIntent.Inlet
+                        });
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "VIn",
+                            Type = "Material",
+                            X = 5,
+                            Y = newItem.Height - 10,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Down,
+                            Intent = ConnectorIntent.Inlet
+
+                        });                       
+
+                        return newItem;
+                    }
+
+                case IconTypes.FeedStage:
+                    {
+                        var newItem = new VisualUnit();
+                        newItem.Name = "EQ01";
+                        newItem.Type = "FeedStage";
+                        newItem.X = x;
+                        newItem.Y = y;
+                        newItem.Height = 60;
+                        newItem.Width = 80;
+                        newItem.DisplayIcon = IconTypes.FeedStage;
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "In",
+                            Type = "Material",
+                            X = -5,
+                            Y = newItem.Height/2 - 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Left,
+                            Intent = ConnectorIntent.Inlet
+                        });
+
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "LOut",
+                            Type = "Material",
+                            X = newItem.Width - 15,
+                            Y = newItem.Height - 10,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Down,
+                            Intent = ConnectorIntent.Outlet
+                        });
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "VOut",
+                            Type = "Material",
+                            X = 5,
+                            Y = 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Up,
+                            Intent = ConnectorIntent.Outlet
+                        });
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "LIn",
+                            Type = "Material",
+                            X = newItem.Width - 15,
+                            Y = 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Up,
+                            Intent = ConnectorIntent.Inlet
+                        });
+
+                        newItem.Connectors.Add(new Connector
+                        {
+                            Name = "VIn",
+                            Type = "Material",
+                            X = 5,
+                            Y = newItem.Height - 10,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Down,
+                            Intent = ConnectorIntent.Inlet
+
+                        });
+
+                        return newItem;
+                    }
 
 
                 case IconTypes.UserModel:

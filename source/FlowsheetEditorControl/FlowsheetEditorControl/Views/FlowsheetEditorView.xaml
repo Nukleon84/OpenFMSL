@@ -178,6 +178,13 @@
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="ColumnSection">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource ColumnSectionTemplate}" />
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="RateBasedSection">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource RateBasedSectionTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="FeedStage">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource FeedStageTemplate}" />
+                                                            </DataTrigger>
+                                                            
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource StreamTemplate}" />
                                                             </DataTrigger>
@@ -229,6 +236,9 @@
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Spreadsheet">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource SpreadsheetTemplate}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="StreamTable">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource StreamTableTemplate}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Breaker">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource RecycleBreakerTemplate}" />

@@ -1,6 +1,7 @@
 ﻿using FlowsheetEditorControl.Items;
 using FlowsheetEditorControl.ViewModels;
 using OpenFMSL.Contracts.Documents;
+using OpenFMSL.Core.Flowsheeting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -430,21 +431,26 @@ namespace FlowsheetEditorControl.Views
 
                     if (unit != null)
                     {
-                        // var msg = new FlowsheetElementDoubleClickedMessage { Sender = vm, Parameter = unit };
-                        // vm.RaiseElementDetailsRequested(msg);
-                        var inspector = new ModelInspectorView();
-                        inspector.DataContext = new ModelInspectorViewModel(unit.Model);
-                        var window = new Window();
-                        window.Content = inspector;
-                        window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                        window.Width = 550;
-                        window.Height =400;
-                        window.ShowActivated = true;
-                        window.Title = unit.Name;
-                        window.WindowStyle = WindowStyle.ToolWindow;
-                        window.Owner = Application.Current.MainWindow;
-                        window.Show();
 
+                        var model = unit.Model as FlowsheetObject;
+
+                        if (model != null)
+                        {
+                            // var msg = new FlowsheetElementDoubleClickedMessage { Sender = vm, Parameter = unit };
+                            // vm.RaiseElementDetailsRequested(msg);
+                            var inspector = new ModelInspectorView();
+                            inspector.DataContext = new ModelInspectorViewModel(model);
+                            var window = new Window();
+                            window.Content = inspector;
+                            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                            window.Width = 550;
+                            window.Height = 400;
+                            window.ShowActivated = true;
+                            window.Title = unit.Name;
+                            window.WindowStyle = WindowStyle.ToolWindow;
+                            window.Owner = Application.Current.MainWindow;
+                            window.Show();
+                        }
                     }
 
                 }

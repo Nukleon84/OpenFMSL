@@ -10,7 +10,9 @@
     <Grid>
         <TabControl TabStripPlacement="Bottom">
             <TabItem Header="Graph">
-        <oxy:PlotView Model="{Binding Plot}"></oxy:PlotView>
+                <Viewbox Stretch="Uniform" VerticalAlignment="Stretch" HorizontalAlignment="Center">
+        <oxy:PlotView Model="{Binding Plot}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MinHeight="800" MinWidth="800" ></oxy:PlotView>
+                </Viewbox>
             </TabItem>
             <TabItem Header="Table">
                 
