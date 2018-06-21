@@ -89,6 +89,9 @@ namespace ThermodynamicsImporter
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol / SI.cum));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J / SI.kmol));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacR", 0));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQ", 0));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQP", 0));
 
             newComp.Functions.Add(new PropertyFunction()
             {
@@ -442,7 +445,7 @@ namespace ThermodynamicsImporter
             int j = ParseInteger(line[3]);
             double aij = ParseDouble(line[4]);
             double aji = ParseDouble(line[5]);
-            //_currentSystem.MixtureProperties.NRTL
+
             var comp1 = _currentSystem.Components[i - 1];
             var comp2 = _currentSystem.Components[j - 1];
 
@@ -482,6 +485,51 @@ namespace ThermodynamicsImporter
             }
 
         }
+
+        void ParseUNIQUAC(string[] line)
+        {
+            int i = ParseInteger(line[2]);
+            int j = ParseInteger(line[3]);
+            double aij = ParseDouble(line[4]);
+            double aji = ParseDouble(line[5]);
+            var comp1 = _currentSystem.Components[i - 1];
+            var comp2 = _currentSystem.Components[j - 1];
+
+            if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "UNIQUAC") == 0)
+                _currentSystem.BinaryParameters.Add(new UNIQUAC(_currentSystem));
+
+            var currentNRTL = _currentSystem.BinaryParameters.FirstOrDefault(ps => ps.Name == "UNIQUAC");
+            switch (line[1])
+            {
+
+                case "A":
+                    currentNRTL.SetParam("A", comp1, comp2, aij);
+                    currentNRTL.SetParam("A", comp2, comp1, aji);
+                    break;
+                case "B":
+                    currentNRTL.SetParam("B", comp1, comp2, aij);
+                    currentNRTL.SetParam("B", comp2, comp1, aji);
+                    break;
+                case "C":
+                    currentNRTL.SetParam("C", comp1, comp2, aij);
+                    currentNRTL.SetParam("C", comp2, comp1, aji);
+                    break;
+                case "D":
+                    currentNRTL.SetParam("D", comp1, comp2, aij);
+                    currentNRTL.SetParam("D", comp2, comp1, aji);
+                    break;
+                case "E":
+                    currentNRTL.SetParam("E", comp1, comp2, aij);
+                    currentNRTL.SetParam("E", comp2, comp1, aji);
+                    break;
+                case "F":
+                    currentNRTL.SetParam("F", comp1, comp2, aij);
+                    currentNRTL.SetParam("F", comp2, comp1, aji);
+                    break;
+            }
+
+        }
+
         void ParseHenry(string[] line)
         {
 
@@ -564,6 +612,29 @@ namespace ThermodynamicsImporter
                     break;
             }
         }
+        void ParseUNIQUACPure(string[] line)
+        {
+            int i = ParseInteger(line[1]);
+
+            double r = ParseDouble(line[2]);
+            double q = ParseDouble(line[3]);
+            double qp = 0;
+            if (line.Length > 4)
+                qp = ParseDouble(line[4]);
+
+            var comp1 = _currentSystem.Components[i - 1];
+
+            comp1.GetConstant(ConstantProperties.UniquacR).ValueInSI = r;
+            comp1.GetConstant(ConstantProperties.UniquacQ).ValueInSI = q;
+
+            if (line.Length > 4)
+                comp1.GetConstant(ConstantProperties.UniquacQP).ValueInSI = qp;
+            else
+                comp1.GetConstant(ConstantProperties.UniquacQP).ValueInSI = q;
+
+        }
+
+
 
         void ParseDIFV(string[] line)
         {
@@ -575,7 +646,7 @@ namespace ThermodynamicsImporter
 
             var comp1 = _currentSystem.Components[i - 1];
             var comp2 = _currentSystem.Components[j - 1];
-            
+
             if (_currentSystem.BinaryParameters.Count(ps => ps.Name == "DVIJ0") == 0)
                 _currentSystem.BinaryParameters.Add(new DiffusionCoefficients(_currentSystem));
 
@@ -644,6 +715,12 @@ namespace ThermodynamicsImporter
                         return true;
                     case "NRTL":
                         ParseNRTL(line);
+                        return true;
+                    case "QUAV":
+                        ParseUNIQUAC(line);
+                        return true;
+                    case "UNIQ":
+                        ParseUNIQUACPure(line);
                         return true;
                     case "HNRY":
                         ParseHenry(line);

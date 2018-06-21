@@ -20,7 +20,12 @@ namespace OpenFMSL.Core.Thermodynamics
                 case EquilibriumApproach.GammaPhi:
                     switch (system.EquilibriumMethod.Activity)
                     {
-
+                        case ActivityMethod.UNIQUAC:
+                            {
+                                var gamma = new ActivityCoefficientUNIQUAC(system, T, x, index);
+                                liquidPart = gamma;
+                                break;
+                            }
                         case ActivityMethod.NRTL:
                             {
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);
@@ -62,7 +67,15 @@ namespace OpenFMSL.Core.Thermodynamics
                 case EquilibriumApproach.GammaPhi:
                     switch (system.EquilibriumMethod.Activity)
                     {
-
+                        case ActivityMethod.UNIQUAC:
+                            {
+                                var gamma = new ActivityCoefficientUNIQUAC(system, T, x, index);
+                                if (currentComponent.IsInert)
+                                    liquidPart = new MixtureHenryCoefficient(system, T, x, index);
+                                else
+                                    liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                break;
+                            }
                         case ActivityMethod.NRTL:
                             {
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);

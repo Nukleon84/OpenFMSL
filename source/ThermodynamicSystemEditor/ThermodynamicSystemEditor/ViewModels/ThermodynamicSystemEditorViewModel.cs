@@ -445,7 +445,7 @@ namespace ThermodynamicSystemEditor.ViewModels
                     {
                         chart.YAxisTitle = "Pressure [mbar]";
                         chart.Title += " at " + TemperatureForPX + " °C";
-
+                        chart.LegendPosition = LegendPosition.TopLeft;
                         stream.Specify("T", TemperatureForPX, METRIC.C);
                         stream.Specify("p", 1000, METRIC.mbar);
                         stream.Specify("n[" + BinaryComponent1.ID + "]", 0.0);
@@ -492,7 +492,7 @@ namespace ThermodynamicSystemEditor.ViewModels
                     {
                         chart.YAxisTitle = "Temperature [°C]";
                         chart.Title += " at " + PressureForTX + " mbar";
-
+                        chart.LegendPosition = LegendPosition.TopRight;
                         stream.Specify("T", 25, METRIC.C);
                         stream.Specify("p", PressureForTX, METRIC.mbar);
                         stream.Specify("n[" + BinaryComponent1.ID + "]", 0.0);
@@ -530,6 +530,7 @@ namespace ThermodynamicSystemEditor.ViewModels
                     {
                         chart.YAxisTitle = "Molar Composition Vapor [mol/mol]";
                         chart.Title += " at " + PressureForTX + " mbar";
+                        chart.LegendPosition = LegendPosition.TopLeft;
 
                         stream.Specify("T", 25, METRIC.C);
                         stream.Specify("p", PressureForTX, METRIC.mbar);
@@ -563,7 +564,7 @@ namespace ThermodynamicSystemEditor.ViewModels
 
 
             var ySeries1 = new SeriesModel(BinaryComponent1.ID, SeriesType.Line, x1Values, y1Values, "Red");
-            var ySeries2 = new SeriesModel(BinaryComponent2.ID, SeriesType.Line, x2Values, y2Values, "Red");
+            var ySeries2 = new SeriesModel(BinaryComponent2.ID, SeriesType.Line, x2Values, y2Values, "Blue");
             chart.Series.Add(ySeries1);
             chart.Series.Add(ySeries2);
             BinaryAnalysisChart = _chartFactory.Create(chart);
@@ -655,14 +656,14 @@ namespace ThermodynamicSystemEditor.ViewModels
                     if (Double.IsNaN(y))
                         y = 0;
 
-                    if (y > maxVal)
-                        y = maxVal;
+                   // if (y > maxVal)
+                   //     y = maxVal;
 
                     xValues.Add(T.ValueInOutputUnit);
                     yValues.Add(y);
 
                 }
-                var ySeries = new SeriesModel(comp.ID + " " + SelectedFunction.Property.ToString(), SeriesType.Line, xValues, yValues, "Red");
+                var ySeries = new SeriesModel(comp.ID + " " + SelectedFunction.Property.ToString(), SeriesType.Line, xValues, yValues, "Auto");
                 chart.Series.Add(ySeries);
             }
 

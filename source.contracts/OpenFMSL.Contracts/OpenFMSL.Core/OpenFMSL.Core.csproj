@@ -95,6 +95,7 @@
     <Compile Include="Numerics\Solvers\Newton.cs" />
     <Compile Include="Numerics\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThermodynamicModels\ActivityCoefficientUNIQUAC.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientWilson.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientNRTL.cs" />
     <Compile Include="ThermodynamicModels\MixtureHenryCoefficient.cs" />

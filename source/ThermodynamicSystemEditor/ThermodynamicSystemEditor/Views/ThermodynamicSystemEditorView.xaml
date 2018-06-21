@@ -117,7 +117,9 @@
                     </StackPanel>
                     <Button x:Name="RedrawBinaryAnalysisChart">Redraw</Button>
                 </StackPanel>
-                <ContentControl x:Name="BinaryAnalysisChart"></ContentControl>
+                
+                <ContentControl x:Name="BinaryAnalysisChart" ></ContentControl>
+                
             </DockPanel>
         </TabItem>
         <TabItem Header="Ternary Analysis"></TabItem>
