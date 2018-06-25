@@ -21,6 +21,7 @@ namespace OpenFMSL.Core.Flowsheeting
         Variable vfmolar;
         Variable vfmass;
         Variable Beta;
+        Variable MW;
 
         Variable MinVfBeta;
         Variable MaxVfBeta;
@@ -169,6 +170,8 @@ namespace OpenFMSL.Core.Flowsheeting
                 AddVariable(MinVfBeta);
                 AddVariable(MaxVfBeta);
 
+                MW = system.VariableFactory.CreateVariable("MW", "Average molar weight (bulk)", PhysicalDimension.MolarWeight);                              
+
                 gamma = new Variable[System.Components.Count];
 
                 KValues = new Variable[System.Components.Count];
@@ -188,7 +191,7 @@ namespace OpenFMSL.Core.Flowsheeting
                     System.EquationFactory.ActivityCoefficient(System, gamma[i], Mixed.Temperature, Liquid.ComponentMolarFraction, i);
 
                 }
-
+                AddVariable(MW);
                 AddVariable(Vfmolar);
                 AddVariable(Beta);
                 foreach (var vari in Mixed.Variables)
@@ -212,6 +215,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 for (int i = 0; i < System.Components.Count; i++)
                 {
                     Variables.Remove(Mixed.ComponentMolarVolume[i]);
+                    Variables.Remove(Vapor.ComponentMolarVolume[i]);
                     Variables.Remove(Mixed.ComponentEnthalpy[i]);
 
                 }
@@ -260,7 +264,7 @@ namespace OpenFMSL.Core.Flowsheeting
         {            
             for (var i = 0; i < System.Components.Count; i++)
             {
-                Mixed.ComponentMolarflow[i].ValueInSI = 1000*Mixed.ComponentMassflow[i].ValueInSI / System.Components[i].MolarWeight.ValueInSI;
+                Mixed.ComponentMolarflow[i].ValueInSI = Mixed.ComponentMassflow[i].ValueInSI / System.Components[i].MolarWeight.ValueInSI;
             }
             return this;
         }
@@ -295,8 +299,9 @@ namespace OpenFMSL.Core.Flowsheeting
             int NC = System.Components.Count;
 
             var vliq = Sym.Sum(0, NC, i => Liquid.ComponentMolarflow[i] * Liquid.ComponentMolarVolume[i]);
-            var vvap = Sym.Sum(0, NC, i => Vapor.ComponentMolarflow[i] * Vapor.ComponentMolarVolume[i]);
+            var vvap = Vapor.TotalMolarflow / Vapor.DensityMolar;
 
+            MW.BindTo(System.EquationFactory.GetAverageMolarWeightExpression(System, Mixed.ComponentMolarFraction.ToArray()));
             Liquid.TotalVolumeflow.BindTo(vliq);
             Vapor.TotalVolumeflow.BindTo(vvap);
             Mixed.TotalVolumeflow.BindTo(vliq + vvap);
@@ -314,7 +319,7 @@ namespace OpenFMSL.Core.Flowsheeting
 
             Mixed.DensityMolar.BindTo(Mixed.TotalMolarflow / Mixed.TotalVolumeflow);
             Liquid.DensityMolar.BindTo(Liquid.TotalMolarflow / Liquid.TotalVolumeflow);
-            Vapor.DensityMolar.BindTo(Vapor.TotalMolarflow / Vapor.TotalVolumeflow);
+            Vapor.DensityMolar.BindTo(System.EquationFactory.GetAverageVaporDensityExpression(System,Mixed.Temperature,Mixed.Pressure, Vapor.ComponentMolarFraction));
 
 
             for (int i = 0; i < NC; i++)
@@ -331,7 +336,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 Vapor.ComponentMassflow[i].BindTo(Vapor.ComponentMolarflow[i] * Sym.Convert(System.Components[i].GetConstant(ConstantProperties.MolarWeight), SI.kg / SI.mol));
                 Vapor.ComponentMassFraction[i].BindTo(Vapor.ComponentMassflow[i] / Sym.Max(1e-12, Vapor.TotalMassflow));
 
-                Vapor.ComponentMolarVolume[i].BindTo((1.0 / System.EquationFactory.GetVaporDensityExpression(System, System.Components[i], Mixed.Temperature, Mixed.Pressure)));
+                
                 Vapor.ComponentEnthalpy[i].BindTo(System.EquationFactory.GetVaporEnthalpyExpression(System, i, Mixed.Temperature));
             }
 

@@ -48,7 +48,8 @@
         SpecificArea,
         MassTransferCoefficient,
         DynamicViscosity,
-        Velocity
+        Velocity,
+        MolarWeight
 
 
     }

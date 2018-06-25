@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace OpenFMSL.Core.ThermodynamicModels
 {
-    public class VOLSRK : Expression
+    public class VOL_SRK : Expression
     {
+        ThermodynamicSystem _system;
+
+
         Variable _T;
         Variable _p;
 
@@ -19,7 +22,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
         PhaseState Phase;
         Variable _R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
 
-        public VOLSRK(Variable T, Variable p, Expression A, Expression B, PhaseState phase)
+        public VOL_SRK(Variable T, Variable p, Expression A, Expression B, PhaseState phase)
         {
             this._T = T;
             this._p = p;
@@ -27,12 +30,72 @@ namespace OpenFMSL.Core.ThermodynamicModels
             this._B = B;
             this.Phase = phase;
 
-            var idealVolume = _R * T / p;
-
             //DiffFunctional = (cache, v) => idealVolume.Diff(cache, v);
             DiffFunctional = (cache, v) => NumDiff(cache, v);
             EvalFunctional = (cache) => Evaluate(cache);
 
+        }
+
+        public VOL_SRK(ThermodynamicSystem system, Variable T, Variable p, List<Variable> y)
+        {
+            _system = system;
+            this._T = T;
+            this._p = p;
+            this.Phase = PhaseState.Vapour;
+            Symbol = "VOL_SRK";
+            var NC = system.Components.Count;
+            var ai = new double[NC];
+            var bi = new double[NC];
+            var Ai = new Expression[NC];
+            var aij = new Expression[NC, NC];
+            var bij = new double[NC, NC];
+
+            double[,] kij = new double[NC, NC];
+            double[,] kbij = new double[NC, NC];
+
+            var parameterSet = _system.BinaryParameters.FirstOrDefault(ps => ps.Name == "SRK");
+            if (parameterSet != null)
+            {
+                kij = parameterSet.Matrices["kij"];
+                kbij = parameterSet.Matrices["kbij"];
+            }
+
+            for (int i = 0; i < system.Components.Count; i++)
+            {
+                var comp = system.Components[i];
+                var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
+                var PC = comp.GetConstant(ConstantProperties.CriticalPressure);
+                var AC = comp.GetConstant(ConstantProperties.AcentricFactor);
+                if (comp.GetConstant(ConstantProperties.RKSA).ValueInSI != 0.0)
+                    ai[i] = comp.GetConstant(ConstantProperties.RKSA).ValueInSI;
+                else
+                    ai[i] = 0.42748 * Math.Pow(_R.ValueInSI, 2.0) * Math.Pow(TC.ValueInSI, 2.0) / PC.ValueInSI;
+
+                if (comp.GetConstant(ConstantProperties.RKSB).ValueInSI != 0.0)
+                    bi[i] = comp.GetConstant(ConstantProperties.RKSB).ValueInSI;
+                else
+                    bi[i] = 0.0867 * _R.ValueInSI * TC.ValueInSI / PC.ValueInSI;
+
+                var mi = 0.48 + 1.574 * AC.ValueInSI - 0.176 * Math.Pow(AC.ValueInSI, 2);
+                var TR = Sym.Binding("TR", T / TC);
+                var alphai = Sym.Pow(1.0 + mi * (1 - Sym.Sqrt(TR)), 2.0);
+                Ai[i] = alphai * ai[i];
+            }
+
+            for (int i = 0; i < system.Components.Count; i++)
+            {
+                for (int j = 0; j < system.Components.Count; j++)
+                {
+                    aij[i, j] = Sym.Sqrt(Ai[i] * Ai[j]) * (1 - kij[i, j]);
+                    bij[i, j] = (bi[i] + bi[j]) / 2.0 * (1 - kbij[i, j]);
+                }
+            }
+                     
+            _A = Sym.Sum(0, NC, i => y[i] * Sym.Sum(0, NC, j => y[j] * aij[i, j]));            
+            _B = Sym.Sum(0, NC, i => y[i] * Sym.Sum(0, NC, j => y[j] * bij[i, j]));
+            
+            DiffFunctional = (cache, v) => NumDiff(cache, v);
+            EvalFunctional = (cache) => Evaluate(cache);
         }
 
         double NumDiff(Evaluator cache, Variable v)
@@ -89,17 +152,17 @@ namespace OpenFMSL.Core.ThermodynamicModels
             if (Phase == PhaseState.Vapour)
                 return VV;
             else
-                return VL;
+                return VL ;
         }
 
     }
 
-    public class EQSRK : Expression
+    public class K_EOS_SRK : Expression
     {
         ThermodynamicSystem _system;
         int index = -1;
         int NC;
-       
+
         Variable T;
         Variable p;
         List<Variable> x;
@@ -128,7 +191,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
         }
 
-        public EQSRK(ThermodynamicSystem system, Variable T, Variable p, List<Variable> x, List<Variable> y, int idx)
+        public K_EOS_SRK(ThermodynamicSystem system, Variable T, Variable p, List<Variable> x, List<Variable> y, int idx)
         {
             index = idx;
             _system = system;
@@ -208,7 +271,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var asi = Sym.Sum(0, NC, j => z[j] * aij[idx, j]);
                 var bm = Sym.Sum(0, NC, i => z[i] * Sym.Sum(0, NC, j => z[j] * bij[i, j]));
                 var bsi = Sym.Sum(0, NC, j => z[j] * bij[idx, j]);
-                var vme = new VOLSRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
+                var vme = new VOL_SRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
                 var vm = Sym.Binding("vm", vme);
                 var Bi = 2 * bsi - bm;
                 var zm = p * vm / (R * T);

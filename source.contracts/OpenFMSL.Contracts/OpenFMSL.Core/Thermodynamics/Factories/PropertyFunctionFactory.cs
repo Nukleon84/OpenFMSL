@@ -119,7 +119,7 @@ namespace OpenFMSL.Core.Thermodynamics
                         switch (system.EquilibriumMethod.EquationOfState)
                         {
                             case EquationOfState.SoaveRedlichKwong:
-                                var eos = new EQSRK(system, T, p, x, y, index);
+                                var eos = new K_EOS_SRK(system, T, p, x, y, index);
                                 K.BindTo(eos);
                                 break;
 
@@ -135,22 +135,35 @@ namespace OpenFMSL.Core.Thermodynamics
             return K;
         }
 
-        public Variable GetAverageVaporDensityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
+        public Variable GetAverageVaporDensityExpression(ThermodynamicSystem system, Variable T, Variable p, List<Variable> y)
         {
             var NC = system.Components.Count;
+            
 
-            var nu = Sym.Sum(0, NC, j => 1 / GetVaporDensityExpression(system, system.Components[j], T, p) * y[j]);
+            if ((system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.PhiPhi && system.EquilibriumMethod.EquationOfState== EquationOfState.SoaveRedlichKwong)||
+                (system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.GammaPhi && system.EquilibriumMethod.Fugacity == FugacityMethod.SoaveRedlichKwong))
+            {
+                var rhoV = new VOL_SRK(system, T, p, y);
+                var pavg= Sym.Binding("DENV",1000*rhoV );
+                pavg.Subscript = "SRK";
+                return pavg;
+            }
 
+            var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
+            var expression = p/ (R * T);
             Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
-            prop.Subscript = "avg";
-            prop.BindTo(1 / nu);
+            prop.Subscript = "ideal";
+            prop.BindTo(expression);
             return prop;
+
+
+            
         }
 
         public Variable GetAverageMolarWeightExpression(ThermodynamicSystem system, Variable[] z)
         {
             var NC = system.Components.Count;
-            var molw = Sym.Sum(0, NC, j => system.Components[j].MolarWeight * z[j]);
+            var molw = Sym.Sum(0, NC, j => Sym.Convert(system.Components[j].MolarWeight, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarWeight]) * z[j]);
             Variable prop = new Variable("MOLW", 1);
             prop.Subscript = "avg";
             prop.BindTo(molw);
@@ -160,7 +173,7 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetAverageVaporViscosityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
         {
             var NC = system.Components.Count;
-            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000));
+            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(Sym.Convert(system.Components[j].MolarWeight, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarWeight])) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(Sym.Convert(system.Components[j].MolarWeight, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarWeight])));
             Variable prop = new Variable("VISV" + "(" + T.FullName + ")", 1);
             prop.Subscript = "avg";
             prop.BindTo(visv);

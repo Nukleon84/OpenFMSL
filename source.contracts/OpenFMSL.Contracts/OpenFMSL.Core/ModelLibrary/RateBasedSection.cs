@@ -486,8 +486,8 @@ namespace OpenFMSL.Core.ModelLibrary
                 //Calculate average properties on  stage, Divide molar weight by 1000 because unit is kg/kmol and not kg/mol as would be SI
                 var TV = tray.TV;
                 var p = tray.p;
-                var rhoVMolar = System.EquationFactory.GetAverageVaporDensityExpression(System, tray.y, TV, p);
-                var rhoV = rhoVMolar * System.EquationFactory.GetAverageMolarWeightExpression(System, tray.y) / 1000;
+                var rhoVMolar = System.EquationFactory.GetAverageVaporDensityExpression(System, TV, p, tray.y.ToList());
+                var rhoV = rhoVMolar * System.EquationFactory.GetAverageMolarWeightExpression(System, tray.y) ;
                 var etaV = System.EquationFactory.GetAverageVaporViscosityExpression(System, tray.y, TV, p);
 
                 var A = Math.PI / 4 * Sym.Pow(tray.d, 2);

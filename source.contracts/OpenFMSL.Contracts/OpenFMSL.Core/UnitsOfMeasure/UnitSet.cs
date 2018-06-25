@@ -92,6 +92,8 @@ namespace OpenFMSL.Core.UnitsOfMeasure
             set.UnitDictionary.Add(PhysicalDimension.VolumeFlow, SI.cum / SI.s);
 
 
+            set.UnitDictionary.Add(PhysicalDimension.MolarWeight, SI.kg / SI.mol);
+
             set.UnitDictionary.Add(PhysicalDimension.MolarVolume,  SI.cum/SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassDensity, SI.kg / SI.cum);
             set.UnitDictionary.Add(PhysicalDimension.MolarDensity, SI.mol / SI.cum);
@@ -136,6 +138,7 @@ namespace OpenFMSL.Core.UnitsOfMeasure
             set.UnitDictionary.Add(PhysicalDimension.HeatFlow, SI.kW);
             set.UnitDictionary.Add(PhysicalDimension.VolumeFlow, SI.cum / SI.h);
 
+            set.UnitDictionary.Add(PhysicalDimension.MolarWeight, SI.kg / SI.kmol);
             set.UnitDictionary.Add(PhysicalDimension.MolarVolume, SI.cum / SI.mol);
             set.UnitDictionary.Add(PhysicalDimension.MassDensity, SI.kg / SI.cum);
             set.UnitDictionary.Add(PhysicalDimension.MolarDensity, SI.mol / SI.cum);

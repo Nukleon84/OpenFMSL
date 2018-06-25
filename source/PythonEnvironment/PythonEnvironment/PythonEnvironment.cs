@@ -502,8 +502,10 @@ namespace PythonEnvironment
                     WriteLine(String.Format(lineFormat, "Pressure", unitFor(PhysicalDimension.Pressure), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "p")))));
                     WriteLine(String.Format(lineFormat, "Vapor Fraction", unitFor(PhysicalDimension.MolarFraction), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "VF")))));
                     WriteLine(String.Format(lineFormat, "Specific Enthalpy", unitFor(PhysicalDimension.SpecificMolarEnthalpy), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "h")))));
-                    WriteLine(String.Format(lineFormat, "Density", unitFor(PhysicalDimension.MassDensity), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "rho")))));
+                    WriteLine(String.Format(lineFormat, "Density", unitFor(PhysicalDimension.MolarDensity), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "rhom")))));
+                    WriteLine(String.Format(lineFormat, "Mass Density", unitFor(PhysicalDimension.MassDensity), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "rho")))));
                     WriteLine(String.Format(lineFormat, "Volume Flow", unitFor(PhysicalDimension.VolumeFlow), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "V")))));
+                    WriteLine(String.Format(lineFormat, "Molar Weight", unitFor(PhysicalDimension.MolarWeight), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "MW")))));
 
                     WriteLine("");
                     WriteLine(String.Format(lineFormat, "Total Molar Flow", unitFor(PhysicalDimension.MolarFlow), String.Join(" ", currentStreamBatch.Select(s => valueSelector(s, "n")))));

@@ -83,8 +83,8 @@ namespace ThermodynamicsImporter
             var newComp = new MolecularComponent();
             newComp.Name = name;
             newComp.ID = id;
-            newComp.CasNumber = "123-456-7";
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("MolarWeight", 18.17, SI.kg / SI.kmol));
+            newComp.CasNumber = "123-456-7";                    
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("MolarWeight", 0.018, SI.kg / SI.mol));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalTemperature", 600, SI.K));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol / SI.cum));
@@ -262,6 +262,8 @@ namespace ThermodynamicsImporter
 
 
             selector(component).ValueInSI = transform(ParseDouble(line[3]));
+
+
 
         }
 
@@ -782,7 +784,7 @@ namespace ThermodynamicsImporter
                         ParseCASNo(line);
                         return true;
                     case "MOLW":
-                        ParseConstant(line, c => c.GetConstant(ConstantProperties.MolarWeight));
+                        ParseConstant(line, c => c.GetConstant(ConstantProperties.MolarWeight), x => x / 1000.0);
                         return true;
                     case "TC":
                         ParseConstant(line, c => c.GetConstant(ConstantProperties.CriticalTemperature));
