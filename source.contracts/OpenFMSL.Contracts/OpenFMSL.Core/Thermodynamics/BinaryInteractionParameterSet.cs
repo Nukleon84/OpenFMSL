@@ -82,7 +82,7 @@ namespace OpenFMSL.Core.Thermodynamics
             Matrices.Add("A", new double[NC, NC]);
             Matrices.Add("B", new double[NC, NC]);
             Matrices.Add("C", new double[NC, NC]);
-            Matrices.Add("D", new double[NC, NC]);           
+            Matrices.Add("D", new double[NC, NC]);
 
         }
     }
@@ -98,10 +98,20 @@ namespace OpenFMSL.Core.Thermodynamics
             Matrices.Add("B", new double[NC, NC]);
             Matrices.Add("C", new double[NC, NC]);
             Matrices.Add("D", new double[NC, NC]);
-         
+
         }
     }
+    public class SRK : BinaryInteractionParameterSet
+    {
+        public SRK(ThermodynamicSystem system)
+        {
+            _system = system;
+            NC = _system.Components.Count;
 
+            Name = "SRK";
+            Matrices.Add("kij", new double[NC, NC]);
+        }
+    }
     public class BinaryInteractionParameterSet
     {
         protected int NC;
@@ -129,7 +139,7 @@ namespace OpenFMSL.Core.Thermodynamics
             var j = _system.Components.IndexOf(c2);
 
             if (i >= 0 && j >= 0 && Matrices.ContainsKey(matrix))
-               return Matrices[matrix][i, j];
+                return Matrices[matrix][i, j];
             return 0;
         }
 

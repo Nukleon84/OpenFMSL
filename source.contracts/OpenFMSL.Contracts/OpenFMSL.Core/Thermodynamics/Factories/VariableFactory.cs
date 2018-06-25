@@ -14,7 +14,7 @@ namespace OpenFMSL.Core.Thermodynamics
         UnitSet _input = UnitSet.CreateSI();
         UnitSet _output = UnitSet.CreateSI();
 
-        double _temperatureLowerBound = 100;
+        double _temperatureLowerBound = 1;
         double _temperatureUpperBound = 1000;
 
         double _pressureLowerBound = 100;

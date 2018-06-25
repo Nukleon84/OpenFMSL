@@ -89,6 +89,7 @@ namespace ThermodynamicsImporter
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol / SI.cum));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J / SI.kmol));
+            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("AcentricFactor", 0.3,SI.nil));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacR", 0));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQ", 0));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQP", 0));
@@ -417,7 +418,7 @@ namespace ThermodynamicsImporter
                     _currentSystem.EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
                     break;
             }
-            switch (line[5])
+            switch (line[4])
             {
                 case "POYN":
                     _currentSystem.EquilibriumMethod.PoyntingCorrection = true;
@@ -431,6 +432,17 @@ namespace ThermodynamicsImporter
             {
                 case "HENR":
                     _currentSystem.EquilibriumMethod.AllowHenryComponents = true;
+                    break;
+                default:
+                    _currentSystem.EquilibriumMethod.AllowHenryComponents = false;
+                    break;
+            }
+
+            switch (line[6])
+            {
+                case "RKS":
+                    _currentSystem.EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.PhiPhi;
+                    _currentSystem.EquilibriumMethod.EquationOfState = EquationOfState.SoaveRedlichKwong;
                     break;
                 default:
                     _currentSystem.EquilibriumMethod.AllowHenryComponents = false;
@@ -709,6 +721,9 @@ namespace ThermodynamicsImporter
                         return true;
                     case "RHOC":
                         ParseConstant(line, c => c.GetConstant(ConstantProperties.CriticalDensity));
+                        return true;
+                    case "AC":
+                        ParseConstant(line, c => c.GetConstant(ConstantProperties.AcentricFactor));
                         return true;
                     case "LVEQ":
                         ParseLVEQ(line);

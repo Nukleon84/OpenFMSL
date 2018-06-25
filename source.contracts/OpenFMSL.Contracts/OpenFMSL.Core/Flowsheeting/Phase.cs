@@ -17,6 +17,7 @@ namespace OpenFMSL.Core.Flowsheeting
         private Variable _temperature;
         private Variable _pressure;
         private Variable _density;
+        private Variable _densityMolar;
         private Variable _totalMolarVolume;
         private Variable _specificEnthalpy;
         private Variable _totalEnthalpy;
@@ -254,6 +255,19 @@ namespace OpenFMSL.Core.Flowsheeting
                 _density = value;
             }
         }
+
+        public Variable DensityMolar
+        {
+            get
+            {
+                return _densityMolar;
+            }
+
+            set
+            {
+                _densityMolar = value;
+            }
+        }
         #endregion
 
         public Phase(string symbol, ThermodynamicSystem system)
@@ -268,7 +282,8 @@ namespace OpenFMSL.Core.Flowsheeting
             TotalVolumeflow = _system.VariableFactory.CreateVariable("V" + symbol, "Volume flow", PhysicalDimension.VolumeFlow);
             TotalMolarflow = _system.VariableFactory.CreateVariable("n" + symbol, "Total molar flow", PhysicalDimension.MolarFlow);
             TotalMassflow = _system.VariableFactory.CreateVariable("m" + symbol, "Total mass flow", PhysicalDimension.MassFlow);
-            Density = _system.VariableFactory.CreateVariable("rho" + symbol, "Density", PhysicalDimension.MolarDensity);
+            Density = _system.VariableFactory.CreateVariable("rho" + symbol, "Density", PhysicalDimension.MassDensity);
+            DensityMolar = _system.VariableFactory.CreateVariable("rhom" + symbol, "Density", PhysicalDimension.MolarDensity);
             TotalMolarVolume = _system.VariableFactory.CreateVariable("v" + symbol, "Total molar volume", PhysicalDimension.MolarVolume);
 
 
@@ -276,6 +291,7 @@ namespace OpenFMSL.Core.Flowsheeting
             Variables.Add(Pressure);
             Variables.Add(SpecificEnthalpy);
             Variables.Add(Density);
+            Variables.Add(DensityMolar);
             Variables.Add(TotalEnthalpy);
             Variables.Add(TotalVolumeflow);
             Variables.Add(TotalMolarflow);

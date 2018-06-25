@@ -32,6 +32,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
         string _status;
         private bool _isConverged = false;
         private bool _isAborted = false;
+        bool _debugMode = true;
 
         System.Diagnostics.Stopwatch _watch;
 
@@ -245,6 +246,19 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 _scalingFrequency = value;
             }
         }
+
+        public bool DebugMode
+        {
+            get
+            {
+                return _debugMode;
+            }
+
+            set
+            {
+                _debugMode = value;
+            }
+        }
         #endregion
 
         #region Logging Callbacks
@@ -345,9 +359,24 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 #endregion
 
                 varNorm = delta.GetNorm();
-                eqNorm = b.ToDouble().Max((s) => Math.Abs(s));
+                eqNorm = 0;//
+                string debugString = "";
 
-                Log(String.Format(" {0:000} {1,15} {2,15} {3,7} {4,4}", Iterations, varNorm.ToString("G2", CultureInfo.InvariantCulture), eqNorm.ToString("G8", CultureInfo.InvariantCulture), lambda, "NEWTON", algorithm, flags));
+                for (int i = 0; i < b.Size; i++)
+                {
+                    var babs = Math.Abs(b[i]);
+                    if (babs > eqNorm)
+                    {
+                        eqNorm = babs;
+                        if (DebugMode)
+                            debugString = ProblemData.Equations[i].ToString();
+                    }
+                }
+                //b.ToDouble().Max((s) => Math.Abs(s));
+                //if(DebugMode)
+                //debugString= ProblemData.Equations.Max(eq=> Math.Abs(eq.Residual()))
+
+                Log(String.Format(" {0:000} {1,15} {2,15} {3,7} {4,4} {5} {6} {7}", Iterations, varNorm.ToString("G2", CultureInfo.InvariantCulture), eqNorm.ToString("G8", CultureInfo.InvariantCulture), lambda, "NEWTON", algorithm, flags, debugString));
 
 
                 OnIteration?.Invoke(system);

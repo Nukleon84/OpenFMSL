@@ -45,7 +45,18 @@ namespace OpenFMSL.Core.Thermodynamics
 
                     break;
                 case EquilibriumApproach.PhiPhi:
-                    throw new NotSupportedException("Only Gamma-Phi allowed");
+                    {
+                        switch (system.EquilibriumMethod.EquationOfState)
+                        {
+                            case EquationOfState.SoaveRedlichKwong:
+                                liquidPart = 1.0;
+                                break;
+
+                            default:
+                                throw new NotSupportedException("Only SoaveRedlichKwong allowed");
+                        }
+                        break;
+                    }
             }
             g.Subscript = system.Components[index].ID;
             g.BindTo(liquidPart);
@@ -58,9 +69,10 @@ namespace OpenFMSL.Core.Thermodynamics
             Expression liquidPart = null;
             Expression vaporPart = p;
 
-
-
             var currentComponent = system.Components[index];
+
+            if (String.IsNullOrEmpty(K.Subscript))
+                K.Subscript = system.Components[index].ID;
 
             switch (system.EquilibriumMethod.EquilibriumApproach)
             {
@@ -74,6 +86,7 @@ namespace OpenFMSL.Core.Thermodynamics
                                     liquidPart = new MixtureHenryCoefficient(system, T, x, index);
                                 else
                                     liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                K.BindTo(liquidPart / vaporPart);
                                 break;
                             }
                         case ActivityMethod.NRTL:
@@ -84,26 +97,41 @@ namespace OpenFMSL.Core.Thermodynamics
                                     liquidPart = new MixtureHenryCoefficient(system, T, x, index);
                                 else
                                     liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                K.BindTo(liquidPart / vaporPart);
                                 break;
                             }
                         case ActivityMethod.Wilson:
                             {
                                 var gamma = new ActivityCoefficientWilson(system, T, x, index);
                                 liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                K.BindTo(liquidPart / vaporPart);
                                 break;
                             }
                         default:
                             liquidPart = GetVaporPressure(system, currentComponent, T);
+                            K.BindTo(liquidPart / vaporPart);
                             break;
                     }
 
                     break;
                 case EquilibriumApproach.PhiPhi:
-                    throw new NotSupportedException("Only Gamma-Phi allowed");
+                    {
+                        switch (system.EquilibriumMethod.EquationOfState)
+                        {
+                            case EquationOfState.SoaveRedlichKwong:
+                                var eos = new EQSRK(system, T, p, x, y, index);
+                                K.BindTo(eos);
+                                break;
+
+                            default:
+                                throw new NotSupportedException("Only SoaveRedlichKwong allowed");
+                        }
+                        break;
+                    }
             }
-            if (String.IsNullOrEmpty(K.Subscript))
-                K.Subscript = system.Components[index].ID;
-            K.BindTo(liquidPart / vaporPart);
+
+
+
             return K;
         }
 
@@ -132,7 +160,7 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetAverageVaporViscosityExpression(ThermodynamicSystem system, Variable[] y, Variable T, Variable p)
         {
             var NC = system.Components.Count;
-            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight/1000) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000));
+            var visv = Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000) * GetVaporViscosityExpression(system, system.Components[j], T, p)) / Sym.Sum(0, NC, j => y[j] * Sym.Sqrt(system.Components[j].MolarWeight / 1000));
             Variable prop = new Variable("VISV" + "(" + T.FullName + ")", 1);
             prop.Subscript = "avg";
             prop.BindTo(visv);
@@ -148,7 +176,7 @@ namespace OpenFMSL.Core.Thermodynamics
         {
             var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
             var expression = Sym.Convert(p, SI.Pa) / (R * T);
-            expression *= Unit.GetConversionFactor(SI.mol / (SI.m ^ 3), system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarDensity]);
+            // expression *= Unit.GetConversionFactor(SI.mol / (SI.m ^ 3), system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarDensity]);
             Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
             prop.Subscript = comp.ID;
             prop.BindTo(expression);

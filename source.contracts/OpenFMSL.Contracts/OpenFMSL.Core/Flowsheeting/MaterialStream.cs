@@ -312,6 +312,11 @@ namespace OpenFMSL.Core.Flowsheeting
             Liquid.Density.BindTo(Liquid.TotalMassflow / Liquid.TotalVolumeflow);
             Vapor.Density.BindTo(Vapor.TotalMassflow / Vapor.TotalVolumeflow);
 
+            Mixed.DensityMolar.BindTo(Mixed.TotalMolarflow / Mixed.TotalVolumeflow);
+            Liquid.DensityMolar.BindTo(Liquid.TotalMolarflow / Liquid.TotalVolumeflow);
+            Vapor.DensityMolar.BindTo(Vapor.TotalMolarflow / Vapor.TotalVolumeflow);
+
+
             for (int i = 0; i < NC; i++)
             {
                 Mixed.ComponentMassflow[i].BindTo(Mixed.ComponentMolarflow[i] * Sym.Convert(System.Components[i].GetConstant(ConstantProperties.MolarWeight), SI.kg / SI.mol));
