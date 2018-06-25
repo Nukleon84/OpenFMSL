@@ -35,7 +35,9 @@ namespace OpenFMSL.Core.Thermodynamics
         UniquacQ,
         UniquacQP,
         UniquacR,
-        HeatOfFormation
+        HeatOfFormation,
+        RKSA,
+        RKSB
     }
 
     public enum EvaluatedProperties

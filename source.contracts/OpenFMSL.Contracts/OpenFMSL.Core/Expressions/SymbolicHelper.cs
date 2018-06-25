@@ -8,6 +8,12 @@ namespace OpenFMSL.Core.Expressions
 {
     public static class Sym
     {
+        public static Variable Binding(string name, Expression expr)
+        {
+            var variable = new Variable(name, 1.0);
+            variable.BindTo(expr);
+            return variable;
+        }
         public static Expression Par(Expression expr)
         {
             return new Parentheses(expr);

@@ -37,13 +37,15 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
         double NumDiff(Evaluator cache, Variable v)
         {
+            var h = 1e-8;
             double original = v.ValueInSI;
-            v.ValueInSI = original + 1e-6;
+            double vnull = Evaluate(cache);
+            v.ValueInSI = original + h;
             double vplus = Evaluate(new Evaluator());
-            v.ValueInSI = original - 1e-6;
-            double vminus = Evaluate(new Evaluator());
+            // v.ValueInSI = original - h;
+            // double vminus = Evaluate(new Evaluator());
             v.ValueInSI = original;
-            var dxdv = (vplus - vminus) / 2e-6;
+            var dxdv = (vplus - vnull) / (1 * h);
             return dxdv;
         }
 
@@ -97,7 +99,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
         ThermodynamicSystem _system;
         int index = -1;
         int NC;
-
+       
         Variable T;
         Variable p;
         List<Variable> x;
@@ -144,14 +146,14 @@ namespace OpenFMSL.Core.ThermodynamicModels
             foreach (var c in y)
                 Parameters.Add(c);
 
-            var NC = system.Components.Count;
+            NC = system.Components.Count;
 
 
-            var ai = new Expression[NC];
-            var bi = new Expression[NC];
+            var ai = new double[NC];
+            var bi = new double[NC];
             var Ai = new Expression[NC];
             var aij = new Expression[NC, NC];
-            var bij = new Expression[NC, NC];
+            var bij = new double[NC, NC];
 
             double[,] kij = new double[NC, NC];
             double[,] kbij = new double[NC, NC];
@@ -169,10 +171,19 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
                 var PC = comp.GetConstant(ConstantProperties.CriticalPressure);
                 var AC = comp.GetConstant(ConstantProperties.AcentricFactor);
-                ai[i] = 0.42748 * Sym.Pow(R, 2.0) * Sym.Pow(TC, 2.0) / PC;
-                bi[i] = 0.0867 * R * TC / PC;
-                var mi = 0.48 + 1.574 * AC - 0.176 * Sym.Pow(AC, 2);
-                var alphai = Sym.Pow(1.0 + mi * (1 - Sym.Sqrt(T / TC)), 2.0);
+                if (comp.GetConstant(ConstantProperties.RKSA).ValueInSI != 0.0)
+                    ai[i] = comp.GetConstant(ConstantProperties.RKSA).ValueInSI;
+                else
+                    ai[i] = 0.42748 * Math.Pow(R.ValueInSI, 2.0) * Math.Pow(TC.ValueInSI, 2.0) / PC.ValueInSI;
+
+                if (comp.GetConstant(ConstantProperties.RKSB).ValueInSI != 0.0)
+                    bi[i] = comp.GetConstant(ConstantProperties.RKSB).ValueInSI;
+                else
+                    bi[i] = 0.0867 * R.ValueInSI * TC.ValueInSI / PC.ValueInSI;
+
+                var mi = 0.48 + 1.574 * AC.ValueInSI - 0.176 * Math.Pow(AC.ValueInSI, 2);
+                var TR = Sym.Binding("TR", T / TC);
+                var alphai = Sym.Pow(1.0 + mi * (1 - Sym.Sqrt(TR)), 2.0);
                 Ai[i] = alphai * ai[i];
             }
 
@@ -197,16 +208,24 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var asi = Sym.Sum(0, NC, j => z[j] * aij[idx, j]);
                 var bm = Sym.Sum(0, NC, i => z[i] * Sym.Sum(0, NC, j => z[j] * bij[i, j]));
                 var bsi = Sym.Sum(0, NC, j => z[j] * bij[idx, j]);
-                var vm = new VOLSRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
+                var vme = new VOLSRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
+                var vm = Sym.Binding("vm", vme);
                 var Bi = 2 * bsi - bm;
                 var zm = p * vm / (R * T);
-                lnPHI[ph] = Bi / bm * (zm - 1)
+
+                var eterm = -am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(1 + bm / vm) + Bi / bm * (zm - 1);
+                var eVariable = Sym.Binding("RKS_E", eterm);
+
+                //lnPHI[ph] = vm / ((vm - bm) * zm) * Sym.Exp(eVariable);
+                lnPHI[ph] = (R * T) / ((vm - bm) * p) * Sym.Exp(eVariable);
+                /*lnPHI[ph] = Bi / bm * (zm - 1)
                     - Sym.Ln(zm)
                     + Sym.Ln(vm / (vm - bm))
-                    - am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(Sym.Par(vm + bm) / vm);
+                    - am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(Sym.Par(vm + bm) / vm);*/
 
             }
-            _kEOS_SRK = Sym.Exp(lnPHI[0] - lnPHI[1]);
+            //_kEOS_SRK = Sym.Exp(lnPHI[0] - lnPHI[1]);
+            _kEOS_SRK = lnPHI[0] / lnPHI[1];
             _dphiDx = new Expression[NC];
             _dphiDy = new Expression[NC];
 
