@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenFMSL.Core.ThermodynamicModels;
 
 namespace OpenFMSL.Core.ModelLibrary
 {
@@ -18,7 +19,7 @@ namespace OpenFMSL.Core.ModelLibrary
         private Variable T;
         private Variable VF;
         private Variable Q;
-
+        private Variable[] r;
         public Heater(string name, ThermodynamicSystem system) : base(name, system)
         {
             Class = "Heater";
@@ -35,11 +36,16 @@ namespace OpenFMSL.Core.ModelLibrary
             Q = system.VariableFactory.CreateVariable("Q", "Heat Duty", PhysicalDimension.HeatFlow);
             dp.LowerBound = 0;
             dp.ValueInSI = 0;
+
+
+
+
             AddVariable(dp);
             AddVariable(p);
             AddVariable(T);
             AddVariable(VF);
             AddVariable(Q);
+
         }
 
         public override void FillEquationSystem(EquationSystem problem)
@@ -54,18 +60,37 @@ namespace OpenFMSL.Core.ModelLibrary
                 Q.IsFixed = true;
                 Q.ValueInSI = 0;
             }
-           
+
 
             for (int i = 0; i < NC; i++)
             {
                 var cindex = i;
+
+                Expression reactingMoles = 0;
+
+                if (ChemistryBlock != null)
+                {
+                    reactingMoles = ChemistryBlock.GetReactingMolesExpression(r, System.Components[i]);
+                }
+
+
                 AddEquationToEquationSystem(problem,
-                    Sym.Sum(0, In.NumberOfStreams, (j) => In.Streams[j].Mixed.ComponentMolarflow[cindex])
+                    (Sym.Sum(0, In.NumberOfStreams, (j) => In.Streams[j].Mixed.ComponentMolarflow[cindex]) + reactingMoles)
                         .IsEqualTo(Sym.Sum(0, Out.NumberOfStreams, (j) => Out.Streams[j].Mixed.ComponentMolarflow[cindex])), "Mass Balance");
+
+
 
             }
 
 
+            if (ChemistryBlock != null)
+            {
+                foreach (var reac in ChemistryBlock.Reactions)
+                {
+                    AddEquationToEquationSystem(problem, reac.GetDefiningEquation(Out.Streams[0]), "Reaction rate equation");
+                }
+            }
+            
             AddEquationToEquationSystem(problem, (p / 1e4).IsEqualTo(Sym.Par(In.Streams[0].Mixed.Pressure - dp) / 1e4), "Pressure Balance");
 
             if (!VF.IsFixed)
@@ -103,6 +128,24 @@ namespace OpenFMSL.Core.ModelLibrary
 
         }
 
+        public override ProcessUnit EnableChemistry(Chemistry chem)
+        {
+            base.EnableChemistry(chem);
+
+            if (ChemistryBlock != null)
+            {
+                r = new Variable[ChemistryBlock.Reactions.Count];
+                for (int i = 0; i < ChemistryBlock.Reactions.Count; i++)
+                {
+                    r[i] = System.VariableFactory.CreateVariable("r", "Reacting molar flow", PhysicalDimension.MolarFlow);
+                    r[i].Subscript = (i + 1).ToString();
+                    r[i].LowerBound = -1e6;
+                }
+                AddVariables(r);
+            }
+
+            return this;
+        }
 
         public override ProcessUnit Initialize()
         {
@@ -119,6 +162,19 @@ namespace OpenFMSL.Core.ModelLibrary
             for (int i = 0; i < NC; i++)
             {
                 Out.Streams[0].Mixed.ComponentMolarflow[i].ValueInSI = Sym.Sum(0, In.NumberOfStreams, (j) => In.Streams[j].Mixed.ComponentMolarflow[i]).Eval(eval);
+            }
+
+
+            if (ChemistryBlock != null)
+            {
+                foreach (var reac in ChemistryBlock.Reactions)
+                {
+                    foreach (var comp in reac.Stoichiometry)
+                    {
+                        if (Math.Abs(Out.Streams[0].Mixed.ComponentMolarflow[comp.Index].ValueInSI) < 1e-10 && Math.Abs(comp.StoichiometricFactor) > 1e-6)
+                            Out.Streams[0].Mixed.ComponentMolarflow[comp.Index].ValueInSI = 1e-6;
+                    }
+                }
             }
 
             Out.Streams[0].Mixed.Temperature.ValueInSI = T.ValueInSI;
@@ -154,6 +210,10 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 Q.ValueInSI = -(In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
             }
+
+
+
+
 
             return this;
         }

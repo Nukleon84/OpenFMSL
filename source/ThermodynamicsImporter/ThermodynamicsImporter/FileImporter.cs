@@ -792,7 +792,7 @@ namespace ThermodynamicsImporter
             int i = ParseInteger(line[1]);
             var comp1 = _currentSystem.Components[i - 1];
             var nu = ParseDouble(line[2]);
-            _currentReaction.Stoichiometry.Add(new StoichiometryPair(i, comp1, nu));
+            _currentReaction.Stoichiometry.Add(new StoichiometryPair(i-1, comp1, nu));
         }
 
         void ParseReactionCoefficients(string[] line)
@@ -947,7 +947,7 @@ namespace ThermodynamicsImporter
                     case "HREF":
                         {
                             int compIdx = ParseInteger(line[1]);
-                            _currentSystem.EnthalpyMethod.PureComponentEnthalpies[compIdx - 1].Href.ValueInSI = ParseDouble(line[2]);
+                            _currentSystem.EnthalpyMethod.PureComponentEnthalpies[compIdx - 1].Href.ValueInSI = ParseDouble(line[2])/1e3;
                         }
                         return true;
 

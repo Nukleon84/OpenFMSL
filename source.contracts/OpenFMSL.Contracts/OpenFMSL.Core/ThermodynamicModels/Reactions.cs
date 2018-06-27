@@ -1,4 +1,6 @@
-﻿using OpenFMSL.Core.Thermodynamics;
+﻿using OpenFMSL.Core.Expressions;
+using OpenFMSL.Core.Flowsheeting;
+using OpenFMSL.Core.Thermodynamics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +66,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
     public class Reaction
     {
         ReactionType _type = ReactionType.CONV;
-        List<StoichiometryPair> _stoichiometry= new List<StoichiometryPair>();
+        List<StoichiometryPair> _stoichiometry = new List<StoichiometryPair>();
         List<double> _coefficients = new List<double>();
         double _reactionEnthalpy = 0.0;
         public List<StoichiometryPair> Stoichiometry
@@ -119,7 +121,61 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
         }
 
-      
+        public double GetStoichiometricFactor(MolecularComponent comp)
+        {
+            var pair = Stoichiometry.FirstOrDefault(s => s.Component == comp);
+            if (pair != null)
+                return pair.StoichiometricFactor;
+            else
+                return 0;
+
+        }
+
+        Expression GetFactor(MaterialStream stream)
+        {
+            switch (Type)
+            {
+                case ReactionType.EQLA:
+                    Expression lnK = Coefficients[0];
+                    if (Coefficients.Count > 1)
+                        lnK += Coefficients[1] / stream.Mixed.Temperature;
+                    if (Coefficients.Count > 2)
+                        lnK += Coefficients[2] * Sym.Ln(stream.Mixed.Temperature);
+                    if (Coefficients.Count > 3)
+                        lnK += Coefficients[3] * stream.Mixed.Temperature;
+                    if (Coefficients.Count > 4)
+                        lnK += Coefficients[4] * Sym.Pow(stream.Mixed.Temperature, 2.0);
+                    if (Coefficients.Count > 5)
+                        lnK += Coefficients[5] * Sym.Pow(stream.Mixed.Temperature, 3.0);
+                    return Sym.Exp(lnK);
+
+            }
+            return 1;
+        }
+
+        Expression GetDrivingForce(MaterialStream stream)
+        {
+            Expression drivingForce = 1;
+            switch (Type)
+            {
+                case ReactionType.EQLA:
+                    {
+                        foreach (var stoic in Stoichiometry)
+                        {
+                            drivingForce *= Sym.Pow(Sym.Par(stream.Gamma[stoic.Index] * stream.Liquid.ComponentMolarFraction[stoic.Index]), stoic.StoichiometricFactor);
+                        }
+                        break;
+                    }
+                default:
+                    break;
+            }
+            return drivingForce;
+        }
+
+        public Equation GetDefiningEquation(MaterialStream stream)
+        {
+            return GetFactor(stream).IsEqualTo(GetDrivingForce(stream));
+        }
     }
 
     public class Chemistry
@@ -152,6 +208,23 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 _reactions = value;
             }
         }
+
+
+
+        public Expression GetReactingMolesExpression(Expression[] reactionRates, MolecularComponent comp)
+        {
+            Expression reactingMoles = 0;
+            for (int j = 0; j < Reactions.Count; j++)
+            {
+                var nu = Reactions[j].GetStoichiometricFactor(comp);
+                if (Math.Abs(nu) > 1e-16)
+                {
+                    reactingMoles += nu * reactionRates[j];
+                }
+            }
+            return reactingMoles;
+        }
+
     }
 
 }

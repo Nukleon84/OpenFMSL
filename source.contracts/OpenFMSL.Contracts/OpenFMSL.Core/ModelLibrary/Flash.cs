@@ -19,6 +19,7 @@ namespace OpenFMSL.Core.ModelLibrary
         private Variable Q;
         private Variable VF;
         private Variable[] K;
+   
         public Flash(string name, ThermodynamicSystem system) : base(name, system)
         {
             Class = "Flash";
@@ -35,11 +36,13 @@ namespace OpenFMSL.Core.ModelLibrary
             VF = system.VariableFactory.CreateVariable("VF", "Vapor Fraction", PhysicalDimension.MolarFraction);
 
             K = new Variable[system.Components.Count];
+         
             for (int i = 0; i < system.Components.Count; i++)
             {
                 K[i] = system.VariableFactory.CreateVariable("K", "Equilibrium partition coefficient", PhysicalDimension.Dimensionless);
                 K[i].Subscript = system.Components[i].ID;
                 K[i].ValueInSI = 1.2;
+                
             }
             dp.LowerBound = -1e10;
             dp.ValueInSI = 0;
@@ -50,6 +53,7 @@ namespace OpenFMSL.Core.ModelLibrary
             AddVariable(VF);
             AddVariable(dp);
             AddVariables(K);
+          
         }
 
         public override void FillEquationSystem(EquationSystem problem)
@@ -70,6 +74,7 @@ namespace OpenFMSL.Core.ModelLibrary
                    (In.Streams[0].Mixed.ComponentMolarflow[cindex])
                         .IsEqualTo(Vap.Streams[0].Mixed.ComponentMolarflow[cindex] + Liq.Streams[0].Mixed.ComponentMolarflow[cindex]), "Mass Balance");
 
+                
             }
 
 
@@ -112,7 +117,11 @@ namespace OpenFMSL.Core.ModelLibrary
             var flashStream = new MaterialStream("FLASH", System);
             flashStream.CopyFrom(In.Streams[0]);
 
-            if(p.IsFixed)
+          
+
+
+
+            if (p.IsFixed)
                 flashStream.Specify("p", p.ValueInSI);
             else if(dp.IsFixed)
                 flashStream.Specify("p", In.Streams[0].Mixed.Pressure.ValueInSI- dp.ValueInSI);
@@ -195,6 +204,7 @@ namespace OpenFMSL.Core.ModelLibrary
             Vap.Streams[0].State = PhaseState.DewPoint;
             Liq.Streams[0].State = PhaseState.BubblePoint;
 
+           
             return this;
         }
     }

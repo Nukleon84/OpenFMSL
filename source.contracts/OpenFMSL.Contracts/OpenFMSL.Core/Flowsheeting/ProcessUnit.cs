@@ -1,5 +1,7 @@
-﻿using OpenFMSL.Core.Numerics;
+﻿using OpenFMSL.Core.Expressions;
+using OpenFMSL.Core.Numerics;
 using OpenFMSL.Core.Numerics.Solvers;
+using OpenFMSL.Core.ThermodynamicModels;
 using OpenFMSL.Core.Thermodynamics;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ namespace OpenFMSL.Core.Flowsheeting
     {
         List<Port<MaterialStream>> _materialPorts = new List<Port<MaterialStream>>();
         List<Port<HeatStream>> _heatPorts = new List<Port<HeatStream>>();
+        Chemistry _chemistryBlock;
 
         public List<Port<MaterialStream>> MaterialPorts
         {
@@ -40,6 +43,18 @@ namespace OpenFMSL.Core.Flowsheeting
             }
         }
 
+        public Chemistry ChemistryBlock
+        {
+            get
+            {
+                return _chemistryBlock;
+            }
+
+            set
+            {
+                _chemistryBlock = value;
+            }
+        }
 
         public ProcessUnit(string name, ThermodynamicSystem system) : base(name, system)
         {
@@ -68,41 +83,65 @@ namespace OpenFMSL.Core.Flowsheeting
             return this;
         }
 
-        public virtual ProcessUnit Initialize()
+        public ProcessUnit EnableChemistry(string label)
         {
+            var chem = System.ChemistryBlocks.FirstOrDefault(c => c.Label == label);
+            if (chem != null)
+                EnableChemistry(chem);
             return this;
         }
-        /// <summary>
-        /// Solves the unit together with the output material streams as a single flowsheet. When using this method, the unit has to be specified fully.
-        /// </summary>
-        public virtual ProcessUnit Solve()
+
+        public virtual ProcessUnit EnableChemistry(Chemistry chem)
         {
-            var decomp = new Decomposer();
-
-            var flowsheet = new Flowsheet(Name);
-            flowsheet.AddUnit(this);
-            foreach (var stream in MaterialPorts.Where(p => p.Direction == PortDirection.Out && p.IsConnected).Select(p => p.Streams.ToArray()))
-            {
-                flowsheet.AddMaterialStreams(stream);
-            }
-            var problem = new EquationSystem();
-            flowsheet.FillEquationSystem(problem);
-            decomp.Solve(problem);
-
+            if (chem == null)
+                return this;
+            ChemistryBlock = chem;
+            
             return this;
-
         }
 
+    public ProcessUnit DisableChemistry()
+    {
+        ChemistryBlock = null;
+        return this;
+    }
 
-        public Port<MaterialStream> FindMaterialPort(string portName)
+
+    public virtual ProcessUnit Initialize()
+    {
+        return this;
+    }
+    /// <summary>
+    /// Solves the unit together with the output material streams as a single flowsheet. When using this method, the unit has to be specified fully.
+    /// </summary>
+    public virtual ProcessUnit Solve()
+    {
+        var decomp = new Decomposer();
+
+        var flowsheet = new Flowsheet(Name);
+        flowsheet.AddUnit(this);
+        foreach (var stream in MaterialPorts.Where(p => p.Direction == PortDirection.Out && p.IsConnected).Select(p => p.Streams.ToArray()))
         {
-            return MaterialPorts.FirstOrDefault(p => p.Name == portName);
+            flowsheet.AddMaterialStreams(stream);
         }
+        var problem = new EquationSystem();
+        flowsheet.FillEquationSystem(problem);
+        decomp.Solve(problem);
 
-        public Port<HeatStream> FindHeatPort(string portName)
-        {
-            return HeatPorts.FirstOrDefault(p => p.Name == portName);
-        }
+        return this;
 
     }
+
+
+    public Port<MaterialStream> FindMaterialPort(string portName)
+    {
+        return MaterialPorts.FirstOrDefault(p => p.Name == portName);
+    }
+
+    public Port<HeatStream> FindHeatPort(string portName)
+    {
+        return HeatPorts.FirstOrDefault(p => p.Name == portName);
+    }
+
+}
 }

@@ -30,8 +30,6 @@ namespace OpenFMSL.Core.Flowsheeting
         Variable[] K;
         Variable[] gamma;
 
-        Chemistry _chemistryBlock;
-
         #region Properties
         public Phase Liquid
         {
@@ -149,6 +147,19 @@ namespace OpenFMSL.Core.Flowsheeting
                 K = value;
             }
         }
+
+        public Variable[] Gamma
+        {
+            get
+            {
+                return gamma;
+            }
+
+            set
+            {
+                gamma = value;
+            }
+        }
         #endregion
 
         public MaterialStream(string name, ThermodynamicSystem system) : base(name, system)
@@ -175,7 +186,7 @@ namespace OpenFMSL.Core.Flowsheeting
 
                 MW = system.VariableFactory.CreateVariable("MW", "Average molar weight (bulk)", PhysicalDimension.MolarWeight);                              
 
-                gamma = new Variable[System.Components.Count];
+                Gamma = new Variable[System.Components.Count];
 
                 KValues = new Variable[System.Components.Count];
                 for (int i = 0; i < System.Components.Count; i++)
@@ -187,11 +198,11 @@ namespace OpenFMSL.Core.Flowsheeting
                     System.EquationFactory.EquilibriumCoefficient(System, KValues[i], Mixed.Temperature, Mixed.Pressure, Liquid.ComponentMolarFraction, Vapor.ComponentMolarFraction, i);
 
 
-                    gamma[i] = system.VariableFactory.CreateVariable("gamma", "Activity coefficient", PhysicalDimension.Dimensionless);
-                    gamma[i].Subscript = System.Components[i].ID;
-                    gamma[i].Group = "Equilibrium";
-                    gamma[i].ValueInSI = 1.4;
-                    System.EquationFactory.ActivityCoefficient(System, gamma[i], Mixed.Temperature, Liquid.ComponentMolarFraction, i);
+                    Gamma[i] = system.VariableFactory.CreateVariable("gamma", "Activity coefficient", PhysicalDimension.Dimensionless);
+                    Gamma[i].Subscript = System.Components[i].ID;
+                    Gamma[i].Group = "Equilibrium";
+                    Gamma[i].ValueInSI = 1.4;
+                    System.EquationFactory.ActivityCoefficient(System, Gamma[i], Mixed.Temperature, Liquid.ComponentMolarFraction, i);
 
                 }
                 AddVariable(MW);
@@ -208,7 +219,7 @@ namespace OpenFMSL.Core.Flowsheeting
                 Variables.AddRange(Liquid.Variables);
                 Variables.AddRange(Vapor.Variables);
                 Variables.AddRange(KValues);
-                Variables.AddRange(gamma);
+                Variables.AddRange(Gamma);
 
                 Variables.Remove(Liquid.Temperature);
                 Variables.Remove(Vapor.Temperature);
@@ -298,25 +309,7 @@ namespace OpenFMSL.Core.Flowsheeting
 
         }
 
-        public MaterialStream EnableChemistry(string label)
-        {
-            var chem = System.ChemistryBlocks.FirstOrDefault(c => c.Label == label);
-            if (chem != null)
-                EnableChemistry(chem);
-            return this;
-        }
-
-        public MaterialStream EnableChemistry(Chemistry chem)
-        {
-            _chemistryBlock = chem;
-            return this;
-        }
-
-        public MaterialStream DisableChemistry()
-        {
-            _chemistryBlock = null;
-            return this;
-        }
+      
 
         public override void FillEquationSystem(EquationSystem problem)
         {
