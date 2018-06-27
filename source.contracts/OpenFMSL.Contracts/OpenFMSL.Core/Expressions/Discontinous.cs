@@ -23,13 +23,13 @@ namespace OpenFMSL.Core.Expressions
                 // var diffExpr = _expr.SymbolicDiff(var);
                 //  return diffExpr.Eval(c);
 
-                var u = Left.Diff(c, var);
-                var v = Right.Diff(c, var);
+              //  var u = Left.Diff(c, var);
+               // var v = Right.Diff(c, var);
 
                 if (Left.Eval(c) < Right.Eval(c))
-                    return u;
+                    return Left.Diff(c, var);
                 else
-                    return v;
+                    return Right.Diff(c, var);
             };
         }
 
@@ -47,6 +47,61 @@ namespace OpenFMSL.Core.Expressions
 
     }
 
+    //log(exp(kx) + exp(ky) ) / k
+
+
+    public class SmoothMax : Binary
+    {
+        Expression _expr;
+
+        public SmoothMax(Expression left, Expression right, double k=10)
+        {
+            Symbol = "smax";
+            Left = left;
+            Right = right;
+            //_expr = 0.5 * (Left + Right + Sym.Abs(Left - Right));
+            _expr = Sym.Ln(Sym.Exp(k * left) + Sym.Exp(k * right)) / k;
+
+            EvalFunctional = (c) => Math.Max(Left.Eval(c), Right.Eval(c));
+            DiffFunctional = (c, var) =>  _expr.Diff(c, var);            
+        }
+
+        public override Expression SymbolicDiff(Variable var)
+        {
+            return _expr.SymbolicDiff(var);
+        }
+
+        public override string ToString()
+        {
+            return Symbol + "(" + Left + "," + Right + ")";
+        }
+    }
+    public class SmoothMin : Binary
+    {
+        Expression _expr;
+
+        public SmoothMin(Expression left, Expression right, double k = 10)
+        {
+            Symbol = "smin";
+            Left = left;
+            Right = right;
+            //_expr = 0.5 * (Left + Right + Sym.Abs(Left - Right));
+            _expr = Sym.Ln(Sym.Exp(-k * left) + Sym.Exp(-k * right)) / -k;
+
+            EvalFunctional = (c) => Math.Min(Left.Eval(c), Right.Eval(c));
+            DiffFunctional = (c, var) => _expr.Diff(c, var);           
+        }
+
+        public override Expression SymbolicDiff(Variable var)
+        {
+            return _expr.SymbolicDiff(var);
+        }
+
+        public override string ToString()
+        {
+            return Symbol + "(" + Left + "," + Right + ")";
+        }
+    }
 
     public class Max : Binary
     {
@@ -61,13 +116,14 @@ namespace OpenFMSL.Core.Expressions
             EvalFunctional = (c) => Math.Max(Left.Eval(c), Right.Eval(c));
             DiffFunctional = (c, var) =>
              {
-                 var u = Left.Diff(c, var);
-                 var v = Right.Diff(c, var);
+                 
+                // var u = Left.Diff(c, var);
+                // var v = Right.Diff(c, var);
 
                  if (Left.Eval(c) > Right.Eval(c))
-                     return u;
+                     return Left.Diff(c, var);
                  else
-                     return v;
+                     return Right.Diff(c, var);
              };
         }
 

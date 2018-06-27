@@ -100,6 +100,15 @@ namespace OpenFMSL.Core.Expressions
             return new Max(left, right);
         }
 
+        public static Expression SmoothMax(Expression left, Expression right)
+        {
+            return new SmoothMax(left, right);
+        }
+        public static Expression SmoothMin(Expression left, Expression right)
+        {
+            return (new SmoothMin(left, right));
+        }
+
         public static Expression SumX(int start, int end, int excludedIndex, Func<int, Expression> mapping)
         {
             var sum = mapping(start);

@@ -2,6 +2,7 @@
 using Caliburn.Micro;
 using OpenFMSL.Contracts.Infrastructure.Messaging;
 using OpenFMSL.Core.Expressions;
+using OpenFMSL.Core.ThermodynamicModels;
 using OpenFMSL.Core.Thermodynamics;
 using OpenFMSL.Core.UnitsOfMeasure;
 using System;
@@ -17,6 +18,9 @@ namespace ThermodynamicsImporter
         IList<MolecularComponent> _components = new List<MolecularComponent>();
         IList<ThermodynamicSystem> _systems = new List<ThermodynamicSystem>();
         ThermodynamicSystem _currentSystem;
+
+        Chemistry _currentChemistryBlock;
+        Reaction _currentReaction;
 
         public IList<MolecularComponent> Components
         {
@@ -83,19 +87,19 @@ namespace ThermodynamicsImporter
             var newComp = new MolecularComponent();
             newComp.Name = name;
             newComp.ID = id;
-            newComp.CasNumber = "123-456-7";                    
+            newComp.CasNumber = "123-456-7";
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("MolarWeight", 0.018, SI.kg / SI.mol));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalTemperature", 600, SI.K));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalPressure", 221e5, SI.Pa));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("CriticalDensity", 0.1, SI.kmol / SI.cum));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("HeatOfFormation", 0, SI.J / SI.kmol));
             newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("AcentricFactor", 0.3, SI.nil));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacR", 0));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQ", 0));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQP", 0));
+            //  newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacR", 0));
+            //   newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQ", 0));
+            // newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("UniquacQP", 0));
 
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("RKSA", 0));
-            newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("RKSB", 0));
+            //newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("RKSA", 0));
+            //newComp.Constants.Add(new OpenFMSL.Core.Expressions.Variable("RKSB", 0));
 
             newComp.Functions.Add(new PropertyFunction()
             {
@@ -680,20 +684,18 @@ namespace ThermodynamicsImporter
 
             double r = ParseDouble(line[2]);
             double q = ParseDouble(line[3]);
-            double qp = 0;
+            double qp = q;
             if (line.Length > 4)
                 qp = ParseDouble(line[4]);
 
             var comp1 = _currentSystem.Components[i - 1];
 
-            comp1.GetConstant(ConstantProperties.UniquacR).ValueInSI = r;
-            comp1.GetConstant(ConstantProperties.UniquacQ).ValueInSI = q;
-
-            if (line.Length > 4)
-                comp1.GetConstant(ConstantProperties.UniquacQP).ValueInSI = qp;
-            else
-                comp1.GetConstant(ConstantProperties.UniquacQP).ValueInSI = q;
-
+            var uniquacPure = new MethodConstantParameters();
+            uniquacPure.Method = MethodTypes.Uniquac;
+            uniquacPure.Parameters.Add("R", new Variable("UniquacR", r));
+            uniquacPure.Parameters.Add("Q", new Variable("UniquacQ", q));
+            uniquacPure.Parameters.Add("Q'", new Variable("UniquacQ'", qp));
+            comp1.MethodParameters.Add(uniquacPure);
         }
         void ParseMODUNIQUACPure(string[] line)
         {
@@ -705,9 +707,13 @@ namespace ThermodynamicsImporter
 
             var comp1 = _currentSystem.Components[i - 1];
 
-            comp1.GetConstant(ConstantProperties.UniquacR).ValueInSI = r;
-            comp1.GetConstant(ConstantProperties.UniquacQ).ValueInSI = q;
-            comp1.GetConstant(ConstantProperties.UniquacQP).ValueInSI = qp;
+            var uniquacPure = new MethodConstantParameters();
+            uniquacPure.Method = MethodTypes.ModUniquac;
+            uniquacPure.Parameters.Add("R", new Variable("ModUniquacR", r));
+            uniquacPure.Parameters.Add("Q", new Variable("ModUniquacQ", q));
+            uniquacPure.Parameters.Add("Q'", new Variable("ModUniquacQ'", qp));
+            comp1.MethodParameters.Add(uniquacPure);
+
 
         }
 
@@ -717,8 +723,13 @@ namespace ThermodynamicsImporter
             double a = ParseDouble(line[2]);
             double b = ParseDouble(line[3]);
             var comp1 = _currentSystem.Components[i - 1];
-            comp1.GetConstant(ConstantProperties.RKSA).ValueInSI = a / 1e6;
-            comp1.GetConstant(ConstantProperties.RKSB).ValueInSI = b;
+
+            var rksPure = new MethodConstantParameters();
+            rksPure.Method = MethodTypes.RKS;
+            rksPure.Parameters.Add("A", new Variable("RKSA", a / 1e6));
+            rksPure.Parameters.Add("B", new Variable("RKSB", b));
+            comp1.MethodParameters.Add(rksPure);
+
         }
 
         void ParseDIFV(string[] line)
@@ -739,6 +750,67 @@ namespace ThermodynamicsImporter
 
             currentParameterSet.SetParam("A", comp1, comp2, aij);
             currentParameterSet.SetParam("A", comp2, comp1, aji);
+        }
+        void ParseChemistryBlock(string[] line)
+        {
+            var chemistry = new Chemistry();
+            chemistry.Label = line[1];
+            int numberOfReactions = ParseInteger(line[2]);
+            for (int i = 0; i < numberOfReactions; i++)
+            {
+                chemistry.Reactions.Add(new Reaction());
+            }
+            _currentChemistryBlock = chemistry;
+            _currentSystem.ChemistryBlocks.Add(chemistry);
+        }
+
+        void ParseReaction(string[] line)
+        {
+            if (_currentChemistryBlock == null)
+                throw new InvalidOperationException("No chemistry block active. Use the CHEM statement before defining a reaction");
+            int indexOfReaction = ParseInteger(line[1]) - 1;
+            double dhr = ParseDouble(line[2]);
+
+            if (indexOfReaction < _currentChemistryBlock.Reactions.Count)
+            {
+                _currentReaction = _currentChemistryBlock.Reactions[indexOfReaction];
+                _currentReaction.ReactionEnthalpy = dhr / 1000.0;
+
+                switch (line[0])
+                {
+                    case "EQLA":
+                        _currentReaction.Type = ReactionType.EQLA;
+                        break;
+                }
+            }
+        }
+
+        void ParseStoichiometry(string[] line)
+        {
+            if (_currentReaction == null)
+                throw new InvalidOperationException("No reaction active. Define a reaction in a CHEM block first");
+            int i = ParseInteger(line[1]);
+            var comp1 = _currentSystem.Components[i - 1];
+            var nu = ParseDouble(line[2]);
+            _currentReaction.Stoichiometry.Add(new StoichiometryPair(i, comp1, nu));
+        }
+
+        void ParseReactionCoefficients(string[] line)
+        {
+            if (_currentReaction == null)
+                throw new InvalidOperationException("No reaction active. Define a reaction in a CHEM block first");
+
+            switch (line[0])
+            {
+                case "F(T)":
+                    var numCoef= ParseInteger(line[1]);
+                    for (int i = 0; i < numCoef; i++)
+                    {
+                        _currentReaction.Coefficients.Add(ParseDouble(line[2 + i]));
+                    }
+                    break;
+            }
+
         }
 
 
@@ -764,6 +836,8 @@ namespace ThermodynamicsImporter
             else
                 throw new ArgumentException("Can not parse " + token + " to double.");
         }
+
+
 
         bool EvaluateLine(string[] line)
         {
@@ -857,6 +931,18 @@ namespace ThermodynamicsImporter
                         return true;
                     case "VISV":
                         ParsePureFunction(line, c => c.GetFunction(EvaluatedProperties.VaporViscosity));
+                        return true;
+                    case "CHEM":
+                        ParseChemistryBlock(line);
+                        return true;
+                    case "EQLA":
+                        ParseReaction(line);
+                        return true;
+                    case "F(T)":
+                        ParseReactionCoefficients(line);
+                        return true;
+                    case "STOE":
+                        ParseStoichiometry(line);
                         return true;
                     case "HREF":
                         {

@@ -12,6 +12,7 @@ using OpenFMSL.Core.Expressions;
 using OpenFMSL.Core.Flowsheeting;
 using OpenFMSL.Core.Numerics;
 using OpenFMSL.Core.Numerics.Solvers;
+using OpenFMSL.Core.ThermodynamicModels;
 using OpenFMSL.Core.Thermodynamics;
 using OpenFMSL.Core.UnitsOfMeasure;
 using System;
@@ -282,7 +283,78 @@ namespace PythonEnvironment
                 }
             }
 
+            WriteLine("");
+            WriteLine("Chemistry blocks");
+            WriteLine("");
+            WriteLine(String.Format("{0,-10} {1,-10} {2,-10} {3,-40} {4,-20} ", "Label", "Type", "DHR", "Reaction", "Stoichiometry"));
 
+
+            foreach (var chem in system.ChemistryBlocks)
+            {
+                foreach (var reac in chem.Reactions)
+                {
+                    WriteLine(String.Format("{0,-10} {1,-10} {2,-10} {3,-40} {4,-20} ",
+                        chem.Label,
+                        reac.Type,
+                        reac.ReactionEnthalpy,
+                        GetReactionFunction(reac),
+                        GetReactionStoichiometry(reac)
+                        ));
+
+                }
+            }
+
+        }
+
+        string GetReactionFunction(Reaction reaction)
+        {
+            Func<double, string> formatter = (x) => x.ToString("G4", System.Globalization.NumberFormatInfo.InvariantInfo);
+
+            switch(reaction.Type)
+            {
+                case ReactionType.EQLA:
+                case ReactionType.EQLM:
+                case ReactionType.EQVM:
+                    var expr= "K=exp("
+                        + ((reaction.Coefficients.Count > 0) ? formatter(reaction.Coefficients[0]) : "")
+                        + ((reaction.Coefficients.Count > 1) ? " + "+formatter(reaction.Coefficients[1]) + "/T" : "")
+                    + ((reaction.Coefficients.Count > 2) ? " + " + formatter(reaction.Coefficients[2]) + "*ln(T)" : "")
+                    +((reaction.Coefficients.Count > 3) ? " + " + formatter(reaction.Coefficients[3]) + "*T^2" : "")
+                    +((reaction.Coefficients.Count > 4) ? " + " + formatter(reaction.Coefficients[4]) + "*T^3" : "");
+                    return expr+")";
+                default:
+                    return "K=1";
+            }
+
+        }
+        string GetReactionStoichiometry(Reaction reaction)
+        {
+            string educts = "";
+            string products = "";
+            Func<double, string> formatter = (x) => x.ToString("G4", System.Globalization.NumberFormatInfo.InvariantInfo);
+
+            switch(reaction.Type)
+            {
+                case ReactionType.EQLA:
+                    foreach(var stoic in reaction.Stoichiometry)
+                    {
+                        if (stoic.StoichiometricFactor < 0)
+                        {
+                            if (educts != "")
+                                educts += " + ";
+                            educts += formatter(Math.Abs(stoic.StoichiometricFactor)) + " " + stoic.Component.ID;                            
+                        }
+                        if (stoic.StoichiometricFactor > 0)
+                        {
+                            if (products != "")
+                                products += " + ";
+                            products += formatter(stoic.StoichiometricFactor) + " " + stoic.Component.ID;
+                        }
+                    }
+                    return educts + " <=> " + products;                    
+            }
+
+            return "";
         }
 
         public OptimizationProblem Solve(OptimizationProblem problem)

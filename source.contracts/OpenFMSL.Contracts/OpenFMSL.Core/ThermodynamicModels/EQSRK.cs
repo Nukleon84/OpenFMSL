@@ -66,13 +66,14 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
                 var PC = comp.GetConstant(ConstantProperties.CriticalPressure);
                 var AC = comp.GetConstant(ConstantProperties.AcentricFactor);
-                if (comp.GetConstant(ConstantProperties.RKSA).ValueInSI != 0.0)
-                    ai[i] = comp.GetConstant(ConstantProperties.RKSA).ValueInSI;
+
+                if(comp.HasParameter(MethodTypes.RKS, "A"))                
+                    ai[i] = comp.GetParameter(MethodTypes.RKS, "A").ValueInSI;
                 else
                     ai[i] = 0.42748 * Math.Pow(_R.ValueInSI, 2.0) * Math.Pow(TC.ValueInSI, 2.0) / PC.ValueInSI;
 
-                if (comp.GetConstant(ConstantProperties.RKSB).ValueInSI != 0.0)
-                    bi[i] = comp.GetConstant(ConstantProperties.RKSB).ValueInSI;
+                if (comp.HasParameter(MethodTypes.RKS, "B"))
+                    bi[i] = comp.GetParameter(MethodTypes.RKS, "B").ValueInSI;
                 else
                     bi[i] = 0.0867 * _R.ValueInSI * TC.ValueInSI / PC.ValueInSI;
 
@@ -234,13 +235,14 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
                 var PC = comp.GetConstant(ConstantProperties.CriticalPressure);
                 var AC = comp.GetConstant(ConstantProperties.AcentricFactor);
-                if (comp.GetConstant(ConstantProperties.RKSA).ValueInSI != 0.0)
-                    ai[i] = comp.GetConstant(ConstantProperties.RKSA).ValueInSI;
+
+                if (comp.HasParameter(MethodTypes.RKS, "A"))
+                    ai[i] = comp.GetParameter(MethodTypes.RKS, "A").ValueInSI;
                 else
                     ai[i] = 0.42748 * Math.Pow(R.ValueInSI, 2.0) * Math.Pow(TC.ValueInSI, 2.0) / PC.ValueInSI;
 
-                if (comp.GetConstant(ConstantProperties.RKSB).ValueInSI != 0.0)
-                    bi[i] = comp.GetConstant(ConstantProperties.RKSB).ValueInSI;
+                if (comp.HasParameter(MethodTypes.RKS, "B"))
+                    bi[i] = comp.GetParameter(MethodTypes.RKS, "B").ValueInSI;
                 else
                     bi[i] = 0.0867 * R.ValueInSI * TC.ValueInSI / PC.ValueInSI;
 

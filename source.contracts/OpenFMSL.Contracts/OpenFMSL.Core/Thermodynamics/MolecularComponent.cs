@@ -15,6 +15,7 @@ namespace OpenFMSL.Core.Thermodynamics
         List<Variable> _constants = new List<Variable>();
         List<PropertyFunction> _functions = new List<PropertyFunction>();
         bool _isInert = false;
+        List<MethodConstantParameters> _unaryParameters = new List<MethodConstantParameters>();
 
         /// <summary>
         /// Systematic name of the component
@@ -117,6 +118,19 @@ namespace OpenFMSL.Core.Thermodynamics
             get { return GetConstant(ConstantProperties.MolarWeight); }
         }
 
+        public List<MethodConstantParameters> MethodParameters
+        {
+            get
+            {
+                return _unaryParameters;
+            }
+
+            set
+            {
+                _unaryParameters = value;
+            }
+        }
+
         /// <summary>
         /// Retrieve the constant for a given constant ID 
         /// </summary>
@@ -131,6 +145,44 @@ namespace OpenFMSL.Core.Thermodynamics
             else
                 throw new ArgumentException("Constant ID not found");
         }
+
+        /// <summary>
+        /// Retrieve the constant for a given constant ID 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Variable GetParameter(MethodTypes id, string parameterName)
+        {
+            var method = MethodParameters.FirstOrDefault(c => c.Method == id);
+
+            if (method != null)
+            {
+                if (method.Parameters.ContainsKey(parameterName))
+                    return method.Parameters[parameterName];
+                else
+                    throw new ArgumentException("Parameter " + parameterName + " not found in method " + id);
+            }
+
+            else
+                throw new ArgumentException("Method parameter set " + id + " not found");
+        }
+
+        /// <summary>
+        /// Retrieve the method parameter for a given constant ID 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool HasParameter(MethodTypes id, string parameterName)
+        {
+            var method = MethodParameters.FirstOrDefault(c => c.Method == id);
+
+            if (method != null && method.Parameters.ContainsKey(parameterName))
+                return true;
+
+            return false;
+        }
+
+
 
         /// <summary>
         /// Retrieve the temperature dependent function for a given property id 

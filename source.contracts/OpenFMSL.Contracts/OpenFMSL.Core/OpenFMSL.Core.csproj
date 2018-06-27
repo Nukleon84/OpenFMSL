@@ -100,11 +100,13 @@
     <Compile Include="ThermodynamicModels\ActivityCoefficientNRTL.cs" />
     <Compile Include="ThermodynamicModels\EQSRK.cs" />
     <Compile Include="ThermodynamicModels\MixtureHenryCoefficient.cs" />
+    <Compile Include="ThermodynamicModels\Reactions.cs" />
     <Compile Include="ThermodynamicModels\SafeLiquidDensity.cs" />
     <Compile Include="Thermodynamics\BinaryInteractionParameterSet.cs" />
     <Compile Include="Thermodynamics\EnthalpyCalculationMethod.cs" />
     <Compile Include="Thermodynamics\Enumerations.cs" />
     <Compile Include="Thermodynamics\FlashRoutines.cs" />
+    <Compile Include="Thermodynamics\MethodConstantParameters.cs" />
     <Compile Include="Thermodynamics\MolecularComponent.cs" />
     <Compile Include="Thermodynamics\EquilibriumCalculationMethod.cs" />
     <Compile Include="Thermodynamics\PropertyFunction.cs" />

@@ -19,6 +19,10 @@ namespace OpenFMSL.Core.Expressions
             DiffFunctional = (c, var) =>
              {
                  var u = Left.Eval(c);
+
+                 if (Math.Abs(u) < Double.Epsilon)
+                     return 0;
+
                  var v = Right.Eval(c);
                  var dudx = Left.Diff(c, var);
                  var dvdx = Right.Diff(c, var);

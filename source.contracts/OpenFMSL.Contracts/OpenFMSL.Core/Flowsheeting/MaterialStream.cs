@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenFMSL.Core.Numerics;
 using OpenFMSL.Core.Expressions;
 using OpenFMSL.Core.UnitsOfMeasure;
+using OpenFMSL.Core.ThermodynamicModels;
 
 namespace OpenFMSL.Core.Flowsheeting
 {
@@ -28,6 +29,8 @@ namespace OpenFMSL.Core.Flowsheeting
 
         Variable[] K;
         Variable[] gamma;
+
+        Chemistry _chemistryBlock;
 
         #region Properties
         public Phase Liquid
@@ -294,6 +297,27 @@ namespace OpenFMSL.Core.Flowsheeting
             return this;
 
         }
+
+        public MaterialStream EnableChemistry(string label)
+        {
+            var chem = System.ChemistryBlocks.FirstOrDefault(c => c.Label == label);
+            if (chem != null)
+                EnableChemistry(chem);
+            return this;
+        }
+
+        public MaterialStream EnableChemistry(Chemistry chem)
+        {
+            _chemistryBlock = chem;
+            return this;
+        }
+
+        public MaterialStream DisableChemistry()
+        {
+            _chemistryBlock = null;
+            return this;
+        }
+
         public override void FillEquationSystem(EquationSystem problem)
         {
             int NC = System.Components.Count;
@@ -412,6 +436,7 @@ namespace OpenFMSL.Core.Flowsheeting
                         AddEquationToEquationSystem(problem,( Sym.Max(Vfmolar, Beta)).IsEqualTo(MaxVfBeta), "Equilibrium");
 
                         //AddEquationToEquationSystem(problem, Sym.Max(Sym.Min(Vfmolar, Beta), Sym.Min(Sym.Max(Vfmolar, Beta), Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
+                        //AddEquationToEquationSystem(problem, Sym.Max(MinVfBeta, Sym.Min(MaxVfBeta, Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
                         AddEquationToEquationSystem(problem, Sym.Max(MinVfBeta, Sym.Min(MaxVfBeta, Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
                     }
                     AddEquationToEquationSystem(problem, (Mixed.TotalMolarflow).IsEqualTo(Vapor.TotalMolarflow + Liquid.TotalMolarflow), "Mass Balance");

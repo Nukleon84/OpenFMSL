@@ -106,9 +106,9 @@ namespace OpenFMSL.Core.ThermodynamicModels
             Expression FiP = 0;
             Expression Sxl = 0;
 
-            var ri = _system.Components[i].GetConstant(ConstantProperties.UniquacR);
-            var qi = _system.Components[i].GetConstant(ConstantProperties.UniquacQ);
-            var qpi = _system.Components[i].GetConstant(ConstantProperties.UniquacQP);
+            var ri = _system.Components[i].GetParameter(MethodTypes.Uniquac, "R").ValueInSI;
+            var qi = _system.Components[i].GetParameter(MethodTypes.Uniquac, "Q").ValueInSI;
+            var qpi = _system.Components[i].GetParameter(MethodTypes.Uniquac, "Q'").ValueInSI;
 
             Expression li = 5 * (ri - qi) - (ri - 1);
 

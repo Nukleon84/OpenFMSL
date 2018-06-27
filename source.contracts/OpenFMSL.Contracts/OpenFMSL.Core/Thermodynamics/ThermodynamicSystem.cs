@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenFMSL.Core.ThermodynamicModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,9 @@ namespace OpenFMSL.Core.Thermodynamics
         PropertyFunctionFactory _equationFactory = new PropertyFunctionFactory();
 
         List<BinaryInteractionParameterSet> _binaryParameters = new List<BinaryInteractionParameterSet>();
+        
+        List<Chemistry> _chemistryBlocks = new List<Chemistry>();
+
         #region Properties
         public string Name
         {
@@ -119,6 +123,21 @@ namespace OpenFMSL.Core.Thermodynamics
             set
             {
                 _binaryParameters = value;
+            }
+        }
+
+       
+
+        public List<Chemistry> ChemistryBlocks
+        {
+            get
+            {
+                return _chemistryBlocks;
+            }
+
+            set
+            {
+                _chemistryBlocks = value;
             }
         }
 
