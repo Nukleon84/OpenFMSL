@@ -42,21 +42,21 @@ namespace OpenFMSL.Core.Thermodynamics
             PrecalculateTP(copy);
 
             var problem2 = new EquationSystem() { Name = "PQ-Flash" };
-          
+
             copy.GetVariable("p").IsFixed = true;
             copy.GetVariable("T").IsFixed = false;
             copy.GetVariable("VF").IsFixed = false;
             copy.Init("VF", stream.Vfmolar.ValueInSI);
             foreach (var comp in stream.System.Components)
             {
-                copy.GetVariable("n["+comp.ID+"]").IsFixed = true;
+                copy.GetVariable("n[" + comp.ID + "]").IsFixed = true;
             }
             problem2.AddConstraints((copy.Mixed.SpecificEnthalpy * copy.Mixed.TotalMolarflow).IsEqualTo(enthalpy));
             copy.FillEquationSystem(problem2);
 
             var solver = new Decomposer();
             solver.Solve(problem2);
-                  
+
             performMassBalance(copy, copy.KValues);
             performDensityUpdate(copy);
             performEnthalpyUpdate(copy);
@@ -119,14 +119,18 @@ namespace OpenFMSL.Core.Thermodynamics
             }
 
             //Solving Rachford Rice equation to get actual vapour fraction
-
-            var rachfordRice = Sym.Sum(0, NC, i => stream.Mixed.ComponentMolarFraction[i] * (1 - stream.KValues[i]) / (1 + stream.Vfmolar * (stream.KValues[i] - 1)));
-            var rachfordRiceEq = rachfordRice.IsEqualTo(0);
-
+            var x = stream.Mixed.ComponentMolarFraction;
+            var K = stream.KValues;
+            var a = stream.Vfmolar;
+            var rachfordRice = Sym.Sum(0, NC, i => x[i] * (1 - K[i]) / (1 + a * (K[i] - 1)));
+          
+            //Evaluate Rachford-Rice at the edge cases of the VLE area
             stream.Vfmolar.ValueInSI = 0;
             var rrAt0 = rachfordRice.Eval(new Evaluator());
             stream.Vfmolar.ValueInSI = 1;
             var rrAt1 = rachfordRice.Eval(new Evaluator());
+
+            stream.Vfmolar.ValueInSI = 0.5;
 
             if (rrAt0 > 0)
             {
@@ -144,20 +148,25 @@ namespace OpenFMSL.Core.Thermodynamics
             {
                 stream.Vfmolar.ValueInSI = 1;
             }
-            else
+                       
+
+            if (stream.Vfmolar.ValueInSI == 0.5 || (rrAt0 == 0 && rrAt1 == 0))
             {
+                for (int i = 0; i < NC; i++)
+                {                
+                    stream.Liquid.ComponentMolarFraction[i].ValueInSI = 0.95*stream.Mixed.ComponentMolarFraction[i].ValueInSI;
+                    stream.Vapor.ComponentMolarFraction[i].ValueInSI = 1.05*stream.Mixed.ComponentMolarFraction[i].ValueInSI;
+                }
+
                 stream.Vfmolar.ValueInSI = 0.5;
-            }
-
-            if (stream.Vfmolar.ValueInSI == 0.5)
-            {
                 var problem2 = new EquationSystem() { Name = "Rachford-Rice" };
-
                 stream.Vfmolar.LowerBound = -5;
                 stream.Vfmolar.UpperBound = 5;
-                problem2.AddConstraints(rachfordRiceEq);
-                problem2.AddVariables(stream.Vfmolar);
+                problem2.AddConstraints(rachfordRice.IsEqualTo(0));
+                problem2.AddVariables(stream.Vfmolar);               
                 _solver.Solve(problem2);
+              
+
             }
 
             if (Double.IsNaN(stream.Vfmolar.ValueInSI))
@@ -169,7 +178,7 @@ namespace OpenFMSL.Core.Thermodynamics
                 stream.Vfmolar.ValueInSI = 1;
             if (stream.Vfmolar.ValueInSI < 0)
                 stream.Vfmolar.ValueInSI = 0;
-            //  stream.GetVariable("d").ValueInSI = 0;
+            
             performMassBalance(stream, stream.KValues);
             performDensityUpdate(stream);
             performEnthalpyUpdate(stream);
@@ -255,7 +264,7 @@ namespace OpenFMSL.Core.Thermodynamics
         }
 
 
-        
+
 
     }
 }

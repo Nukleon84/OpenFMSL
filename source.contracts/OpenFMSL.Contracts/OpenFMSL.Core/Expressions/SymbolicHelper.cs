@@ -91,6 +91,12 @@ namespace OpenFMSL.Core.Expressions
             return new Tanh { Parameter = param };
         }
 
+        public static Expression Mid(Expression a, Expression b, Expression c)
+        {
+            return new Max(Min(a, b), Min(Max(a, b), c));
+        }
+
+
         public static Expression Min(Expression left, Expression right)
         {
             return new Min(left, right);

@@ -1,12 +1,14 @@
 ﻿using OpenFMSL.Core.UnitsOfMeasure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenFMSL.Core.Expressions
 {
+    [DebuggerDisplay("{FullName} = {ValueInSI} {InternalUnit}")]
     public class Variable : Expression
     {
         private bool _isFixed = false;

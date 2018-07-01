@@ -98,7 +98,7 @@
     <Compile Include="ThermodynamicModels\ActivityCoefficientUNIQUAC.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientWilson.cs" />
     <Compile Include="ThermodynamicModels\ActivityCoefficientNRTL.cs" />
-    <Compile Include="ThermodynamicModels\EQSRK.cs" />
+    <Compile Include="ThermodynamicModels\EOS_SRK.cs" />
     <Compile Include="ThermodynamicModels\MixtureHenryCoefficient.cs" />
     <Compile Include="ThermodynamicModels\Reactions.cs" />
     <Compile Include="ThermodynamicModels\SafeLiquidDensity.cs" />

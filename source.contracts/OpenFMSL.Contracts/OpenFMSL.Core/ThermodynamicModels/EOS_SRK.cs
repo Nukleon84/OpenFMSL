@@ -53,6 +53,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             double[,] kij = new double[NC, NC];
             double[,] kbij = new double[NC, NC];
 
+
             var parameterSet = _system.BinaryParameters.FirstOrDefault(ps => ps.Name == "SRK");
             if (parameterSet != null)
             {
@@ -67,7 +68,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var PC = comp.GetConstant(ConstantProperties.CriticalPressure);
                 var AC = comp.GetConstant(ConstantProperties.AcentricFactor);
 
-                if(comp.HasParameter(MethodTypes.RKS, "A"))                
+                if (comp.HasParameter(MethodTypes.RKS, "A"))
                     ai[i] = comp.GetParameter(MethodTypes.RKS, "A").ValueInSI;
                 else
                     ai[i] = 0.42748 * Math.Pow(_R.ValueInSI, 2.0) * Math.Pow(TC.ValueInSI, 2.0) / PC.ValueInSI;
@@ -91,10 +92,10 @@ namespace OpenFMSL.Core.ThermodynamicModels
                     bij[i, j] = (bi[i] + bi[j]) / 2.0 * (1 - kbij[i, j]);
                 }
             }
-                     
-            _A = Sym.Sum(0, NC, i => y[i] * Sym.Sum(0, NC, j => y[j] * aij[i, j]));            
+
+            _A = Sym.Sum(0, NC, i => y[i] * Sym.Sum(0, NC, j => y[j] * aij[i, j]));
             _B = Sym.Sum(0, NC, i => y[i] * Sym.Sum(0, NC, j => y[j] * bij[i, j]));
-            
+
             DiffFunctional = (cache, v) => NumDiff(cache, v);
             EvalFunctional = (cache) => Evaluate(cache);
         }
@@ -127,6 +128,9 @@ namespace OpenFMSL.Core.ThermodynamicModels
             var VV = 1e-3;
             var VL = 1e-4;
 
+            var rhoc = 0.1734 / B;
+
+
             if (DISKR < 0)
             {
                 var RSTR = Math.Sign(QSTR) * Math.Sqrt(Math.Abs(PSTR));
@@ -148,12 +152,17 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var V = H3 * Math.Pow(Math.Abs(H1), 1.0 / 3.0) + H4 * Math.Pow(Math.Abs(H2), 1.0 / 3.0);
                 VL = V + R * T / 3.0 / P;
                 VV = V + R * T / 3.0 / P;
+
+                if (VL > 1.0 / rhoc)
+                    VL = 1.0 / rhoc;
+                if (VV < 1.0 / rhoc)
+                    VV = 1.0 / rhoc;
             }
 
             if (Phase == PhaseState.Vapour)
                 return VV;
             else
-                return VL ;
+                return VL;
         }
 
     }

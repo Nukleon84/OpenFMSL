@@ -90,7 +90,7 @@ namespace OpenFMSL.Core.ModelLibrary
                     AddEquationToEquationSystem(problem, reac.GetDefiningEquation(Out.Streams[0]), "Reaction rate equation");
                 }
             }
-            
+
             AddEquationToEquationSystem(problem, (p / 1e4).IsEqualTo(Sym.Par(In.Streams[0].Mixed.Pressure - dp) / 1e4), "Pressure Balance");
 
             if (!VF.IsFixed)
@@ -177,7 +177,11 @@ namespace OpenFMSL.Core.ModelLibrary
                 }
             }
 
-            Out.Streams[0].Mixed.Temperature.ValueInSI = T.ValueInSI;
+            if (T.IsFixed)
+                Out.Streams[0].Mixed.Temperature.ValueInSI = T.ValueInSI;
+            else
+                Out.Streams[0].Mixed.Temperature.ValueInSI = In.Streams[0].Mixed.Temperature.ValueInSI;
+            
             Out.Streams[0].Mixed.Pressure.ValueInSI = p.ValueInSI - dp.ValueInSI;
             Out.Streams[0].Vfmolar.ValueInSI = In.Streams[0].Vfmolar.ValueInSI;
 
@@ -185,6 +189,7 @@ namespace OpenFMSL.Core.ModelLibrary
             var flash = new FlashRoutines(new Numerics.Solvers.Newton());
             if (T.IsFixed)
                 flash.CalculateTP(Out.Streams[0]);
+
 
             if (VF.IsFixed)
             {
@@ -197,20 +202,28 @@ namespace OpenFMSL.Core.ModelLibrary
                     Out.Streams[0].FixDewPoint();
             }
 
-            if (Duty.IsConnected)
+
+            if (Q.IsFixed)
             {
-                if (Duty.Direction == PortDirection.In)
-                    Duty.Streams[0].Q.ValueInSI = -(In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
-                else
-                    Duty.Streams[0].Q.ValueInSI = (In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
-
-
+                flash.CalculateTP(Out.Streams[0]);
+                flash.CalculatePQ(Out.Streams[0], In.Streams[0].Mixed.SpecificEnthalpy.ValueInSI * In.Streams[0].Mixed.TotalMolarflow.ValueInSI);
             }
             else
             {
-                Q.ValueInSI = -(In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
-            }
+                if (Duty.IsConnected)
+                {
+                    if (Duty.Direction == PortDirection.In)
+                        Duty.Streams[0].Q.ValueInSI = -(In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
+                    else
+                        Duty.Streams[0].Q.ValueInSI = (In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
 
+
+                }
+                else
+                {
+                    Q.ValueInSI = -(In.Streams[0].Mixed.SpecificEnthalpy * In.Streams[0].Mixed.TotalMolarflow - Out.Streams[0].Mixed.SpecificEnthalpy * Out.Streams[0].Mixed.TotalMolarflow).Eval(eval);
+                }
+            }
 
 
 
