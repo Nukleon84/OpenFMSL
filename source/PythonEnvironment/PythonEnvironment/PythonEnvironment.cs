@@ -5,6 +5,7 @@ using Microsoft.Scripting.Hosting;
 using Microsoft.Scripting.Hosting.Providers;
 using OpenFMSL.Contracts.Documents;
 using OpenFMSL.Contracts.Entities;
+using OpenFMSL.Contracts.Infrastructure.Databases;
 using OpenFMSL.Contracts.Infrastructure.Messaging;
 using OpenFMSL.Contracts.Infrastructure.Reporting;
 using OpenFMSL.Contracts.Infrastructure.Scripting;
@@ -31,6 +32,7 @@ namespace PythonEnvironment
         private readonly IThermodynamicSystemImporter _importer;
         private readonly IChartViewModelFactory _chartFactory;
         private readonly IFlowsheetEntityEditorFactory _flowsheetFactory;
+        private readonly IPureComponentPropertyDatabase _pureComponentDB;
 
         Action<string> _onWrite;
 
@@ -43,7 +45,8 @@ namespace PythonEnvironment
         public PythonEnvironmentModule(IEventAggregator aggregator, IEntityManagerViewModel entityManager,
             IThermodynamicSystemImporter importer,
             IChartViewModelFactory chartFactory,
-            IFlowsheetEntityEditorFactory flowsheetFactory
+            IFlowsheetEntityEditorFactory flowsheetFactory,
+            IPureComponentPropertyDatabase pureDB
             )
         {
             _aggregator = aggregator;
@@ -53,7 +56,7 @@ namespace PythonEnvironment
             _flowsheetFactory = flowsheetFactory;
             _pyEngine = Python.CreateEngine();
             _pyScope = _pyEngine.CreateScope();
-
+            _pureComponentDB = pureDB;
 
             _pyScope.SetVariable("_host", this);
             _pyScope.SetVariable("Items", _entityManager);
@@ -87,6 +90,7 @@ namespace PythonEnvironment
             ipopt = new IpoptSolver();
             ipopt.OnLog = (x) => Write("    " + x + Environment.NewLine);
             _pyScope.SetVariable("_ipopt", ipopt);
+            _pyScope.SetVariable("Database", _pureComponentDB);
 
             newton = new Newton();
             newton.OnLog = (x) => Write("    " + x + Environment.NewLine);

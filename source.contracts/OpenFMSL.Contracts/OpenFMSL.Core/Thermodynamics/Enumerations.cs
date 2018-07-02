@@ -20,7 +20,11 @@ namespace OpenFMSL.Core.Thermodynamics
         PolynomialIntegrated,
         Dippr102,
         Kirchhoff,
-        Sutherland
+        Sutherland,
+        Chemsep16,
+        Chemsep16Integrated,
+        Chemsep101,
+        Chemsep106,
     }
 
 

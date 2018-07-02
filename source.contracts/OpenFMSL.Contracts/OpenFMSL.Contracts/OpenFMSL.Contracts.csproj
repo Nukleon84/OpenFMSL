@@ -63,6 +63,7 @@
     <Compile Include="Entities\Snapshot.cs" />
     <Compile Include="Entities\StoreEntityInRepositoryMessage.cs" />
     <Compile Include="Entities\ThermodynamicSystem.cs" />
+    <Compile Include="Infrastructure\Databases\IPureComponentPropertyDatabase.cs" />
     <Compile Include="Infrastructure\Messaging\BaseMessage.cs" />
     <Compile Include="Infrastructure\Messaging\ChangeStatusBarTextMessage.cs" />
     <Compile Include="Infrastructure\Messaging\IMessageLogViewModel.cs" />

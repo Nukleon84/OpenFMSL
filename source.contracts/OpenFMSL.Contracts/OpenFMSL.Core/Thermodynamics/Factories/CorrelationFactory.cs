@@ -155,6 +155,48 @@ namespace OpenFMSL.Core.Thermodynamics
                         expr = (func.Coefficients[0] * Sym.Sqrt(T)) / (1 + func.Coefficients[1] / T);
                         break;
                     }
+
+                case FunctionType.Chemsep16:
+                    {
+                        EnsureCoefficients(func.Coefficients, 5);
+                        var a = func.Coefficients[0];
+                        var b = func.Coefficients[1];
+                        var c = func.Coefficients[2];
+                        var d = func.Coefficients[3];
+                        var e = func.Coefficients[4];
+                        expr = a + Sym.Exp(b / T + c + d * T + e * Sym.Pow(T, 2));
+                        break;
+                    }
+                case FunctionType.Chemsep16Integrated:
+                    {
+                        EnsureCoefficients(func.Coefficients, 5);
+                        var a = func.Coefficients[0];
+                        var b = func.Coefficients[1];
+                        var c = func.Coefficients[2];
+                        var d = func.Coefficients[3];
+                        var e = func.Coefficients[4];
+                        expr = a*T + Sym.Exp(b + c*T + 0.5*d * Sym.Pow(T,2) + 1.0/3.0*e * Sym.Pow(T, 3));
+                        break;
+                    }
+                case FunctionType.Chemsep101:
+                    {
+                        EnsureCoefficients(func.Coefficients, 5);
+                        var a = func.Coefficients[0];
+                        var b = func.Coefficients[1];
+                        var c = func.Coefficients[2];
+                        var d = func.Coefficients[3];
+                        var e = func.Coefficients[4];
+                        expr = (Sym.Exp(a + b / T + c * Sym.Ln(T) + d * Sym.Pow(T, 2.0)));
+                        break;
+                    }
+                case FunctionType.Chemsep106:
+                    {
+                        EnsureCoefficients(func.Coefficients, 6);
+                        var TR = Sym.Par(T / TC);
+                        var h = func.Coefficients[1] + func.Coefficients[2] * TR + func.Coefficients[3] * Sym.Pow(TR, 2) + func.Coefficients[4] * Sym.Pow(TR, 3);
+                        expr = func.Coefficients[0] * Sym.Pow(Sym.Par(1 - TR), h);
+                    }
+                    break;
                 default:
                     throw new InvalidOperationException("Unknown function type" + typeToCreate);
             }

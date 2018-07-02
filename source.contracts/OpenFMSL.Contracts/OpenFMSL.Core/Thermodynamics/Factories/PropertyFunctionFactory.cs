@@ -199,7 +199,11 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetLiquidDensityExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable p)
         {
             var func = comp.GetFunction(EvaluatedProperties.LiquidDensity);
-            var expression = system.CorrelationFactory.CreateExpression(func.Type, func, T, null, null);
+
+
+            var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
+
+            var expression = system.CorrelationFactory.CreateExpression(func.Type, func, T, TC, null);
             expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarDensity]);
 
             var expresssionDENV = GetVaporDensityExpression(system, comp, T, p);
@@ -410,6 +414,12 @@ namespace OpenFMSL.Core.Thermodynamics
                 case FunctionType.AlyLee:
                     expression = system.CorrelationFactory.CreateExpression(FunctionType.Dippr117, func, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
                     expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.HeatCapacity]);
+                    break;
+                case FunctionType.Chemsep16:
+                    //   expr = a + Sym.Exp(b / T + c + d * T + e * Sym.Pow(T, 2));
+                    expression = system.CorrelationFactory.CreateExpression(FunctionType.Chemsep16Integrated, func, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
+                    expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.HeatCapacity]);
+
                     break;
 
             }

@@ -18,7 +18,7 @@ namespace OpenFMSL.Core.Thermodynamics
         PropertyFunctionFactory _equationFactory = new PropertyFunctionFactory();
 
         List<BinaryInteractionParameterSet> _binaryParameters = new List<BinaryInteractionParameterSet>();
-        
+
         List<Chemistry> _chemistryBlocks = new List<Chemistry>();
 
         #region Properties
@@ -126,7 +126,7 @@ namespace OpenFMSL.Core.Thermodynamics
             }
         }
 
-       
+
 
         public List<Chemistry> ChemistryBlocks
         {
@@ -143,5 +143,56 @@ namespace OpenFMSL.Core.Thermodynamics
 
         #endregion
 
+        public ThermodynamicSystem()
+        {
+
+        }
+        public ThermodynamicSystem(string name, string baseMethod, string uomset="default")
+        {
+            Name = name;
+            MakeDefault(baseMethod);
+
+            if (uomset.ToLower() == "default")
+                VariableFactory.SetOutputDimensions(UnitsOfMeasure.UnitSet.CreateDefault());
+            if (uomset == "SI")
+                VariableFactory.SetOutputDimensions(UnitsOfMeasure.UnitSet.CreateSI());
+
+        }
+
+        public ThermodynamicSystem AddComponent(MolecularComponent comp)
+        {
+            Components.Add(comp);
+            var enthalpy = PureEnthalpyFunction.Create(this, comp);
+            enthalpy.ReferenceState = PhaseState.Vapour;
+            enthalpy.Tref.ValueInSI = 273.15;
+            EnthalpyMethod.PureComponentEnthalpies.Add(enthalpy);
+
+            return this;
+        }
+
+        public void MakeDefault(string baseMethod)
+        {
+            switch (baseMethod)
+            {
+
+
+                case "NRTL":
+                    EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
+                    EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
+                    EquilibriumMethod.Activity = ActivityMethod.NRTL;
+                    EquilibriumMethod.AllowHenryComponents = false;
+                    EquilibriumMethod.PoyntingCorrection = false;
+                    EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
+                    break;
+                default:
+                    EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
+                    EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
+                    EquilibriumMethod.Activity = ActivityMethod.Ideal;
+                    EquilibriumMethod.AllowHenryComponents = false;
+                    EquilibriumMethod.PoyntingCorrection = false;
+                    EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
+                    break;
+            }
+        }
     }
 }
