@@ -26,12 +26,17 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0">about</Label>
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="10">
                     <TextBlock TextWrapping="WrapWithOverflow">OpenFMSL Simple IDE is a program designed for the management of multiple process simulation models,
                     the solution of simulation problems and the visualization of simulation results.</TextBlock>
-                    <TextBlock TextWrapping="WrapWithOverflow">© OpenFMSL by J. Steimel 2017</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">
+                        This program is distributed as Open-Source under the MIT License.                        
+                    <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="https://github.com/Nukleon84/OpenFMSL">https://github.com/Nukleon84/OpenFMSL</Hyperlink></TextBlock>
+                    <TextBlock> © OpenFMSL by J. Steimel 2017
+                    </TextBlock>
                 </StackPanel>
                 <Label Grid.Row="1" Grid.Column="0">numerics</Label>
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
@@ -40,17 +45,28 @@
                     <TextBlock>  This program uses CSparse.net for the Dulmage-Mendelsohn Decomposition of equation systems</TextBlock>
                     <TextBlock>  This program uses CSparse.net for the solution of linear equation systems with the SparseLU class</TextBlock>
                 </StackPanel>
+                <Label Grid.Row="2" Grid.Column="0">properties</Label>
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="10">
+                    <TextBlock TextWrapping="Wrap"> This program uses the ChemSep Lite component property databases published by R. Tayler and H. Kooijman. The pure component database is included in OpenFMSL according to the Artistic License. 
+                        The binary interaction parameter databases can be obtained from an installation of ChemSep Lite.
+                        <Hyperlink  RequestNavigate="link_RequestNavigate"   NavigateUri="http://www.chemsep.org/">http://www.chemsep.org/</Hyperlink>
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap">  The methods for calculating thermophysical properties are the same as in the IK-CAPE thermodynamics package maintained by the DECHEMA e.V.
+                       <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="https://dechema.de/IK_CAPE+THERMO-p-40.html">https://dechema.de/IK_CAPE+THERMO-p-40.html</Hyperlink></TextBlock>
 
-                <Label Grid.Row="2" Grid.Column="0">frameworks</Label>
-                <StackPanel Grid.Row="2" Grid.Column="1" Margin="10" >
+                </StackPanel>
+
+                <Label Grid.Row="3" Grid.Column="0">frameworks</Label>
+                <StackPanel Grid.Row="3" Grid.Column="1" Margin="10" >
                     <TextBlock TextWrapping="WrapWithOverflow">OpenFMSL Simple IDE uses several third-party libraries for the GUI.</TextBlock>
                     <!--<TextBlock TextWrapping="WrapWithOverflow">This program uses MahApps.Metro controls. https://github.com/MahApps/MahApps.Metro</TextBlock>
                     <TextBlock TextWrapping="WrapWithOverflow">This program uses XCEED.ExtendedWPFToolkit controls. http://wpftoolkit.codeplex.com/</TextBlock>-->
-                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Caliburn.Micro as a MVVM toolkit. https://caliburnmicro.com/</TextBlock>
-                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Castle.Windsor for dependency injection. http://www.castleproject.org/projects/windsor/</TextBlock>
-                    <TextBlock TextWrapping="WrapWithOverflow">This program uses MaterialDesignThemes in XAML. https://github.com/ButchersBoy/MaterialDesignInXamlToolkit</TextBlock>
-                    <TextBlock TextWrapping="WrapWithOverflow">This program uses the AvalonEdit control. http://avalonedit.net/</TextBlock>
-                    <TextBlock TextWrapping="WrapWithOverflow">This program uses IronPython for scripting. http://ironpython.net/</TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Caliburn.Micro as a MVVM toolkit.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="https://caliburnmicro.com/">https://caliburnmicro.com/</Hyperlink></TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Castle.Windsor for dependency injection.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="http://www.castleproject.org/projects/windsor/">http://www.castleproject.org/projects/windsor/</Hyperlink></TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses MaterialDesignThemes in XAML.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="https://github.com/ButchersBoy/MaterialDesignInXamlToolkit">https://github.com/ButchersBoy/MaterialDesignInXamlToolkit</Hyperlink></TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses the AvalonEdit control.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="http://avalonedit.net/">http://avalonedit.net/</Hyperlink></TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses IronPython for scripting.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="http://ironpython.net/">http://ironpython.net/</Hyperlink></TextBlock>
+                    <TextBlock TextWrapping="WrapWithOverflow">This program uses Oxyplot for displaying charts.  <Hyperlink  RequestNavigate="link_RequestNavigate" NavigateUri="http://www.oxyplot.org/">http://www.oxyplot.org/</Hyperlink></TextBlock>
 
                 </StackPanel>
             </Grid>

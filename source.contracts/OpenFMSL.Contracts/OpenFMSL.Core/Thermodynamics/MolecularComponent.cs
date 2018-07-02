@@ -131,6 +131,12 @@ namespace OpenFMSL.Core.Thermodynamics
             }
         }
 
+
+        public MolecularComponent RenameID(string newID)
+        {
+            ID = newID;
+            return this;
+        }
         /// <summary>
         /// Retrieve the constant for a given constant ID 
         /// </summary>

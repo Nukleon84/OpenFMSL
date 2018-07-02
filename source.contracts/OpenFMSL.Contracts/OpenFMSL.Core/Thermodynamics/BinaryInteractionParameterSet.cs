@@ -120,18 +120,34 @@ namespace OpenFMSL.Core.Thermodynamics
         Dictionary<string, double[,]> _matrices = new Dictionary<string, double[,]>();
 
 
-        public void SetParam(string matrix, int i, int j, double value)
+        public BinaryInteractionParameterSet SetParam(string matrix, int i, int j, double value)
         {
             if (i >= 0 && j >= 0 && Matrices.ContainsKey(matrix))
                 Matrices[matrix][i, j] = value;
+            return this;
         }
-        public void SetParam(string matrix, MolecularComponent c1, MolecularComponent c2, double value)
+
+        public BinaryInteractionParameterSet SetParamSymmetric(string matrix, MolecularComponent c1, MolecularComponent c2, double value)
+        {
+            var i = _system.Components.IndexOf(c1);
+            var j = _system.Components.IndexOf(c2);
+
+            if (i >= 0 && j >= 0 && Matrices.ContainsKey(matrix))
+            {
+                Matrices[matrix][i, j] = value;
+                Matrices[matrix][j, i] = value;
+            }
+            return this;
+        }
+
+        public BinaryInteractionParameterSet SetParam(string matrix, MolecularComponent c1, MolecularComponent c2, double value)
         {
             var i = _system.Components.IndexOf(c1);
             var j = _system.Components.IndexOf(c2);
 
             if (i >= 0 && j >= 0 && Matrices.ContainsKey(matrix))
                 Matrices[matrix][i, j] = value;
+            return this;
         }
         public double GetParam(string matrix, MolecularComponent c1, MolecularComponent c2)
         {
