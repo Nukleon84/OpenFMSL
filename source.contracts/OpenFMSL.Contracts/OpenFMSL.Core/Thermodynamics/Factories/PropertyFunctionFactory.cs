@@ -32,6 +32,12 @@ namespace OpenFMSL.Core.Thermodynamics
                                 liquidPart = gamma;
                                 break;
                             }
+                        case ActivityMethod.NRTLRP:
+                            {
+                                var gamma = new ActivityCoefficientNRTL(system, T, x, index, true);
+                                liquidPart = gamma;
+                                break;
+                            }
                         case ActivityMethod.Wilson:
                             {
                                 var gamma = new ActivityCoefficientWilson(system, T, x, index);
@@ -92,6 +98,17 @@ namespace OpenFMSL.Core.Thermodynamics
                         case ActivityMethod.NRTL:
                             {
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);
+
+                                if (currentComponent.IsInert)
+                                    liquidPart = new MixtureHenryCoefficient(system, T, x, index);
+                                else
+                                    liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
+                                K.BindTo(liquidPart / vaporPart);
+                                break;
+                            }
+                        case ActivityMethod.NRTLRP:
+                            {
+                                var gamma = new ActivityCoefficientNRTL(system, T, x, index,true);
 
                                 if (currentComponent.IsInert)
                                     liquidPart = new MixtureHenryCoefficient(system, T, x, index);

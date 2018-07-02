@@ -11,5 +11,8 @@ namespace OpenFMSL.Contracts.Infrastructure.Databases
     {
         
         MolecularComponent FindComponent(string name);
+        void FillBIPs(ThermodynamicSystem system);
+        void SetLogCallback(Action<string> callback);
+        void ListComponents(string pattern);
     }
 }

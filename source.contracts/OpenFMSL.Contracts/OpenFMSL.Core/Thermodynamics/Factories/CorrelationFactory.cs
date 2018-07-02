@@ -189,6 +189,17 @@ namespace OpenFMSL.Core.Thermodynamics
                         expr = (Sym.Exp(a + b / T + c * Sym.Ln(T) + d * Sym.Pow(T, 2.0)));
                         break;
                     }
+                case FunctionType.Chemsep102:
+                    {
+                        EnsureCoefficients(func.Coefficients, 5);
+                        var a = func.Coefficients[0];
+                        var b = func.Coefficients[1];
+                        var c = func.Coefficients[2];
+                        var d = func.Coefficients[3];
+                        var e = func.Coefficients[4];
+                        expr = a * Sym.Pow(T, b) / (1 + c / T + d / Sym.Pow(T, 2));
+                        break;
+                    }
                 case FunctionType.Chemsep106:
                     {
                         EnsureCoefficients(func.Coefficients, 6);

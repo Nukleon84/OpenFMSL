@@ -147,7 +147,7 @@ namespace OpenFMSL.Core.Thermodynamics
         {
 
         }
-        public ThermodynamicSystem(string name, string baseMethod, string uomset="default")
+        public ThermodynamicSystem(string name, string baseMethod="Ideal", string uomset="default")
         {
             Name = name;
             MakeDefault(baseMethod);
@@ -164,7 +164,7 @@ namespace OpenFMSL.Core.Thermodynamics
             Components.Add(comp);
             var enthalpy = PureEnthalpyFunction.Create(this, comp);
             enthalpy.ReferenceState = PhaseState.Vapour;
-            enthalpy.Tref.ValueInSI = 273.15;
+            enthalpy.Tref.ValueInSI = 298.15;
             EnthalpyMethod.PureComponentEnthalpies.Add(enthalpy);
 
             return this;
@@ -180,6 +180,14 @@ namespace OpenFMSL.Core.Thermodynamics
                     EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
                     EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
                     EquilibriumMethod.Activity = ActivityMethod.NRTL;
+                    EquilibriumMethod.AllowHenryComponents = false;
+                    EquilibriumMethod.PoyntingCorrection = false;
+                    EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
+                    break;
+                case "NRTLRP":
+                    EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
+                    EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
+                    EquilibriumMethod.Activity = ActivityMethod.NRTLRP;
                     EquilibriumMethod.AllowHenryComponents = false;
                     EquilibriumMethod.PoyntingCorrection = false;
                     EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;

@@ -87,6 +87,8 @@ namespace PythonEnvironment
             Run("pause= _host.WaitThread");
             Run("CreateThermo= _host.LoadThermodynamicSystem");
 
+            _pureComponentDB.SetLogCallback(Write);
+
             ipopt = new IpoptSolver();
             ipopt.OnLog = (x) => Write("    " + x + Environment.NewLine);
             _pyScope.SetVariable("_ipopt", ipopt);

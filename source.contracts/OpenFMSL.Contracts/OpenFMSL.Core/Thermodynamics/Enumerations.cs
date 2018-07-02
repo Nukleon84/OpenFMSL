@@ -24,6 +24,7 @@ namespace OpenFMSL.Core.Thermodynamics
         Chemsep16,
         Chemsep16Integrated,
         Chemsep101,
+        Chemsep102,
         Chemsep106,
     }
 
@@ -87,6 +88,7 @@ namespace OpenFMSL.Core.Thermodynamics
         Ideal,
         Wilson,
         NRTL,
+        NRTLRP,
         UNIQUAC,
         MODUNIQUAC,
         UNIFAC

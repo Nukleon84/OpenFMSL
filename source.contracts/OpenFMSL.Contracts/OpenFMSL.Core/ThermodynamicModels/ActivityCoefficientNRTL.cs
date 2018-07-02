@@ -37,7 +37,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
         }
 
-        public ActivityCoefficientNRTL(ThermodynamicSystem system, Variable T, List<Variable> x, int idx)
+        public ActivityCoefficientNRTL(ThermodynamicSystem system, Variable T, List<Variable> x, int idx, bool aInCal = false)
         {
             index = idx;
             _system = system;
@@ -68,12 +68,22 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
             int i = index;
 
+            var Rcal = 1.9872;
+
             for (int ii = 0; ii < NC; ii++)
             {
                 for (int j = 0; j < NC; j++)
                 {
-                    tau[ii, j] = (a[ii, j] + b[ii, j] / T + e[ii, j] * Sym.Ln(T) + f[ii, j] * T);
-                    G[ii, j] = (Sym.Exp(-(c[ii, j] + d[ii, j] * (T - 273.15)) * tau[ii, j]));
+                    if (!aInCal)
+                    {
+                        tau[ii, j] = (a[ii, j] + b[ii, j] / T + e[ii, j] * Sym.Ln(T) + f[ii, j] * T);
+                        G[ii, j] = (Sym.Exp(-(c[ii, j] + d[ii, j] * (T - 273.15)) * tau[ii, j]));
+                    }
+                    else
+                    {
+                        tau[ii, j] = (a[ii, j])/ (Rcal*T);
+                        G[ii, j] = (Sym.Exp(-c[ii, j] * tau[ii, j]));
+                    }
                 }
             }
             Expression lnGamma = 0.0;
