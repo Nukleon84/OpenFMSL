@@ -17,6 +17,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
         Action<string> onLogSuccess;
         Action<string> onLogInfo;
 
+        bool _supressLogging = false;
+
         public Action<string> OnLog
         {
             get { return onLog; }
@@ -105,10 +107,24 @@ namespace OpenFMSL.Core.Numerics.Solvers
             }
         }
 
+        public bool SuppressLogging
+        {
+            get
+            {
+                return _supressLogging;
+            }
 
+            set
+            {
+                _supressLogging = value;
+            }
+        }
 
         void Log(string message)
         {
+            if (SuppressLogging)
+                return;
+
             if (OnLog != null)
                 OnLog(message);
         }
@@ -121,6 +137,9 @@ namespace OpenFMSL.Core.Numerics.Solvers
         }
         private void LogSuccess(string message)
         {
+            if (SuppressLogging)
+                return;
+
             if (OnLogSuccess != null)
                 OnLogSuccess(String.Format("{0}", message));
             else
@@ -130,6 +149,10 @@ namespace OpenFMSL.Core.Numerics.Solvers
         }
         private void LogInfo(string message)
         {
+            if (SuppressLogging)
+                return;
+
+
             if (OnLogInfo != null)
                 OnLogInfo(String.Format("{0}", message));
             else
@@ -140,6 +163,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
         }
         private void LogWarning(string message)
         {
+
             if (OnLogWarning != null)
                 OnLogWarning(String.Format("{0}", message));
             else
@@ -189,18 +213,15 @@ namespace OpenFMSL.Core.Numerics.Solvers
         {
             this.ProblemData = problem;
 
-            LogInfo("Setting up problem...");
+            //LogInfo("Setting up problem...");
             _isInsufficientRank = false;
             _isOverconstrained = false;
             // LogInfo("Starting decomposition");
             // Log(String.Format("Original Problem : {0} Variables and {1} Equations", problem.NumberOfVariables, problem.NumberOfEquations));
-            LogInfo("Variables       : " + problem.NumberOfVariables);
-            LogInfo("Equations       : " + problem.NumberOfEquations);
-            LogInfo("Performing Dulmage-Mendelsohn decomposition...");
+             //LogInfo("Performing Dulmage-Mendelsohn decomposition...");
             var dmd = new DulmageMendelsohnDecomposition();
             var dm = dmd.Generate(ProblemData);
-            LogInfo("Blocks          : " + dm.Blocks);
-            LogInfo("Singletons      : " + dm.Singletons);
+            LogInfo(String.Format("Decomposition Result: V={0}, E={1}, Blocks={2}, Singletons={3}", problem.NumberOfVariables, problem.NumberOfEquations, dm.Blocks, dm.Singletons));     
             if (dm.StructuralRank != problem.NumberOfEquations)
                 LogInfo("Structural Rank : " + dm.StructuralRank);
             if (dm.StructuralRank < problem.NumberOfEquations)
@@ -288,7 +309,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
             newtonSubsolver.OnLogWarning += OnLogWarning;
 
             int i = 1;
-            LogInfo("Solving decomposed sub-problems...");      
+           // LogInfo("Solving decomposed sub-problems...");      
             bool hasError = false;
             var watch = System.Diagnostics.Stopwatch.StartNew();
 

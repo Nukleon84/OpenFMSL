@@ -104,5 +104,15 @@ namespace OpenFMSL.Contracts.Infrastructure.Reporting
             Y = y;
             Color = color;
         }
+
+        public SeriesModel(string name, SeriesType type, double x, double y, string color)
+        {
+            Name = name;
+            Type = type;
+            X = new List<double>(new double[]{ x });
+            Y = new List<double>(new double[] {y });
+            Color = color;
+        }
+
     }
 }

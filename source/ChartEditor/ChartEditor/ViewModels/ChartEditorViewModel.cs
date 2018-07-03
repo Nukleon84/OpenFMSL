@@ -24,7 +24,7 @@ namespace ChartEditor.ViewModels
             Plot.Title = model.Title;
             if (model.ShowLegend)
             {
-                switch(model.LegendPosition)
+                switch (model.LegendPosition)
                 {
                     case OpenFMSL.Contracts.Infrastructure.Reporting.LegendPosition.TopRight:
                         Plot.LegendPosition = OxyPlot.LegendPosition.RightTop;
@@ -42,7 +42,7 @@ namespace ChartEditor.ViewModels
                         Plot.LegendPosition = OxyPlot.LegendPosition.RightTop;
                         break;
                 }
-                
+
                 Plot.IsLegendVisible = true;
             }
 
@@ -135,14 +135,14 @@ namespace ChartEditor.ViewModels
                                     //line.BrokenLineThickness = series.Thickness;
                                     line.LineStyle = LineStyle.Dot;
                                     break;
-                                        
+
                                 default:
                                     line.LineStyle = LineStyle.Solid;
                                     //line.BrokenLineStyle = LineStyle.Solid;
                                     //line.BrokenLineThickness = 0;
                                     break;
                             }
-                                                      
+
 
                             for (int i = 0; i < series.X.Count; i++)
                             {
@@ -163,7 +163,22 @@ namespace ChartEditor.ViewModels
                     case SeriesType.Scatter:
                         {
                             var line = new ScatterSeries();
-                            line.MarkerType = OxyPlot.MarkerType.Circle;
+                            line.Title = series.Name;
+                            switch (series.Marker)
+                            {
+                                case OpenFMSL.Contracts.Infrastructure.Reporting.MarkerType.Circle:
+                                    line.MarkerType = OxyPlot.MarkerType.Circle;
+                                    break;
+                                case OpenFMSL.Contracts.Infrastructure.Reporting.MarkerType.Diamond:
+                                    line.MarkerType = OxyPlot.MarkerType.Diamond;
+                                    break;
+                                case OpenFMSL.Contracts.Infrastructure.Reporting.MarkerType.Square:
+                                    line.MarkerType = OxyPlot.MarkerType.Square;
+                                    break;
+                                default:
+                                    line.MarkerType = OxyPlot.MarkerType.Cross;
+                                    break;
+                            }
 
                             if (series.Color != "Auto")
                             {
@@ -177,6 +192,12 @@ namespace ChartEditor.ViewModels
 
                                 line.Points.Add(item);
                             }
+
+                            if (series.ShowInLegend)
+                                line.RenderInLegend = true;
+                            else
+                                line.RenderInLegend = false;
+
                             Plot.Series.Add(line);
                             break;
                         }

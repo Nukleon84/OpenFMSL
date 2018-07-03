@@ -169,7 +169,10 @@ namespace OpenFMSL.Core.Thermodynamics
 
             return this;
         }
-
+        public BinaryInteractionParameterSet GetBinaryParameters(string name)
+        {
+            return BinaryParameters.FirstOrDefault(s => s.Name == name);
+        }
         public void MakeDefault(string baseMethod)
         {
             switch (baseMethod)
