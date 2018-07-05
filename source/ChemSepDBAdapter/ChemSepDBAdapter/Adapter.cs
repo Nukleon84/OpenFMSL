@@ -16,7 +16,9 @@ namespace ChemSepDBAdapter
     {
         XElement db = null;
         Action<string> _callback;
-        List<NRTLBIPSet> nrtldb = null;
+        List<NRTLBIPSet> nrtlDB = null;
+        List<SRKBIPSet> srkDB = null;
+        List<UniquacBIPSet> uniquacDB = null;
 
 
 
@@ -28,7 +30,14 @@ namespace ChemSepDBAdapter
                 case ActivityMethod.NRTLRP:
                     FillNRTL(system);
                     break;
+                case ActivityMethod.UNIQUAC:
+                    FillUniquac(system);
+                    break;
             }
+
+            if (system.EquilibriumMethod.Fugacity == FugacityMethod.SoaveRedlichKwong || system.EquilibriumMethod.EquationOfState == EquationOfState.SoaveRedlichKwong)
+                FillSRK(system);
+
         }
 
 
@@ -96,6 +105,27 @@ namespace ChemSepDBAdapter
 
                 component.Functions.Add(GetFunction(c.Element("SurfaceTension"), EvaluatedProperties.SurfaceTension));
 
+
+                if (c.Element("UniquacR") != null && c.Element("UniquacQ") != null)
+                {
+                    var r = (double)c.Element("UniquacR").Attribute("value");
+                    var q = (double)c.Element("UniquacQ").Attribute("value");
+
+                    var uniquacPure = new MethodConstantParameters();
+                    uniquacPure.Method = MethodTypes.Uniquac;
+                    uniquacPure.Parameters.Add("R", new Variable("UniquacR", r));
+                    uniquacPure.Parameters.Add("Q", new Variable("UniquacQ", q));
+                    uniquacPure.Parameters.Add("Q'", new Variable("UniquacQ'", q));
+                    component.MethodParameters.Add(uniquacPure);
+                }
+                /*
+                 *   var uniquacPure = new MethodConstantParameters();
+            uniquacPure.Method = MethodTypes.Uniquac;
+            uniquacPure.Parameters.Add("R", new Variable("UniquacR", r));
+            uniquacPure.Parameters.Add("Q", new Variable("UniquacQ", q));
+            uniquacPure.Parameters.Add("Q'", new Variable("UniquacQ'", qp));
+            comp1.MethodParameters.Add(uniquacPure);
+                 * */
                 //CPIG, HVAP, CL, DENL, VP
                 return component;
 
@@ -228,7 +258,7 @@ namespace ChemSepDBAdapter
         void LoadNRTLDB()
         {
             var rawdata = File.ReadAllLines(".\\Data\\nrtl.ipd");
-            nrtldb = new List<NRTLBIPSet>();
+            nrtlDB = new List<NRTLBIPSet>();
 
             foreach (var line in rawdata)
             {
@@ -242,17 +272,17 @@ namespace ChemSepDBAdapter
                         entry.Cas2 = tokens[1];
 
                         if (tokens[2].StartsWith("."))
-                            tokens[2] = "0" + tokens[4];
-                        entry.Aij = Double.Parse(tokens[2],System.Globalization.NumberFormatInfo.InvariantInfo );
+                            tokens[2] = "0" + tokens[2];
+                        entry.Aij = Double.Parse(tokens[2], System.Globalization.NumberFormatInfo.InvariantInfo);
 
                         if (tokens[3].StartsWith("."))
-                            tokens[3] = "0" + tokens[4];
+                            tokens[3] = "0" + tokens[3];
                         entry.Aji = Double.Parse(tokens[3], System.Globalization.NumberFormatInfo.InvariantInfo);
 
                         if (tokens[4].StartsWith("."))
-                            tokens[4] = "0" + tokens[4];    
+                            tokens[4] = "0" + tokens[4];
                         entry.Alpha = Double.Parse(tokens[4], System.Globalization.NumberFormatInfo.InvariantInfo);
-                        nrtldb.Add(entry);
+                        nrtlDB.Add(entry);
                     }
 
                 }
@@ -264,7 +294,7 @@ namespace ChemSepDBAdapter
             if (!File.Exists(".\\Data\\nrtl.ipd"))
                 throw new FileNotFoundException("NRTL parameter database not found. Please install ChemSep Lite and copy the nrtl.ipd file to the Data directory of this program.");
 
-            if (nrtldb == null)
+            if (nrtlDB == null)
                 LoadNRTLDB();
 
             var nrtlParamSet = new NRTL(system);
@@ -280,24 +310,164 @@ namespace ChemSepDBAdapter
                 for (int j = i; j < system.Components.Count; j++)
                 {
                     var c2 = system.Components[j];
-                    
-                    var entry = (from e in nrtldb
-                                where (e.Cas1 == c1.CasNumber && e.Cas2 == c2.CasNumber) || (e.Cas1 == c2.CasNumber && e.Cas2 == c1.CasNumber)
-                                select e).FirstOrDefault();
-                    
-                    if(entry!=null)
+
+                    var entry = (from e in nrtlDB
+                                 where (e.Cas1 == c1.CasNumber && e.Cas2 == c2.CasNumber) || (e.Cas1 == c2.CasNumber && e.Cas2 == c1.CasNumber)
+                                 select e).FirstOrDefault();
+
+                    if (entry != null)
                     {
-                        nrtlParamSet.SetParam("A", c1, c2, entry.Aij);
-                        nrtlParamSet.SetParam("A", c2, c1, entry.Aji);
+                        nrtlParamSet.SetParam("B", c1, c2, entry.Aij / 1.9872);
+                        nrtlParamSet.SetParam("B", c2, c1, entry.Aji / 1.9872);
 
                         nrtlParamSet.SetParam("C", c1, c2, entry.Alpha);
                         nrtlParamSet.SetParam("C", c2, c1, entry.Alpha);
-                        Write("Found NRTL parameter set for " + c1.ID + " / " + c2.ID+Environment.NewLine);
+                        Write("Found NRTL parameter set for " + c1.ID + " / " + c2.ID + Environment.NewLine);
                     }
                 }
             }
 
         }
+
+        void LoadUNIQUACDB()
+        {
+            var rawdata = File.ReadAllLines(".\\Data\\uniquac.ipd");
+            uniquacDB = new List<UniquacBIPSet>();
+
+            foreach (var line in rawdata)
+            {
+                if (!String.IsNullOrEmpty(line) && Char.IsNumber(line[0]))
+                {
+                    var tokens = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (tokens.Count() >= 5)
+                    {
+                        var entry = new UniquacBIPSet();
+                        entry.Cas1 = tokens[0];
+                        entry.Cas2 = tokens[1];
+
+                        if (tokens[2].StartsWith("."))
+                            tokens[2] = "0" + tokens[2];
+                        entry.Aij = Double.Parse(tokens[2], System.Globalization.NumberFormatInfo.InvariantInfo);
+
+                        if (tokens[3].StartsWith("."))
+                            tokens[3] = "0" + tokens[3];
+                        entry.Aji = Double.Parse(tokens[3], System.Globalization.NumberFormatInfo.InvariantInfo);
+
+                        uniquacDB.Add(entry);
+                    }
+
+                }
+            }
+        }
+
+
+        void FillUniquac(ThermodynamicSystem system)
+        {
+            if (!File.Exists(".\\Data\\uniquac.ipd"))
+                throw new FileNotFoundException("UNIQUAC parameter database not found. Please install ChemSep Lite and copy the nrtl.ipd file to the Data directory of this program.");
+
+            if (uniquacDB == null)
+                LoadUNIQUACDB();
+
+            var paramSet = new UNIQUAC(system);
+            if (system.BinaryParameters.Count(ps => ps.Name == "UNIQUAC") == 0)
+                system.BinaryParameters.Add(paramSet);
+
+            //var Rcal = 1.9872;
+
+            for (int i = 0; i < system.Components.Count; i++)
+            {
+
+                var c1 = system.Components[i];
+                for (int j = i; j < system.Components.Count; j++)
+                {
+                    var c2 = system.Components[j];
+
+                    var entry = (from e in uniquacDB
+                                 where (e.Cas1 == c1.CasNumber && e.Cas2 == c2.CasNumber) || (e.Cas1 == c2.CasNumber && e.Cas2 == c1.CasNumber)
+                                 select e).FirstOrDefault();
+
+                    if (entry != null)
+                    {
+                        paramSet.SetParam("B", c1, c2, -entry.Aij / 1.9872);
+                        paramSet.SetParam("B", c2, c1, -entry.Aji / 1.9872);
+
+                        Write("Found UNIQUAC parameter set for " + c1.ID + " / " + c2.ID + Environment.NewLine);
+                    }
+                }
+            }
+
+        }
+
+
+
+
+        void LoadSRKDB()
+        {
+            var rawdata = File.ReadAllLines(".\\Data\\srk.ipd");
+            srkDB = new List<SRKBIPSet>();
+
+            foreach (var line in rawdata)
+            {
+                if (!String.IsNullOrEmpty(line) && Char.IsNumber(line[0]))
+                {
+                    var tokens = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (tokens.Count() >= 5)
+                    {
+                        var entry = new SRKBIPSet();
+                        entry.Cas1 = tokens[0];
+                        entry.Cas2 = tokens[1];
+                        if (tokens[2].StartsWith("."))
+                            tokens[2] = "0" + tokens[2];
+                        if (tokens[2].StartsWith("-."))
+                            tokens[2] = tokens[2].Insert(1, "0");
+
+                        entry.Aij = Double.Parse(tokens[2], System.Globalization.NumberFormatInfo.InvariantInfo);
+
+                        srkDB.Add(entry);
+                    }
+
+                }
+            }
+        }
+        void FillSRK(ThermodynamicSystem system)
+        {
+            if (!File.Exists(".\\Data\\srk.ipd"))
+                throw new FileNotFoundException("SRK parameter database not found. Please install ChemSep Lite and copy the nrtl.ipd file to the Data directory of this program.");
+
+            if (srkDB == null)
+                LoadSRKDB();
+
+            var srkParamSet = new SRK(system);
+            if (system.BinaryParameters.Count(ps => ps.Name == "SRK") == 0)
+                system.BinaryParameters.Add(srkParamSet);
+
+            //var Rcal = 1.9872;
+
+            for (int i = 0; i < system.Components.Count; i++)
+            {
+
+                var c1 = system.Components[i];
+                for (int j = i; j < system.Components.Count; j++)
+                {
+                    var c2 = system.Components[j];
+
+                    var entry = (from e in srkDB
+                                 where (e.Cas1 == c1.CasNumber && e.Cas2 == c2.CasNumber) || (e.Cas1 == c2.CasNumber && e.Cas2 == c1.CasNumber)
+                                 select e).FirstOrDefault();
+
+                    if (entry != null)
+                    {
+                        srkParamSet.SetParam("A", c1, c2, entry.Aij);
+
+                        Write("Found SRK parameter set for " + c1.ID + " / " + c2.ID + Environment.NewLine);
+                    }
+                }
+            }
+
+        }
+
+
 
     }
 }

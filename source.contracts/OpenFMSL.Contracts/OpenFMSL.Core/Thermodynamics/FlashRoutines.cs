@@ -22,15 +22,17 @@ namespace OpenFMSL.Core.Thermodynamics
 
         public bool CalculateTP(MaterialStream stream)
         {
+          
             PrecalculateTP(stream);
-
+           
             return true;
         }
 
         public bool CalculateZP(MaterialStream stream)
         {
+            
             PrecalculateZP(stream);
-
+            
             return true;
         }
 

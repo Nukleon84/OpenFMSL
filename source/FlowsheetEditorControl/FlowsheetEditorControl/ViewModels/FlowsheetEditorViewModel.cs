@@ -319,7 +319,7 @@ namespace FlowsheetEditorControl.ViewModels
                 if (source == null && sink != null)
                 {
                     var visualUnit = ItemFactory.Create(IconTypes.Feed, stream.Icon.X, stream.Icon.Y);
-                    visualUnit.Name = "Source_" + stream.Name;
+                    visualUnit.Name = stream.Name;
                     visualUnit.BorderColor = stream.Icon.BorderColor;
                     visualUnit.FillColor = stream.Icon.FillColor;
                     visualUnit.Model = stream;
@@ -340,7 +340,7 @@ namespace FlowsheetEditorControl.ViewModels
                 if (source != null && sink == null)
                 {
                     var visualUnit = ItemFactory.Create(IconTypes.Product, stream.Icon.X, stream.Icon.Y);
-                    visualUnit.Name = "Sink_" + stream.Name;
+                    visualUnit.Name =  stream.Name;
                     visualUnit.BorderColor = stream.Icon.BorderColor;
                     visualUnit.FillColor = stream.Icon.FillColor;
                     visualUnit.Model = stream;

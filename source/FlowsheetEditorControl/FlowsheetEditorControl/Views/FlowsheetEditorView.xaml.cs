@@ -446,7 +446,7 @@ namespace FlowsheetEditorControl.Views
                             window.Width = 550;
                             window.Height = 400;
                             window.ShowActivated = true;
-                            window.Title = unit.Name;
+                            window.Title = unit.Name + "["+ model.Class+"]" ;
                             window.WindowStyle = WindowStyle.ToolWindow;
                             window.Owner = Application.Current.MainWindow;
                             window.Show();

@@ -252,6 +252,9 @@
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="PIAdapter">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource PIAdapterTemplate}" />
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding DisplayIcon}" Value="PFR">
+                                                                <Setter Property="ContentTemplate" Value="{StaticResource ReactorTemplate}" />
+                                                            </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ContentControl.Style>

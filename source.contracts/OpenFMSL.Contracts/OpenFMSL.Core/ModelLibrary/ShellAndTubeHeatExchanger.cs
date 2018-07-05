@@ -32,7 +32,7 @@ namespace OpenFMSL.Core.ModelLibrary
         List<MaterialStream> _shellStreams = new List<MaterialStream>();
         List<MaterialStream> _tubeStreams = new List<MaterialStream>();
         List<HeatStream> _qExchanged = new List<HeatStream>();
- 
+
         public int Discretization
         {
             get
@@ -127,7 +127,7 @@ namespace OpenFMSL.Core.ModelLibrary
             }
         }
 
-        public ShellAndTubeHeatExchanger(string name,  ThermodynamicSystem system, int passes, int discretization) : base(name, system)
+        public ShellAndTubeHeatExchanger(string name, ThermodynamicSystem system, int passes, int discretization) : base(name, system)
         {
             Class = "Shell&Tube";
             Icon.IconType = IconTypes.HeatExchanger;
@@ -143,7 +143,7 @@ namespace OpenFMSL.Core.ModelLibrary
             _area = system.VariableFactory.CreateVariable("A", "Area", PhysicalDimension.Area);
             _koverall = system.VariableFactory.CreateVariable("k", "Effective Heat Transfer Coefficient", PhysicalDimension.HeatTransferCoefficient);
             AddVariables(_area, _koverall);
-         
+
 
         }
         public ShellAndTubeHeatExchanger Initialize(double shellSideDT, double tubeSideDT, double shellSideDP, double tubeSideDP)
@@ -154,7 +154,7 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 Shell[i].Specify("DP", shellSideDP / numTotalCells, METRIC.mbar);
                 Shell[i].Specify("T", ShellStreams[i].Mixed.Temperature.ValueInSI + shellSideDT / numTotalCells, SI.K);
-                
+
                 Shell[i].Initialize();
 
                 Tube[i].Specify("DP", tubeSideDP / numTotalCells, METRIC.mbar);
@@ -165,7 +165,7 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 Shell[i].Unspecify("T");
                 Tube[i].Unspecify("T");
-               
+
 
                 QExchanged[i].Q.ValueInSI = Tube[i].GetVariable("Q").ValueInSI;
             }
@@ -182,7 +182,7 @@ namespace OpenFMSL.Core.ModelLibrary
             int NC = System.Components.Count;
             var numTotalCells = NumberOfPasses * Discretization;
 
-            for (int i = 1; i < numTotalCells ; i++)
+            for (int i = 1; i < numTotalCells; i++)
             {
                 ShellStreams[i].FillEquationSystem(problem);
                 TubeStreams[i].FillEquationSystem(problem);
@@ -195,8 +195,8 @@ namespace OpenFMSL.Core.ModelLibrary
                 Tube[i].FillEquationSystem(problem);
                 QExchanged[i].FillEquationSystem(problem);
 
-                var DT = Sym.Par(TubeStreams[i].Mixed.Temperature - ShellStreams[i].Mixed.Temperature);                
-                AddEquationToEquationSystem(problem, QExchanged[i].Q.IsEqualTo(_koverall * _area/numTotalCells * DT));
+                var DT = Sym.Par(TubeStreams[i].Mixed.Temperature - ShellStreams[i].Mixed.Temperature);
+                AddEquationToEquationSystem(problem, QExchanged[i].Q.IsEqualTo(_koverall * _area / numTotalCells * DT));
             }
 
 
@@ -216,7 +216,7 @@ namespace OpenFMSL.Core.ModelLibrary
                 !FindMaterialPort("ShellOut").IsConnected)
                 throw new InvalidOperationException("Shell&Tube heat Exchanger not connected correctly");
 
-        
+
             var TubeIn = FindMaterialPort("TubeIn").Streams[0];
             var TubeOut = FindMaterialPort("TubeOut").Streams[0];
 
@@ -229,11 +229,13 @@ namespace OpenFMSL.Core.ModelLibrary
             TubeStreams.Add(TubeIn);
             ShellStreams.Add(ShellIn);
             var numTotalCells = NumberOfPasses * Discretization;
+           
+
             for (int i = 0; i < numTotalCells; i++)
             {
                 if (i < numTotalCells - 1)
                 {
-                    TubeStreams.Add(new MaterialStream(Name+".TubeStream[" + (i + 1) + "]", tubeSystem));
+                    TubeStreams.Add(new MaterialStream(Name + ".TubeStream[" + (i + 1) + "]", tubeSystem));
                     ShellStreams.Add(new MaterialStream(Name + ".ShellStream[" + (i + 1) + "]", shellSystem));
                 }
                 else
@@ -288,6 +290,15 @@ namespace OpenFMSL.Core.ModelLibrary
                 default:
                     throw new NotSupportedException("Flow pattern " + FlowPattern + " is not supported.");
             }
+
+
+            for (int i = 0; i < numTotalCells; i++)
+            {
+                //AddVariables(Tube[i].Variables.ToArray());
+               // AddVariables(Shell[i].Variables.ToArray());
+                //AddVariables(QExchanged[i].Q);
+            }
+
             return this;
 
         }

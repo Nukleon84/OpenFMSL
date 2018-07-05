@@ -173,6 +173,10 @@ namespace FlowsheetEditorControl.Items
                             else
                                 connectionRoute = 9;
                         }
+                        else
+                        {
+                            connectionRoute = 15;
+                        }
 
                     }
 
@@ -197,6 +201,9 @@ namespace FlowsheetEditorControl.Items
                     {
                       //  if (startPoint.X > endPoint.X && startPoint.Y > endPoint.Y)
                             connectionRoute = 10;
+                        if (startPoint.X > endPoint.X && startPoint.Y < endPoint.Y)
+                            connectionRoute = 14;
+
                     }
                     if (Source.Direction == ConnectorDirection.Right && Sink.Direction == ConnectorDirection.Down)
                     {
@@ -285,6 +292,22 @@ namespace FlowsheetEditorControl.Items
                             Path.Points.Add(startPoint);
                             Path.Points.Add(new System.Windows.Point((startPoint.X), Math.Min(startPoint.Y - 20, endPoint.Y - 20)));
                             Path.Points.Add(new System.Windows.Point((endPoint.X), Math.Min(startPoint.Y - 20, endPoint.Y - 20)));
+                            Path.Points.Add(endPoint);
+                            LabelPoint = new Point(Path.Points[1].X - 20, Path.Points[1].Y - 10);
+                            break;
+                        case 14:
+                            Path.Points.Add(startPoint);
+                            Path.Points.Add(new System.Windows.Point((startPoint.X+20), startPoint.Y));
+                            Path.Points.Add(new System.Windows.Point((startPoint.X+20), (startPoint.Y +endPoint.Y)/2.0));
+                            Path.Points.Add(new System.Windows.Point((endPoint.X), (startPoint.Y + endPoint.Y) / 2.0));                            
+                            Path.Points.Add(endPoint);
+                            LabelPoint = new Point(Path.Points[2].X - 20, Path.Points[2].Y - 10);
+                            break;
+                        case 15:
+                            Path.Points.Add(startPoint);
+                            Path.Points.Add(new System.Windows.Point((startPoint.X), Math.Max(startPoint.Y + 20, endPoint.Y + 40)));
+                            Path.Points.Add(new System.Windows.Point((endPoint.X-20), Math.Max(startPoint.Y + 20, endPoint.Y + 40)));
+                            Path.Points.Add(new System.Windows.Point((endPoint.X - 20),  endPoint.Y));
                             Path.Points.Add(endPoint);
                             LabelPoint = new Point(Path.Points[1].X - 20, Path.Points[1].Y - 10);
                             break;

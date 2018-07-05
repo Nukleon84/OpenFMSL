@@ -24,6 +24,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
         double _maximumNewtonStep = 1e12;
         int _maximumIterations = 30;
         double _brakeFactor = 1.0;
+        double _lambdaMin = 0.2;
         bool _doScaling = true;
         bool _doLinesearch = true;
 
@@ -259,6 +260,19 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 _debugMode = value;
             }
         }
+
+        public double LambdaMin
+        {
+            get
+            {
+                return _lambdaMin;
+            }
+
+            set
+            {
+                _lambdaMin = value;
+            }
+        }
         #endregion
 
         #region Logging Callbacks
@@ -454,7 +468,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 var x0 = system.Variables.Select(v => v.ValueInSI).ToArray();
                 var lineSearchIter = 0;
                 var currentStepLength = lambda;
-                var lambdaMin = 0.1;
+                var lambdaMin = _lambdaMin;
 
                 if (DoLinesearch)
                 {

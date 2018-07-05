@@ -161,7 +161,7 @@ namespace OpenFMSL.Core.Thermodynamics
                 (system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.GammaPhi && system.EquilibriumMethod.Fugacity == FugacityMethod.SoaveRedlichKwong))
             {
                 var rhoV = new VOL_SRK(system, T, p, y);
-                var pavg= Sym.Binding("DENV",1000*rhoV );
+                var pavg= Sym.Binding("DENV",1.0/rhoV );
                 pavg.Subscript = "SRK";
                 return pavg;
             }

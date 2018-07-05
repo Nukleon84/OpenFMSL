@@ -6,22 +6,12 @@ using System.Threading.Tasks;
 
 namespace ChemSepDBAdapter
 {
-    public class NRTLBIPSet
+    public class SRKBIPSet
     {
         public string Cas1;
         public string Cas2;
         public double Aij;
-        public double Aji;
-        public double Alpha;
-
-    }
-
-    public class UniquacBIPSet
-    {
-        public string Cas1;
-        public string Cas2;
-        public double Aij;
-        public double Aji;        
+       
 
     }
 }

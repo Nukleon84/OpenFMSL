@@ -46,6 +46,21 @@ namespace FlowsheetEditorControl.Factory
                         newItem.Model = element;
                         return newItem;
                     }
+                case IconTypes.Spreadsheet:
+                    {
+                        var newItem = new VisualUnit();
+                        newItem.Name = "Sheet01";
+                        newItem.Type = "Spreadsheet";
+                        newItem.X = icon.X;
+                        newItem.Y = icon.Y;
+                        newItem.Height = icon.Height;
+                        newItem.Width = icon.Width;
+                        newItem.DisplayIcon = IconTypes.Spreadsheet;
+                        newItem.FillColor = icon.FillColor;
+                        newItem.BorderColor = icon.BorderColor;
+                        newItem.Model = element;
+                        return newItem;
+                    }
                 default:
                     {
                         var newItem = new VisualUnit();

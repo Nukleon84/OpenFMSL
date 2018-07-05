@@ -26,6 +26,20 @@ namespace FlowsheetEditorControl.ViewModels
                 _model = value;
                 NotifyOfPropertyChange(() => Model);
                 NotifyOfPropertyChange(() => Variables);
+                NotifyOfPropertyChange(() => RawVariables);
+            }
+        }
+        public List<Variable> RawVariables
+        {
+            get
+            {
+                if (Model != null)
+                {
+                    var collection = Model.Variables;                 
+                    return collection;
+                }
+                else
+                    return new List<Variable>();
             }
         }
 
@@ -36,7 +50,7 @@ namespace FlowsheetEditorControl.ViewModels
                 if (Model != null)
                 {
                     var collection = new ListCollectionView(Model.Variables);
-                    collection.GroupDescriptions.Add(new PropertyGroupDescription("Name"));
+                   // collection.GroupDescriptions.Add(new PropertyGroupDescription("Name"));
                     
                     return collection;
                 }

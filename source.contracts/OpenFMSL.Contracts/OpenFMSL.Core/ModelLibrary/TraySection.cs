@@ -845,16 +845,17 @@ namespace OpenFMSL.Core.ModelLibrary
                 _trays[i].T.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
                 _trays[i].TV.ValueInSI = TTop + (TBot - TTop) / (double)(NumberOfTrays - 1) * i;
                 if (i == 0)
-                    _trays[i].L.ValueInSI = In.Streams[0].Mixed.TotalMolarflow.ValueInSI * 0.5;
+                    _trays[i].L.ValueInSI = In.Streams[0].Mixed.TotalMolarflow.ValueInSI * 0.5;// + LIn.Streams[0].Mixed.TotalMolarflow.ValueInSI;
                 else
                     _trays[i].L.ValueInSI = _trays[i - 1].L.ValueInSI + _trays[i].F.ValueInSI;
 
-                _trays[i].V.ValueInSI = In.Streams[0].Mixed.TotalMolarflow.ValueInSI;
+                _trays[i].V.ValueInSI = In.Streams[0].Mixed.TotalMolarflow.ValueInSI;// + VIn.Streams[0].Mixed.TotalMolarflow.ValueInSI;
 
                 for (int j = 0; j < System.Components.Count; j++)
                 {
-                    _trays[i].x[j].ValueInSI = _feeds[0].Stream.Liquid.ComponentMolarFraction[j].ValueInSI;
-                    _trays[i].y[j].ValueInSI = _feeds[0].Stream.Vapor.ComponentMolarFraction[j].ValueInSI;
+                    _trays[i].x[j].ValueInSI = _feeds[0].Stream.Mixed.ComponentMolarFraction[j].ValueInSI;
+                    _trays[i].y[j].ValueInSI = _feeds[0].Stream.Mixed.ComponentMolarFraction[j].ValueInSI;
+                    _trays[i].yeq[j].ValueInSI = _feeds[0].Stream.Mixed.ComponentMolarFraction[j].ValueInSI;
                 }
             }
 

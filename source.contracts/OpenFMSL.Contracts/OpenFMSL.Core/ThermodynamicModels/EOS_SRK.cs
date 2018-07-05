@@ -58,7 +58,8 @@ namespace OpenFMSL.Core.ThermodynamicModels
             if (parameterSet != null)
             {
                 kij = parameterSet.Matrices["kij"];
-                kbij = parameterSet.Matrices["kbij"];
+                if (parameterSet.Matrices.ContainsKey("kbij"))
+                    kbij = parameterSet.Matrices["kbij"];
             }
 
             for (int i = 0; i < system.Components.Count; i++)
@@ -147,6 +148,12 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
                 var H1 = -QSTR + Math.Sqrt(DISKR);
                 var H2 = -QSTR - Math.Sqrt(DISKR);
+
+                if (Double.IsNaN(H1))
+                    H1 = 0;
+                if (Double.IsNaN(H2))
+                    H2 = 0;
+
                 var H3 = Math.Sign(H1);
                 var H4 = Math.Sign(H2);
                 var V = H3 * Math.Pow(Math.Abs(H1), 1.0 / 3.0) + H4 * Math.Pow(Math.Abs(H2), 1.0 / 3.0);
@@ -160,9 +167,9 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
 
             if (Phase == PhaseState.Vapour)
-                return VV;
+                return VV ;
             else
-                return VL;
+                return VL ;
         }
 
     }
@@ -235,7 +242,9 @@ namespace OpenFMSL.Core.ThermodynamicModels
             if (parameterSet != null)
             {
                 kij = parameterSet.Matrices["kij"];
-                kbij = parameterSet.Matrices["kbij"];
+
+                if (parameterSet.Matrices.ContainsKey("kbij"))
+                    kbij = parameterSet.Matrices["kbij"];
             }
 
             for (int i = 0; i < system.Components.Count; i++)
@@ -283,7 +292,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var bm = Sym.Sum(0, NC, i => z[i] * Sym.Sum(0, NC, j => z[j] * bij[i, j]));
                 var bsi = Sym.Sum(0, NC, j => z[j] * bij[idx, j]);
                 var vme = new VOL_SRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
-                var vm = Sym.Binding("vm", vme);
+                var vm = Sym.Binding("vm", vme );
                 var Bi = 2 * bsi - bm;
                 var zm = p * vm / (R * T);
 

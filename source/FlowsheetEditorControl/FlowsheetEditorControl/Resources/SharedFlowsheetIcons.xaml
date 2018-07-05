@@ -165,10 +165,10 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Bottom" Margin="5">
                         <Button  Margin="10,0,0,0" Command="{Binding CodeProvider.AddHoursCommand}" CommandParameter="-24">-1d</Button>
-                        <Button Margin="10,0,0,0" Command="{Binding CodeProvider.AddHoursCommand}" CommandParameter="-1">-1h</Button>                        
+                        <Button Margin="10,0,0,0" Command="{Binding CodeProvider.AddHoursCommand}" CommandParameter="-1">-1h</Button>
                         <Button Margin="10,0,0,0" Command="{Binding CodeProvider.AddHoursCommand}" CommandParameter="1">+1h</Button>
                         <Button  Margin="10,0,0,0" Command="{Binding CodeProvider.AddHoursCommand}" CommandParameter="24">+1d</Button>
-                        
+
                     </StackPanel>
                     <DataGrid ItemsSource="{Binding CodeProvider.Variables}" CanUserAddRows="True" CanUserDeleteRows="True" Margin="5,20,5,5" AutoGenerateColumns="False">
                         <DataGrid.Resources>
@@ -200,37 +200,34 @@
     </DataTemplate>
 
     <DataTemplate x:Key="SpreadsheetTemplate" DataType="{x:Type items:VisualUnit}">
-        <Expander Header="{Binding Name}" IsExpanded="True" BorderBrush="{Binding BorderColor}" Background="{Binding FillColor}">
-            <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" MinWidth="{Binding Width}" MinHeight="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
+        <Border BorderBrush="{Binding BorderColor}" BorderThickness="5" Background="{Binding FillColor}" MinWidth="{Binding Width}" MinHeight="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
 
-                <DataGrid ItemsSource="{Binding CodeProvider.Variables}" CanUserAddRows="True" CanUserDeleteRows="True" Margin="5,20,5,20" AutoGenerateColumns="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="HorizontalAlignment" Value="Left" />
-                            <Setter Property="Margin" Value="5,0,5,0" />
-                            <Setter Property="TextElement.FontWeight" Value="Normal"></Setter>
-                        </Style>
-                    </DataGrid.Resources>
+            <DataGrid ItemsSource="{Binding Model.Variables}" CanUserAddRows="False" CanUserDeleteRows="False" Margin="5,20,5,20" AutoGenerateColumns="False" Background="White">
+                <DataGrid.Resources>
+                    <!--<Style TargetType="DataGridCell">
+                        <Setter Property="HorizontalAlignment" Value="Left" />
+                        <Setter Property="Margin" Value="5,0,5,0" />
+                        <Setter Property="TextElement.FontWeight" Value="Normal"></Setter>
+                    </Style>-->
+                </DataGrid.Resources>
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Block" Binding="{Binding Block}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Variable" Binding="{Binding Variable}" ></DataGridTextColumn>
-                        <DataGridTextColumn Header="Value" Binding="{Binding FormattedValue}"></DataGridTextColumn>
-                        <!--<DataGridTextColumn Header="Format" Binding="{Binding FormatString}"></DataGridTextColumn>-->
-                        <DataGridTextColumn Header="Unit" Binding="{Binding Unit}"></DataGridTextColumn>
-                        <!--<DataGridCheckBoxColumn Header="Fixed" Binding="{Binding IsFixed}"></DataGridCheckBoxColumn>-->
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Block" Binding="{Binding ModelName}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Variable" Binding="{Binding FullName}" ></DataGridTextColumn>
+                    <DataGridTextColumn Header="Value" Binding="{Binding ValueInOutputUnit, StringFormat=G6}"></DataGridTextColumn>
+                    <!--<DataGridTextColumn Header="Format" Binding="{Binding FormatString}"></DataGridTextColumn>-->
+                    <DataGridTextColumn Header="Unit" Binding="{Binding OutputUnit}"></DataGridTextColumn>
+                    <!--<DataGridCheckBoxColumn Header="Fixed" Binding="{Binding IsFixed}"></DataGridCheckBoxColumn>-->
+                </DataGrid.Columns>
+            </DataGrid>
 
-            </Border>
-        </Expander>
-
+        </Border>
     </DataTemplate>
 
     <DataTemplate x:Key="StreamTableTemplate" DataType="{x:Type items:VisualUnit}">
-        <Expander Header="{Binding Model.Name}" IsExpanded="True" BorderBrush="{Binding BorderColor}" Background="{Binding FillColor}">
-            <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
-                <DataGrid ItemsSource="{Binding Model.StreamTableView}" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"  IsReadOnly="True" CanUserReorderColumns="False"  Margin="5"  HeadersVisibility="Column" ClipboardCopyMode="IncludeHeader" Background="White">
+        <!--<Expander Header="{Binding Model.Name}" IsExpanded="True" BorderBrush="{Binding BorderColor}" Background="{Binding FillColor}">-->
+            <Border BorderBrush="{Binding BorderColor}" BorderThickness="5" Background="{Binding FillColor}" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
+            <DataGrid ItemsSource="{Binding Model.StreamTableView}"  Margin="5,20,5,20" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"  IsReadOnly="True" CanUserReorderColumns="False"   HeadersVisibility="Column" ClipboardCopyMode="IncludeHeader" Background="White">
                     <DataGrid.Resources>
                         <Style TargetType="DataGridCell">
                             <Setter Property="HorizontalAlignment" Value="Right" />
@@ -240,9 +237,9 @@
                     </DataGrid.Resources>
                 </DataGrid>
             </Border>
-        </Expander>
+        <!--</Expander>-->
     </DataTemplate>
-    
+
 
     <DataTemplate x:Key="ButtonTemplate" DataType="{x:Type items:VisualUnit}">
         <Border BorderBrush="{Binding BorderColor}" BorderThickness="2" Background="{Binding FillColor}" MinWidth="{Binding Width}" MinHeight="{Binding Height}"  HorizontalAlignment="Left" SnapsToDevicePixels="True">
@@ -330,6 +327,38 @@
     <DataTemplate x:Key="HorizontalVesselTemplate" DataType="{x:Type items:VisualUnit}">
         <Rectangle RadiusX="10" RadiusY="20" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}"  StrokeThickness="2" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left">
         </Rectangle>
+    </DataTemplate>
+
+
+    <DataTemplate x:Key="ReactorTemplate" DataType="{x:Type items:VisualUnit}">
+        <Viewbox Width="{Binding Width}" Height="{Binding Height}" Stretch="Fill">
+            <Grid>
+                <Grid.Resources>
+                    <VisualBrush 
+                          x:Key="HatchBrush" 
+                          TileMode="Tile" Viewport="0,0,10,10" 
+                          ViewportUnits="Absolute" Viewbox="0,0,10,10"    
+                          ViewboxUnits="Absolute">
+                        <VisualBrush.Visual>
+                            <Canvas>
+                                <Rectangle Fill="White" Width="10" Height="10" />
+                                <Path Stroke="{Binding BorderColor}" Data="M 0 0 l 10 10" />
+                                <Path Stroke="{Binding BorderColor}" Data="M 0 10 l 10 -10" />
+                            </Canvas>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Grid.Resources>
+
+
+                <Rectangle RadiusX="15" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}"  StrokeThickness="2"   Width="{Binding Width}" Height="{Binding Height}" HorizontalAlignment="Left">
+
+                </Rectangle>
+
+                <Rectangle Margin="25,0,25,0" Stroke="{Binding BorderColor}" StrokeThickness="2"   Fill="{StaticResource HatchBrush}"  HorizontalAlignment="Stretch">
+                </Rectangle>
+
+            </Grid>
+        </Viewbox>
     </DataTemplate>
 
 
@@ -551,6 +580,11 @@
             </Rectangle>
             <Rectangle Margin="0,30,0,30" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
 
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Background="White">
+                <TextBlock Text="N=" ></TextBlock>
+                <TextBlock Text="{Binding Model.NumberOfTrays}"></TextBlock>
+            </StackPanel>
+
         </Grid>
 
     </DataTemplate>
@@ -571,23 +605,23 @@
                             <Path Stroke="{Binding BorderColor}" Data="M 0 10 l 10 -10" />
                         </Canvas>
                     </VisualBrush.Visual>
-                </VisualBrush>               
+                </VisualBrush>
             </Grid.Resources>
 
 
             <Rectangle RadiusX="30" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
-            
+
             <!--<Rectangle Margin="0,35,0,30" Stroke="{Binding BorderColor}" Fill="{StaticResource HatchBrush}" StrokeThickness="2" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>-->
 
             <Ellipse HorizontalAlignment="Stretch" Height="30" VerticalAlignment="Top" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2" ></Ellipse>
-            
+
         </Grid>
 
     </DataTemplate>
 
     <DataTemplate x:Key="FeedStageTemplate" DataType="{x:Type items:VisualUnit}">
         <Grid  Width="{Binding Width}" Height="{Binding Height}" >
-        
+
 
             <Rectangle RadiusX="30" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></Rectangle>
 
@@ -633,7 +667,7 @@
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="FeedStage">
                                     <Setter Property="ContentTemplate" Value="{StaticResource FeedStageTemplate}" />
                                 </DataTrigger>
-                                
+
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                     <Setter Property="ContentTemplate" Value="{StaticResource StreamTemplate}" />
                                 </DataTrigger>
@@ -705,6 +739,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding DisplayIcon}" Value="PIAdapter">
                                     <Setter Property="ContentTemplate" Value="{StaticResource PIAdapterTemplate}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding DisplayIcon}" Value="PFR">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource ReactorTemplate}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

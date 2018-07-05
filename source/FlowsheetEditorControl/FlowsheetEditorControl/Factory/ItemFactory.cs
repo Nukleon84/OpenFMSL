@@ -167,11 +167,10 @@ namespace FlowsheetEditor.Factory
                         {
                             Name = "In",
                             Type = "Material",
-                            X = newItem.Width - 5,
-
+                            X =  - 5,
                             Y = (int)(newItem.Height / 2) - 5,
                             Owner = newItem,
-                            Direction = ConnectorDirection.Right,
+                            Direction = ConnectorDirection.Left,
                             Intent = ConnectorIntent.Inlet
                         };
                         newItem.Connectors.Add(inlet);
@@ -180,10 +179,45 @@ namespace FlowsheetEditor.Factory
                         {
                             Name = "Out",
                             Type = "Material",
-                            X = -5,
+                            X = newItem.Width - 5,
                             Y = (int)(newItem.Height / 2) - 5,
                             Owner = newItem,
-                            Direction=ConnectorDirection.Left
+                            Direction=ConnectorDirection.Right
+                        };
+                        newItem.Connectors.Add(outlet1);
+                        return newItem;
+                    }
+                case IconTypes.PFR:
+                    {
+                        var newItem = new VisualUnit();
+                        newItem.Name = "PFR1";
+                        newItem.Type = "PFR";
+                        newItem.X = x;
+                        newItem.Y = y;
+                        newItem.Height = 40;
+                        newItem.Width = 100;
+                        newItem.DisplayIcon = IconTypes.PFR;
+
+                        var inlet = new Connector
+                        {
+                            Name = "In",
+                            Type = "Material",
+                            X =  - 5,
+                            Y = (int)(newItem.Height / 2) - 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Left,
+                            Intent = ConnectorIntent.Inlet
+                        };
+                        newItem.Connectors.Add(inlet);
+
+                        var outlet1 = new Connector
+                        {
+                            Name = "Out",
+                            Type = "Material",
+                            X = newItem.Width  - 5,
+                            Y = (int)(newItem.Height / 2) - 5,
+                            Owner = newItem,
+                            Direction = ConnectorDirection.Right
                         };
                         newItem.Connectors.Add(outlet1);
                         return newItem;

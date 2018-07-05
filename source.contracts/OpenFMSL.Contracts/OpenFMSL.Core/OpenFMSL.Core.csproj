@@ -62,6 +62,7 @@
     <Compile Include="Expressions\Variable.cs" />
     <Compile Include="Flowsheeting\BaseFlowsheetObject.cs" />
     <Compile Include="Flowsheeting\Documentation\DocumentationElement.cs" />
+    <Compile Include="Flowsheeting\Documentation\SpreadsheetElement.cs" />
     <Compile Include="Flowsheeting\Documentation\StreamTableElement.cs" />
     <Compile Include="Flowsheeting\Documentation\TextElement.cs" />
     <Compile Include="Flowsheeting\Flowsheet.cs" />

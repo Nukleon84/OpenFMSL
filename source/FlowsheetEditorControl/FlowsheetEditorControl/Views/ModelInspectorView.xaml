@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" Width="Auto" Height="Auto" >
     <Grid>
-        <DataGrid ItemsSource="{Binding Variables}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+        <DataGrid ItemsSource="{Binding RawVariables}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" EnableRowVirtualization="True">
             <DataGrid.Resources>
                 <Style TargetType="DataGridCell">
                     <Setter Property="Padding" Value="0"/>

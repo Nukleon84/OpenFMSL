@@ -178,7 +178,15 @@ namespace OpenFMSL.Core.Thermodynamics
             switch (baseMethod)
             {
 
-
+                case "SRK":
+                    EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.PhiPhi;
+                    EquilibriumMethod.Fugacity = FugacityMethod.SoaveRedlichKwong;
+                    EquilibriumMethod.EquationOfState = EquationOfState.SoaveRedlichKwong;
+                    EquilibriumMethod.Activity = ActivityMethod.Ideal;
+                    EquilibriumMethod.AllowHenryComponents = false;
+                    EquilibriumMethod.PoyntingCorrection = false;
+                    EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
+                    break;
                 case "NRTL":
                     EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
                     EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
@@ -191,6 +199,14 @@ namespace OpenFMSL.Core.Thermodynamics
                     EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
                     EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
                     EquilibriumMethod.Activity = ActivityMethod.NRTLRP;
+                    EquilibriumMethod.AllowHenryComponents = false;
+                    EquilibriumMethod.PoyntingCorrection = false;
+                    EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
+                    break;
+                case "UNIQUAC":
+                    EquilibriumMethod.EquilibriumApproach = EquilibriumApproach.GammaPhi;
+                    EquilibriumMethod.Fugacity = FugacityMethod.Ideal;
+                    EquilibriumMethod.Activity = ActivityMethod.UNIQUAC;
                     EquilibriumMethod.AllowHenryComponents = false;
                     EquilibriumMethod.PoyntingCorrection = false;
                     EquilibriumMethod.AllowedPhases = AllowedPhases.VLE;
