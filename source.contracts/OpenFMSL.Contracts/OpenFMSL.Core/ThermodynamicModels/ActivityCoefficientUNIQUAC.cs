@@ -55,7 +55,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
             return new IntegerLiteral(0);
         }
-        
+
 
 
         /// <summary>
@@ -106,36 +106,41 @@ namespace OpenFMSL.Core.ThermodynamicModels
             Expression FiP = 0;
             Expression Sxl = 0;
 
-            var ri = _system.Components[i].GetParameter(MethodTypes.Uniquac, "R").ValueInSI;
-            var qi = _system.Components[i].GetParameter(MethodTypes.Uniquac, "Q").ValueInSI;
-            var qpi = _system.Components[i].GetParameter(MethodTypes.Uniquac, "Q'").ValueInSI;
+            var ri = _system.Components.Select(co => co.GetParameter(MethodTypes.Uniquac, "R").ValueInSI).ToList();
+            var qi = _system.Components.Select(co => co.GetParameter(MethodTypes.Uniquac, "Q").ValueInSI).ToList();
+            var qpi = _system.Components.Select(co => co.GetParameter(MethodTypes.Uniquac, "Q'").ValueInSI).ToList();
 
-            Expression li = 5 * (ri - qi) - (ri - 1);
+            double[] li = new double[NC];
+            for (int j = 0; j < NC; j++)
+            {
+                li[j] = 5 * (ri[j] - qi[j]) - (ri[j] - 1);
+            }
 
-            Vi = ri * x[i] / Sym.Sum(0, NC, (j) => ri * x[j]);
-            Fi = qi * x[i] / Sym.Sum(0, NC, (j) => qi * x[j]);
-            FiP = qpi * x[i] / Sym.Sum(0, NC, (j) => qpi * x[j]);
-            Sxl = Sym.Sum(0, NC, (j) => (5 * (ri - qi) - (ri - 1)) * x[j]);
+            Vi = ri[i] * x[i] / Sym.Sum(0, NC, (j) => ri[j] * x[j]);
+            Fi = qi[i] * x[i] / Sym.Sum(0, NC, (j) => qi[j] * x[j]);
+            FiP = qpi[i] * x[i] / Sym.Sum(0, NC, (j) => qpi[j] * x[j]);
 
-            lnGammaComb = Sym.Ln(Vi / x[i]) + 5 * qi * Sym.Ln(Fi / Vi) + li - Vi / x[i] * Sxl;
+            //Sxl = Sym.Sum(0, NC, (j) => (5 * (_system.Components[j].GetParameter(MethodTypes.Uniquac, "R").ValueInSI - _system.Components[j].GetParameter(MethodTypes.Uniquac, "Q").ValueInSI) - (_system.Components[j].GetParameter(MethodTypes.Uniquac, "R").ValueInSI - 1)) * x[j]);
+
+            lnGammaComb = Sym.Ln(Vi / Sym.Max(1e-10,x[i])) + 5 * qi[i] * Sym.Ln(Fi / Vi) + li[i] - Vi / Sym.Max(1e-10,x[i]) * Sym.Sum(0, NC, j => x[j] * li[j]);
 
             Expression[] FPj = new Expression[_system.Components.Count];
             for (int j = 0; j < NC; j++)
             {
-                FPj[j] = qpi * x[j] / Sym.Sum(0, NC, (kj) => qpi * x[kj]);
+                FPj[j] = qpi[j] * x[j] / Sym.Sum(0, NC, (kj) => qpi[kj]* x[kj]);
             }
 
             var doubleSum = Sym.Sum(0, NC, (j) => FPj[j] * tau[i, j] / (Sym.Sum(0, NC, (k) => FPj[k] * tau[k, j])));
             var SFP = Sym.Sum(0, NC, (j) => FPj[j] * tau[j, i]);
 
-            lnGammaRes = qpi * (1 - Sym.Ln(SFP) - doubleSum);
+            lnGammaRes = qpi[i] * (1.0 - Sym.Ln(SFP) - doubleSum);
             lnGamma = lnGammaComb + lnGammaRes;
             _gamma_exp = Sym.Exp(lnGamma);
 
             _dgamma_dx = new Expression[NC];
-            
+
             DiffFunctional = (cache, v) => _gamma_exp.Diff(cache, v);
-            EvalFunctional = (cache) => _gamma_exp.Eval(cache);            
+            EvalFunctional = (cache) => _gamma_exp.Eval(cache);
         }
 
         public override HashSet<Variable> Incidence()

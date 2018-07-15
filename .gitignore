@@ -72,3 +72,4 @@ buildscripts/build.log
 source/ChemSepDBAdapter/ChemSepDBAdapter/Data/nrtl.ipd
 source/ChemSepDBAdapter/ChemSepDBAdapter/Data/srk.ipd
 source/ChemSepDBAdapter/ChemSepDBAdapter/Data/uniquac.ipd
+buildscripts/build.log

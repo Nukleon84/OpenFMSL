@@ -13,6 +13,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
     {
         ThermodynamicSystem _system;
 
+        private List<Expression> _parameters = new List<Expression>();
 
         Variable _T;
         Variable _p;
@@ -21,6 +22,18 @@ namespace OpenFMSL.Core.ThermodynamicModels
         Expression _B;
         PhaseState Phase;
         Variable _R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
+        public List<Expression> Parameters
+        {
+            get
+            {
+                return _parameters;
+            }
+
+            set
+            {
+                _parameters = value;
+            }
+        }
 
         public VOL_SRK(Variable T, Variable p, Expression A, Expression B, PhaseState phase)
         {
@@ -30,6 +43,11 @@ namespace OpenFMSL.Core.ThermodynamicModels
             this._B = B;
             this.Phase = phase;
 
+            Parameters.Add(T);
+            Parameters.Add(p);
+           // Parameters.Add(A);
+           // Parameters.Add(B);
+            
             //DiffFunctional = (cache, v) => idealVolume.Diff(cache, v);
             DiffFunctional = (cache, v) => NumDiff(cache, v);
             EvalFunctional = (cache) => Evaluate(cache);
@@ -52,6 +70,13 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
             double[,] kij = new double[NC, NC];
             double[,] kbij = new double[NC, NC];
+
+
+            Parameters.Add(T);
+            Parameters.Add(p);
+           // foreach (var c in y)
+           //    Parameters.Add(c);
+
 
 
             var parameterSet = _system.BinaryParameters.FirstOrDefault(ps => ps.Name == "SRK");
@@ -129,7 +154,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             var VV = 1e-3;
             var VL = 1e-4;
 
-            var rhoc = 0.1734 / B;
+            var rhoc = 0.2599 / B;
 
 
             if (DISKR < 0)
@@ -160,6 +185,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 VL = V + R * T / 3.0 / P;
                 VV = V + R * T / 3.0 / P;
 
+                //HACK: Very simple extrapolation of densities in non-physical region. Research needed on my side. Refer: Boston Mathias, Gundersen, Prausnitz
                 if (VL > 1.0 / rhoc)
                     VL = 1.0 / rhoc;
                 if (VV < 1.0 / rhoc)
@@ -167,11 +193,20 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
 
             if (Phase == PhaseState.Vapour)
-                return VV ;
+                return VV;
             else
-                return VL ;
+                return VL;
         }
+        //public override HashSet<Variable> Incidence()
+        //{
+        //    var inc = new HashSet<Variable>();
 
+        //    foreach (var parameter in Parameters)
+        //    {
+        //        inc.UnionWith(parameter.Incidence());
+        //    }
+        //    return inc;
+        //}
     }
 
     public class K_EOS_SRK : Expression
@@ -190,7 +225,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
         Expression _dphiDp;
         Expression[] _dphiDx;
         Expression[] _dphiDy;
-        Expression[] lnPHI = new Expression[2];
+        Expression[] PHI = new Expression[2];
 
         private List<Expression> _parameters = new List<Expression>();
         Variable R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
@@ -292,23 +327,18 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var bm = Sym.Sum(0, NC, i => z[i] * Sym.Sum(0, NC, j => z[j] * bij[i, j]));
                 var bsi = Sym.Sum(0, NC, j => z[j] * bij[idx, j]);
                 var vme = new VOL_SRK(T, p, am, bm, ph == 0 ? PhaseState.Liquid : PhaseState.Vapour);
-                var vm = Sym.Binding("vm", vme );
+                var vm = Sym.Binding("vm", vme);
                 var Bi = 2 * bsi - bm;
                 var zm = p * vm / (R * T);
 
                 var eterm = -am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(1 + bm / vm) + Bi / bm * (zm - 1);
                 var eVariable = Sym.Binding("RKS_E", eterm);
 
-                //lnPHI[ph] = vm / ((vm - bm) * zm) * Sym.Exp(eVariable);
-                lnPHI[ph] = (R * T) / ((vm - bm) * p) * Sym.Exp(eVariable);
-                /*lnPHI[ph] = Bi / bm * (zm - 1)
-                    - Sym.Ln(zm)
-                    + Sym.Ln(vm / (vm - bm))
-                    - am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(Sym.Par(vm + bm) / vm);*/
+                PHI[ph] = (R * T) / ((vm - bm) * p) * Sym.Exp(eVariable);             
 
             }
             //_kEOS_SRK = Sym.Exp(lnPHI[0] - lnPHI[1]);
-            _kEOS_SRK = lnPHI[0] / lnPHI[1];
+            _kEOS_SRK = PHI[0] / PHI[1];
             _dphiDx = new Expression[NC];
             _dphiDy = new Expression[NC];
 
@@ -318,11 +348,10 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
         double Evaluate(Evaluator cache)
         {
-            //  var phiL = Sym.Exp(lnPHI[0]).Eval(cache);
-            //  var phiV = Sym.Exp(lnPHI[1]).Eval(cache);
-
+              //var phiL = Sym.Exp(lnPHI[0]).Eval(cache);
+             // var phiV = Sym.Exp(lnPHI[1]).Eval(cache);
             var value = _kEOS_SRK.Eval(cache);
-            // var value2 = phiL / phiV;
+             //var value = phiL / phiV;
             return value;
         }
         public override Expression SymbolicDiff(Variable var)
