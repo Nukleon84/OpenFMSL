@@ -2,6 +2,7 @@
 using OpenFMSL.Core.Flowsheeting;
 using OpenFMSL.Core.Numerics;
 using OpenFMSL.Core.Numerics.Solvers;
+using OpenFMSL.Core.ThermodynamicModels;
 using OpenFMSL.Core.Thermodynamics;
 using OpenFMSL.Core.UnitsOfMeasure;
 using System;
@@ -391,8 +392,11 @@ namespace OpenFMSL.Core.ModelLibrary
                 AddEquationToEquationSystem(problem, Sym.Sum(0, NC, (j) => Sym.Par(tray.x[j] - tray.yeq[j])).IsEqualTo(0));
 
                 //Ent(H)alpy
-                tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.T)));
-                tray.HV.BindTo(Sym.Sum(0, NC, (idx) => tray.y[idx] * System.EquationFactory.GetVaporEnthalpyExpression(System, idx, tray.TV)));
+                //tray.HL.BindTo(Sym.Sum(0, NC, (idx) => tray.x[idx] * System.EquationFactory.GetLiquidEnthalpyExpression(System, idx, tray.T)));
+                //tray.HV.BindTo(Sym.Sum(0, NC, (idx) => tray.y[idx] * System.EquationFactory.GetVaporEnthalpyExpression(System, idx, tray.TV)));
+                tray.HL.BindTo(new EnthalpyRoute(System, tray.T, tray.p, tray.x.ToList(), PhaseState.Liquid));
+                tray.HV.BindTo(new EnthalpyRoute(System, tray.TV, tray.p, tray.y.ToList(), PhaseState.Vapour));
+
                 var Hi = Sym.Par(Sym.Par(1 + tray.RV) * tray.V * tray.HV + Sym.Par(1 + tray.RL) * tray.L * tray.HL) / hscale;
                 if (i == 0)
                     AddEquationToEquationSystem(problem, (Sym.Par(_trays[i + 1].V * _trays[i + 1].HV + L0 * LIn.Mixed.SpecificEnthalpy + tray.F * tray.HF + tray.Q) / hscale).IsEqualTo(Hi));

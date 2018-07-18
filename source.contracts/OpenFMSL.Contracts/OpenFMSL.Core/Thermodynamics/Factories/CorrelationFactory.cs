@@ -19,6 +19,35 @@ namespace OpenFMSL.Core.Thermodynamics
             }
         }
 
+        public Expression CreateIntegratedExpression(FunctionType typeToCreate, PropertyFunction func, Variable T, Variable Tref)
+        {
+            Expression expr = null;
+            switch (typeToCreate)
+            {
+                case FunctionType.PolynomialIntegrated:
+
+                    EnsureCoefficients(func.Coefficients, 1);
+                    expr = func.Coefficients[0] * T;
+
+                    for (int i = 1; i < func.NumberOfCoefficients; i++)
+                    {
+                        expr += 1.0 / (double)(i + 1) * func.Coefficients[i] * Sym.Par(Sym.Pow(T, i + 1)- Sym.Pow(Tref, i + 1));
+                    }
+                    break;
+
+                case FunctionType.Dippr117:
+                    {
+                        EnsureCoefficients(func.Coefficients, 5);
+                        var Tcon = Sym.Convert(T, func.XUnit);
+                        var Trefcon = Sym.Convert(Tref, func.XUnit);
+
+                        expr = func.Coefficients[0] * Sym.Par(Tcon-Trefcon) + func.Coefficients[1] * func.Coefficients[2] * Sym.Par(Sym.Coth(func.Coefficients[2] / Tcon)- Sym.Coth(func.Coefficients[2] / Trefcon)) - func.Coefficients[3] * func.Coefficients[4] * Sym.Par(Sym.Tanh(func.Coefficients[4] / Tcon)- Sym.Tanh(func.Coefficients[4] / Trefcon));
+                        break;
+                    }
+            }
+            return expr;
+        }
+
         public Expression CreateExpression(FunctionType typeToCreate, PropertyFunction func, Variable T, Variable TC, Variable PC)
         {
             Expression expr = null;
@@ -166,18 +195,7 @@ namespace OpenFMSL.Core.Thermodynamics
                         var e = func.Coefficients[4];
                         expr = a + Sym.Exp(b / T + c + d * T + e * Sym.Pow(T, 2));
                         break;
-                    }
-                case FunctionType.Chemsep16Integrated:
-                    {
-                        EnsureCoefficients(func.Coefficients, 5);
-                        var a = func.Coefficients[0];
-                        var b = func.Coefficients[1];
-                        var c = func.Coefficients[2];
-                        var d = func.Coefficients[3];
-                        var e = func.Coefficients[4];
-                        expr = a*T + Sym.Exp(b + c*T + 0.5*d * Sym.Pow(T,2) + 1.0/3.0*e * Sym.Pow(T, 3));
-                        break;
-                    }
+                    }              
                 case FunctionType.Chemsep101:
                     {
                         EnsureCoefficients(func.Coefficients, 5);

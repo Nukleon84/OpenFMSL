@@ -31,13 +31,7 @@ namespace OpenFMSL.Core.Thermodynamics
                                 var gamma = new ActivityCoefficientNRTL(system, T, x, index);
                                 liquidPart = gamma;
                                 break;
-                            }
-                        case ActivityMethod.NRTLRP:
-                            {
-                                var gamma = new ActivityCoefficientNRTL(system, T, x, index, true);
-                                liquidPart = gamma;
-                                break;
-                            }
+                            }                      
                         case ActivityMethod.Wilson:
                             {
                                 var gamma = new ActivityCoefficientWilson(system, T, x, index);
@@ -105,18 +99,7 @@ namespace OpenFMSL.Core.Thermodynamics
                                     liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
                                 K.BindTo(liquidPart / vaporPart);
                                 break;
-                            }
-                        case ActivityMethod.NRTLRP:
-                            {
-                                var gamma = new ActivityCoefficientNRTL(system, T, x, index,true);
-
-                                if (currentComponent.IsInert)
-                                    liquidPart = new MixtureHenryCoefficient(system, T, x, index);
-                                else
-                                    liquidPart = gamma * GetVaporPressure(system, currentComponent, T);
-                                K.BindTo(liquidPart / vaporPart);
-                                break;
-                            }
+                            }                      
                         case ActivityMethod.Wilson:
                             {
                                 var gamma = new ActivityCoefficientWilson(system, T, x, index);
@@ -155,26 +138,26 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetAverageVaporDensityExpression(ThermodynamicSystem system, Variable T, Variable p, List<Variable> y)
         {
             var NC = system.Components.Count;
-            
 
-            if ((system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.PhiPhi && system.EquilibriumMethod.EquationOfState== EquationOfState.SoaveRedlichKwong)||
+
+            if ((system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.PhiPhi && system.EquilibriumMethod.EquationOfState == EquationOfState.SoaveRedlichKwong) ||
                 (system.EquilibriumMethod.EquilibriumApproach == EquilibriumApproach.GammaPhi && system.EquilibriumMethod.Fugacity == FugacityMethod.SoaveRedlichKwong))
             {
                 var rhoV = new VOL_SRK(system, T, p, y);
-                var pavg= Sym.Binding("DENV",1.0/rhoV );
+                var pavg = Sym.Binding("DENV", 1.0 / rhoV);
                 pavg.Subscript = "SRK";
                 return pavg;
             }
 
             var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
-            var expression = p/ (R * T);
+            var expression = p / (R * T);
             Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
             prop.Subscript = "ideal";
             prop.BindTo(expression);
             return prop;
 
 
-            
+
         }
 
         public Variable GetAverageMolarWeightExpression(ThermodynamicSystem system, Variable[] z)
@@ -281,22 +264,22 @@ namespace OpenFMSL.Core.Thermodynamics
             {
                 if (sys.EnthalpyMethod.PureComponentEnthalpies[idx].ReferenceState == PhaseState.Vapour)
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, Tref));
+                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T, Tref));
                 else
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, Tref))
+                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T, Tref))
                         + sys.EquationFactory.GetEnthalpyOfVaporizationExpression(sys, comp, T);
             }
             else
             {
                 if (sys.EnthalpyMethod.PureComponentEnthalpies[idx].ReferenceState == PhaseState.Vapour)
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, Tref));
+                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T, Tref));
                 else
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange) - sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, Tref))
+                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange, Tref))
                         + sys.EquationFactory.GetEnthalpyOfVaporizationExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange)
-                         + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange));
+                         + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange));
 
 
             }
@@ -311,15 +294,16 @@ namespace OpenFMSL.Core.Thermodynamics
             Variable Tref = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Tref;
             Expression expr = null;
             var comp = sys.Components[idx];
+
             if (sys.EnthalpyMethod.PureComponentEnthalpies[idx].PhaseChangeAtSystemTemperature)
             {
                 if (sys.EnthalpyMethod.PureComponentEnthalpies[idx].ReferenceState == PhaseState.Vapour)
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, Tref))
+                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, T, Tref))
                         - sys.EquationFactory.GetEnthalpyOfVaporizationExpression(sys, comp, T);
                 else
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, Tref));
+                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T, Tref));
 
 
             }
@@ -328,13 +312,13 @@ namespace OpenFMSL.Core.Thermodynamics
             {
                 if (sys.EnthalpyMethod.PureComponentEnthalpies[idx].ReferenceState == PhaseState.Vapour)
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange) - sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, Tref))
+                        + Sym.Par(sys.EquationFactory.GetIdealGasHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange, Tref))
                         - sys.EquationFactory.GetEnthalpyOfVaporizationExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange)
-                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange))
+                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T, sys.EnthalpyMethod.PureComponentEnthalpies[idx].TPhaseChange))
                         ;
                 else
                     expr = sys.EnthalpyMethod.PureComponentEnthalpies[idx].Href
-                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T) - sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, Tref));
+                        + Sym.Par(sys.EquationFactory.GetLiquidHeatCapacityIntegralExpression(sys, comp, T,Tref) );
             }
 
 
@@ -391,7 +375,7 @@ namespace OpenFMSL.Core.Thermodynamics
         }
 
 
-        public Expression GetIdealGasHeatCapacityIntegralExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T)
+        public Expression GetIdealGasHeatCapacityIntegralExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable Tref)
         {
             Expression expression = null;
             var func = comp.GetFunction(EvaluatedProperties.IdealGasHeatCapacity);
@@ -399,12 +383,12 @@ namespace OpenFMSL.Core.Thermodynamics
             switch (func.Type)
             {
                 case FunctionType.Polynomial:
-                    expression = system.CorrelationFactory.CreateExpression(FunctionType.PolynomialIntegrated, func, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
+                    expression = system.CorrelationFactory.CreateIntegratedExpression(FunctionType.PolynomialIntegrated, func, T,Tref);
                     expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.HeatCapacity]);
                     break;
 
                 case FunctionType.AlyLee:
-                    expression = system.CorrelationFactory.CreateExpression(FunctionType.Dippr117, func, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
+                    expression = system.CorrelationFactory.CreateIntegratedExpression(FunctionType.Dippr117, func, T,Tref);
                     expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.HeatCapacity]);
                     break;
 
@@ -416,7 +400,7 @@ namespace OpenFMSL.Core.Thermodynamics
 
 
         }
-        public Expression GetLiquidHeatCapacityIntegralExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T)
+        public Expression GetLiquidHeatCapacityIntegralExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable Tref)
         {
             Expression expression = null;
             var func = comp.GetFunction(EvaluatedProperties.LiquidHeatCapacity);

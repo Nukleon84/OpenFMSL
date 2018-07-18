@@ -182,12 +182,14 @@ namespace OpenFMSL.Core.Numerics.Solvers
             var eval = new Evaluator();
             foreach (var entry in problem.Jacobian)
             {
-                var value = problem.Equations[entry.EquationIndex].Diff(eval, problem.Variables[entry.VariableIndex]);
+
+               /* var value = problem.Equations[entry.EquationIndex].Diff(eval, problem.Variables[entry.VariableIndex]);
                 if(Double.IsNaN(value))
                 {
                     var eq = problem.Equations[entry.EquationIndex];
                     var vari = problem.Variables[entry.VariableIndex];
-                }
+                }*/
+
                 sparseJacobian.At(entry.EquationIndex, entry.VariableIndex, 1);
             }
 

@@ -37,7 +37,7 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
         }
 
-        public ActivityCoefficientNRTL(ThermodynamicSystem system, Variable T, List<Variable> x, int idx, bool aInCal = false)
+        public ActivityCoefficientNRTL(ThermodynamicSystem system, Variable T, List<Variable> x, int idx)
         {
             index = idx;
             _system = system;
@@ -68,57 +68,72 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
             int i = index;
 
-            var Rcal = 1.9872;
-
             for (int ii = 0; ii < NC; ii++)
             {
                 for (int j = 0; j < NC; j++)
                 {
-                    if (!aInCal)
-                    {
-                        tau[ii, j] = (a[ii, j] + b[ii, j] / T + e[ii, j] * Sym.Ln(T) + f[ii, j] * T);
-                        G[ii, j] = (Sym.Exp(-(c[ii, j] + d[ii, j] * (T - 273.15)) * tau[ii, j]));
-                    }
+
+                    tau[ii, j] = a[ii, j];
+
+                    if (b[ii, j] != 0.0)
+                        tau[ii, j] += b[ii, j] / T;
+                    if (e[ii, j] != 0.0)
+                        tau[ii, j] += e[ii, j] * Sym.Ln(T);
+                    if (f[ii, j] != 0.0)
+                        tau[ii, j] += f[ii, j] * T;
+
+                    Expression sij = c[ii, j];
+                    if (d[ii, j] != 0.0)
+                        sij += d[ii, j] * (T - 273.15);
+
+                    if (c[ii, j] == 0.0 && d[i, j] == 0.0)
+                        G[ii, j] = 1.0;
                     else
-                    {
-                        tau[ii, j] = (a[ii, j])/ (Rcal*T);
-                        G[ii, j] = (Sym.Exp(-c[ii, j] * tau[ii, j]));
-                    }
+                        G[ii, j] = (Sym.Exp(-sij * tau[ii, j]));
+
                 }
             }
             Expression lnGamma = 0.0;
-            Expression S1 = 0;
+            Expression S1 = 0.0;
             Expression[] S2 = new Expression[NC];
-            Expression S3 = 0;
+            Expression S3 = 0.0;
             for (int j = 0; j < NC; j++)
             {
+                if (a[j, i] == 0.0 && b[j, i] == 0.0)
+                    continue;
+                if (c[j, i] == 0.0 && d[j, i] == 0.0)
+                    continue;
+
                 S1 += x[j] * tau[j, i] * G[j, i];
             }
 
             for (int ii = 0; ii < NC; ii++)
             {
-                S2[ii] = 0;
+                S2[ii] = 0.0;
                 for (int k = 0; k < NC; k++)
-                {
+                {                    
                     S2[ii] += x[k] * G[k, ii];
                 }
             }
             for (int j = 0; j < NC; j++)
             {
-                Expression S5 = 0;
+                Expression S5 = 0.0;
 
                 for (int m = 0; m < NC; m++)
                 {
+                    if (a[m, j] == 0.0 && b[m, j] == 0.0)
+                        continue;
+             
+
                     S5 += x[m] * tau[m, j] * G[m, j];
                 }
 
-                S3 += x[j] * G[i, j] / S2[j] * (tau[i, j] - S5 / S2[j]);
+                S3 += x[j] * G[i, j] / Sym.Par(S2[j]) * (tau[i, j] - S5 / Sym.Par(S2[j]));
             }
 
             lnGamma = S1 / S2[i] + S3;
 
             _gammaExp = Sym.Exp(lnGamma);
-
             _dgammaDx = new Expression[NC];
 
             DiffFunctional = (cache, v) => _gammaExp.Diff(cache, v);
@@ -146,9 +161,6 @@ namespace OpenFMSL.Core.ThermodynamicModels
             }
             return new IntegerLiteral(0);
         }
-
-
-
 
         public override HashSet<Variable> Incidence()
         {

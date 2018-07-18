@@ -12,7 +12,7 @@ namespace OpenFMSL.Core.Expressions
 
         protected Func<Evaluator, double> EvalFunctional;
         protected Func<Evaluator, Variable, double> DiffFunctional;
-        
+
 
         public string Symbol
         {
@@ -42,14 +42,16 @@ namespace OpenFMSL.Core.Expressions
         {
             var value = Double.NaN;
 
-            if (evaluator.DiffCache.ContainsKey(this) && evaluator.DiffCache[this].TryGetValue(var, out value))
+            Dictionary<Expression, double> existingDict;
+            var found = evaluator.DiffCache.TryGetValue(this, out existingDict);
+            if (found && existingDict.TryGetValue(var, out value))
             {
                 return value;
             }
             else
             {
                 value = function(evaluator, var);
-                if(Double.IsNaN(value))
+                if (Double.IsNaN(value))
                 {
                     value = 0;
                 }
@@ -157,7 +159,7 @@ namespace OpenFMSL.Core.Expressions
             return MemberwiseClone() as Expression;
         }
 
-        
+
 
         #region Addition
 
@@ -192,26 +194,85 @@ namespace OpenFMSL.Core.Expressions
 
         public static Expression operator *(Expression u1, Expression u2)
         {
+            var u1lit = u1 as DoubleLiteral;
+            if (u1lit != null && u1lit.Value == 0.0)
+                return 0;
+            if (u1lit != null && u1lit.Value ==1.0)
+                return u2;
+
+
+            var u2lit = u2 as DoubleLiteral;
+            if (u2lit != null && u2lit.Value == 0.0)
+                return 0;
+            if (u2lit != null && u2lit.Value == 1.0)
+                return u1;
+
             return new Multiplication { Left = u1, Right = u2 };
         }
 
         public static Expression operator *(Expression u1, int u2)
         {
+            if (u2 == 0)
+                return 0;
+            if (u2 == 1)
+                return u1;
+
+            var u1lit = u1 as DoubleLiteral;
+            if (u1lit != null && u1lit.Value == 0.0)
+                return 0;
+            if (u1lit != null && u1lit.Value == 1.0)
+                return u2;
+
             return new Multiplication { Left = u1, Right = new IntegerLiteral { Value = u2 } };
         }
 
         public static Expression operator *(Expression u1, double u2)
         {
+            if (u2 == 0.0)
+                return 0;
+            if (u2 == 1.0)
+                return u1;
+
+            var u1lit = u1 as DoubleLiteral;
+            if (u1lit != null && u1lit.Value == 0.0)
+                return 0;
+            if (u1lit != null && u1lit.Value == 1.0)
+                return u2;
+
             return new Multiplication { Left = u1, Right = new DoubleLiteral { Value = u2 } };
         }
 
         public static Expression operator *(int u1, Expression u2)
         {
+            if (u1 == 0)
+                return 0;
+            if (u1 == 1)
+                return u2;
+
+            var u2lit = u2 as DoubleLiteral;
+            if (u2lit != null && u2lit.Value == 0.0)
+                return 0;
+            if (u2lit != null && u2lit.Value == 1.0)
+                return u1;
+
             return new Multiplication { Left = new IntegerLiteral { Value = u1 }, Right = u2 };
+
+
         }
 
         public static Expression operator *(double u1, Expression u2)
         {
+            if (u1 == 0.0)
+                return 0;
+            if (u1 == 1.0)
+                return u2;
+
+            var u2lit = u2 as DoubleLiteral;
+            if (u2lit != null && u2lit.Value == 0.0)
+                return 0;
+            if (u2lit != null && u2lit.Value == 1.0)
+                return u1;
+
             return new Multiplication { Left = new DoubleLiteral { Value = u1 }, Right = u2 };
         }
 

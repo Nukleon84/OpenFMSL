@@ -327,8 +327,12 @@ namespace OpenFMSL.Core.Flowsheeting
             Liquid.TotalMassflow.BindTo(Sym.Sum(Liquid.ComponentMassflow));
             Vapor.TotalMassflow.BindTo(Sym.Sum(Vapor.ComponentMassflow));
 
-            Liquid.SpecificEnthalpy.BindTo(Sym.Par(Sym.Sum(0, NC, (idx) => Liquid.ComponentMolarFraction[idx] * Liquid.ComponentEnthalpy[idx])));
-            Vapor.SpecificEnthalpy.BindTo(Sym.Par(Sym.Sum(0, NC, (idx) => Vapor.ComponentMolarFraction[idx] * Vapor.ComponentEnthalpy[idx])));
+            //Liquid.SpecificEnthalpy.BindTo(Sym.Par(Sym.Sum(0, NC, (idx) => Liquid.ComponentMolarFraction[idx] * Liquid.ComponentEnthalpy[idx])));
+            //Vapor.SpecificEnthalpy.BindTo(Sym.Par(Sym.Sum(0, NC, (idx) => Vapor.ComponentMolarFraction[idx] * Vapor.ComponentEnthalpy[idx])));
+
+            Liquid.SpecificEnthalpy.BindTo(new EnthalpyRoute(System, Mixed.Temperature, Mixed.Pressure, Liquid.ComponentMolarFraction, PhaseState.Liquid));
+            Vapor.SpecificEnthalpy.BindTo(new EnthalpyRoute(System, Mixed.Temperature, Mixed.Pressure, Vapor.ComponentMolarFraction, PhaseState.Vapour));
+
 
             Mixed.Density.BindTo(Mixed.TotalMassflow / Mixed.TotalVolumeflow);
             Liquid.Density.BindTo(Liquid.TotalMassflow / Liquid.TotalVolumeflow);
