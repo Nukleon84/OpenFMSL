@@ -27,7 +27,7 @@ namespace OpenFMSL.Core.Thermodynamics
                 case FunctionType.PolynomialIntegrated:
 
                     EnsureCoefficients(func.Coefficients, 1);
-                    expr = func.Coefficients[0] * T;
+                    expr = func.Coefficients[0] * Sym.Par(T-Tref);
 
                     for (int i = 1; i < func.NumberOfCoefficients; i++)
                     {

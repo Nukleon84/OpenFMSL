@@ -45,9 +45,9 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
             Parameters.Add(T);
             Parameters.Add(p);
-           // Parameters.Add(A);
-           // Parameters.Add(B);
-            
+            // Parameters.Add(A);
+            // Parameters.Add(B);
+
             //DiffFunctional = (cache, v) => idealVolume.Diff(cache, v);
             DiffFunctional = (cache, v) => NumDiff(cache, v);
             EvalFunctional = (cache) => Evaluate(cache);
@@ -72,10 +72,10 @@ namespace OpenFMSL.Core.ThermodynamicModels
             double[,] kbij = new double[NC, NC];
 
 
-            Parameters.Add(T);
-            Parameters.Add(p);
-           // foreach (var c in y)
-           //    Parameters.Add(c);
+            //  Parameters.Add(T);
+            //  Parameters.Add(p);
+            // foreach (var c in y)
+            //    Parameters.Add(c);
 
 
 
@@ -334,7 +334,8 @@ namespace OpenFMSL.Core.ThermodynamicModels
                 var eterm = -am / (bm * R * T) * (2 * asi / am - Bi / bm) * Sym.Ln(1 + bm / vm) + Bi / bm * (zm - 1);
                 var eVariable = Sym.Binding("RKS_E", eterm);
 
-                PHI[ph] = (R * T) / ((vm - bm) * p) * Sym.Exp(eVariable);             
+                //PHI[ph] = (R * T) / ((vm - bm) * p) * Sym.Exp(eVariable);
+                PHI[ph] = 1.0 / ((vm - bm)) * Sym.Exp(eVariable);
 
             }
             //_kEOS_SRK = Sym.Exp(lnPHI[0] - lnPHI[1]);
@@ -348,10 +349,10 @@ namespace OpenFMSL.Core.ThermodynamicModels
 
         double Evaluate(Evaluator cache)
         {
-              //var phiL = Sym.Exp(lnPHI[0]).Eval(cache);
-             // var phiV = Sym.Exp(lnPHI[1]).Eval(cache);
+            //var phiL = Sym.Exp(lnPHI[0]).Eval(cache);
+            // var phiV = Sym.Exp(lnPHI[1]).Eval(cache);
             var value = _kEOS_SRK.Eval(cache);
-             //var value = phiL / phiV;
+            //var value = phiL / phiV;
             return value;
         }
         public override Expression SymbolicDiff(Variable var)
