@@ -25,7 +25,7 @@ namespace OpenFMSL.Core.ModelLibrary
 
             dp = system.VariableFactory.CreateVariable("DP", "Pressure Drop", PhysicalDimension.Pressure);
             p = system.VariableFactory.CreateVariable("P", "Pressure in mixer", PhysicalDimension.Pressure);
-            dp.LowerBound = 0;
+            //dp.LowerBound = 0;
             AddVariable(dp);
             AddVariable(p);
         }
@@ -46,7 +46,7 @@ namespace OpenFMSL.Core.ModelLibrary
             }
 
 
-            AddEquationToEquationSystem(problem, (p / 1e4).IsEqualTo((Sym.Min(In.Streams[0].Mixed.Pressure, In.Streams[1].Mixed.Pressure) - dp) / 1e4),"Pressure Balance");
+            AddEquationToEquationSystem(problem, (p / 1e4).IsEqualTo(Sym.Par(Sym.Min(In.Streams[0].Mixed.Pressure, In.Streams[1].Mixed.Pressure) - dp) / 1e4),"Pressure Balance");
 
             foreach (var outlet in Out.Streams)
             {

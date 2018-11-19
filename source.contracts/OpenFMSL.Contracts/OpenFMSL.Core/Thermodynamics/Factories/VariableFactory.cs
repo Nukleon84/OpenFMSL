@@ -124,6 +124,10 @@ namespace OpenFMSL.Core.Thermodynamics
                     variable.LowerBound = 0;
                     variable.UpperBound = 1e20;
                     break;
+                case PhysicalDimension.VolumeFlow:
+                    variable.LowerBound = 0;
+                    variable.UpperBound = 1e6;
+                    break;
                 case PhysicalDimension.MolarVolume:
                     variable.LowerBound = 0;
                     variable.UpperBound = 1e6;

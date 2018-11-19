@@ -1,9 +1,11 @@
 ﻿using FlowsheetEditorControl.Items;
 using FlowsheetEditorControl.ViewModels;
+using Microsoft.Win32;
 using OpenFMSL.Contracts.Documents;
 using OpenFMSL.Core.Flowsheeting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -634,7 +636,72 @@ namespace FlowsheetEditorControl.Views
             }
         }
 
-       
-       
+        static bool ShowSaveFileDialog(string extension, string filter, out string path)
+        {
+            path = "";
+            var dlg = new SaveFileDialog();
+            dlg.DefaultExt = extension;
+            dlg.Filter = filter;
+            dlg.FileName = "flowsheet." + extension;
+            var result = dlg.ShowDialog();
+
+            if (result.HasValue && result.Value)
+            {
+                path = dlg.FileName;
+                return true;
+            }
+            return false;
+        }
+
+
+        private void ExportFlowsheetImage()
+        {
+            string filename;
+            try
+            {
+                if (ShowSaveFileDialog("png", "PNG files|*.png", out filename))
+                {
+                    CreateSaveBitmap(theGrid, filename);
+                }
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show(e.Message, "Error");
+            }
+        }
+
+        private void CreateSaveBitmap(FrameworkElement view, string filename)
+        {
+            Size size = new Size(view.ActualWidth, view.ActualHeight);
+            if (size.IsEmpty)
+                return;
+
+            RenderTargetBitmap result = new RenderTargetBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
+
+            DrawingVisual drawingvisual = new DrawingVisual();
+            using (DrawingContext context = drawingvisual.RenderOpen())
+            {
+                context.DrawRectangle(new VisualBrush(view), null, new Rect(new Point(), size));
+                context.Close();
+            }
+
+            result.Render(drawingvisual);
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(result));
+
+            using (var stream = File.Create(filename))
+            {
+                encoder.Save(stream);
+            }
+                      
+
+
+        }
+
+        private void ExportFlowsheetImage_Click(object sender, RoutedEventArgs e)
+        {
+            ExportFlowsheetImage();
+        }
     }
 }

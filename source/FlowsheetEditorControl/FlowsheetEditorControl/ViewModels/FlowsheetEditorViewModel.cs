@@ -374,6 +374,9 @@ namespace FlowsheetEditorControl.ViewModels
                 }
             }
 
+            FlowsheetWidth = Items.Max(i => i.X + i.Width + 100);
+            FlowsheetHeight = Items.Max(i => i.Y + i.Height + 100);
+
         }
 
 
@@ -586,12 +589,14 @@ namespace FlowsheetEditorControl.ViewModels
             }
 
             var window = new Window();
+            var dock = new DockPanel();
             var textBox = new TextBox();
             textBox.VerticalAlignment = VerticalAlignment.Stretch;
             textBox.Text = exportText;
-            textBox.AcceptsReturn = true;
+            textBox.AcceptsReturn = true;            
             textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
-            window.Content = textBox;
+            dock.Children.Add(textBox);
+            window.Content = dock;
             window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             window.Width = 550;
             window.Height = 400;
@@ -601,6 +606,30 @@ namespace FlowsheetEditorControl.ViewModels
             window.Owner = Application.Current.MainWindow;
             window.Show();
 
+        }
+
+
+        public void ScaleStreams()
+        {
+            double maxThickness = 10.0f;
+            double minThickness = 1.0f;
+
+            double maxMassFlow = Flowsheet.Connections.Max(s => s.Massflow.ValueInSI);
+            double minMassFlow = Flowsheet.Connections.Min(s => s.Massflow.ValueInSI);
+
+            foreach (var stream in Flowsheet.Connections)
+            {
+                var flow = stream.Massflow.ValueInSI;
+                var thick = minThickness + (maxThickness - minThickness) / (maxMassFlow - minMassFlow) * (flow - minMassFlow);
+                stream.Thickness = thick;
+            }
+
+        }
+
+        public void ResetStreams()
+        {
+            foreach (var stream in Flowsheet.Connections)
+                stream.Thickness = 3.0;
         }
     }
 }

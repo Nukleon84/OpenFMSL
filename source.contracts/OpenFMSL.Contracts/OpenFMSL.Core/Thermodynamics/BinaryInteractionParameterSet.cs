@@ -149,6 +149,20 @@ namespace OpenFMSL.Core.Thermodynamics
                 Matrices[matrix][i, j] = value;
             return this;
         }
+
+        public BinaryInteractionParameterSet SetParamPair(string matrix, MolecularComponent c1, MolecularComponent c2, double value, double othervalue)
+        {
+            var i = _system.Components.IndexOf(c1);
+            var j = _system.Components.IndexOf(c2);
+
+            if (i >= 0 && j >= 0 && Matrices.ContainsKey(matrix))
+            {
+                Matrices[matrix][i, j] = value;
+                Matrices[matrix][j, i] = othervalue;
+            }
+            return this;
+        }
+
         public double GetParam(string matrix, MolecularComponent c1, MolecularComponent c2)
         {
             var i = _system.Components.IndexOf(c1);

@@ -33,8 +33,8 @@ namespace PythonEnvironment
         private readonly IChartViewModelFactory _chartFactory;
         private readonly IFlowsheetEntityEditorFactory _flowsheetFactory;
         private readonly IPureComponentPropertyDatabase _pureComponentDB;
-
-        Action<string> _onWrite;
+        private readonly IThermodynamicSystemViewModelFactory _thermoEditorFactory;
+       Action<string> _onWrite;
 
         private readonly ScriptEngine _pyEngine = null;
         private readonly ScriptScope _pyScope = null;
@@ -46,7 +46,8 @@ namespace PythonEnvironment
             IThermodynamicSystemImporter importer,
             IChartViewModelFactory chartFactory,
             IFlowsheetEntityEditorFactory flowsheetFactory,
-            IPureComponentPropertyDatabase pureDB
+            IPureComponentPropertyDatabase pureDB,
+            IThermodynamicSystemViewModelFactory thermoEditorFactory
             )
         {
             _aggregator = aggregator;
@@ -57,6 +58,7 @@ namespace PythonEnvironment
             _pyEngine = Python.CreateEngine();
             _pyScope = _pyEngine.CreateScope();
             _pureComponentDB = pureDB;
+            _thermoEditorFactory = thermoEditorFactory;
 
             _pyScope.SetVariable("_host", this);
             _pyScope.SetVariable("Items", _entityManager);
@@ -73,6 +75,7 @@ namespace PythonEnvironment
             Run("from OpenFMSL.Core.Flowsheeting import *");
             Run("from OpenFMSL.Core.Flowsheeting.Documentation import *");
             Run("from OpenFMSL.Core.Numerics import *");
+            Run("from OpenFMSL.Core.Numerics.Solvers import *");
             Run("from OpenFMSL.Core.UnitsOfMeasure import *");
             Run("from OpenFMSL.Core.ModelLibrary import *");
             Run("from OpenFMSL.Core.Thermodynamics import *");
@@ -180,6 +183,15 @@ namespace PythonEnvironment
         {
             Thread.Sleep(milliseconds);
         }
+
+        public void Show(ThermodynamicSystem system)
+        {
+            var vm = _thermoEditorFactory.Create(system);            
+
+            _aggregator.PublishOnUIThread(new AddNewDocumentMessage { TimeStamp = DateTime.Now, Sender = this, Title = system.Name, Parameter = vm });
+        }
+
+
         public void Show(ChartModel chart)
         {
             var vm = _chartFactory.Create(chart);

@@ -22,6 +22,11 @@ namespace OpenFMSL.Contracts.Infrastructure.Reporting
         List<string> _xAxisLabels = new List<string>();
         bool _autoScaleX = false;
         bool _autoScaleY = false;
+        double _defaultFontSize = 18.0;
+        double _legendFontSize = 16.0;
+
+        double _plotAreaWidth = 800.0;
+        double _plotAreaHeight = 800.0;
         LegendPosition _legendPosition = LegendPosition.TopRight;
 
         double _xMin, _xMax, _yMin, _yMax;
@@ -150,6 +155,58 @@ namespace OpenFMSL.Contracts.Infrastructure.Reporting
             set
             {
                 _legendPosition = value;
+            }
+        }
+
+        public double DefaultFontSize
+        {
+            get
+            {
+                return _defaultFontSize;
+            }
+
+            set
+            {
+                _defaultFontSize = value;
+            }
+        }
+
+        public double LegendFontSize
+        {
+            get
+            {
+                return _legendFontSize;
+            }
+
+            set
+            {
+                _legendFontSize = value;
+            }
+        }
+
+        public double PlotAreaWidth
+        {
+            get
+            {
+                return _plotAreaWidth;
+            }
+
+            set
+            {
+                _plotAreaWidth = value;
+            }
+        }
+
+        public double PlotAreaHeight
+        {
+            get
+            {
+                return _plotAreaHeight;
+            }
+
+            set
+            {
+                _plotAreaHeight = value;
             }
         }
 

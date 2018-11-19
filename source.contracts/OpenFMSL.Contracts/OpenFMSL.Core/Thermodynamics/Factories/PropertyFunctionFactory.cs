@@ -108,7 +108,12 @@ namespace OpenFMSL.Core.Thermodynamics
                                 break;
                             }
                         default:
-                            liquidPart = GetVaporPressure(system, currentComponent, T);
+                            //liquidPart = GetVaporPressure(system, currentComponent, T);
+                            if (currentComponent.IsInert)
+                                liquidPart = new MixtureHenryCoefficient(system, T, x, index);
+                            else
+                                liquidPart =  GetVaporPressure(system, currentComponent, T);
+
                             K.BindTo(liquidPart / vaporPart);
                             break;
                     }
@@ -148,14 +153,15 @@ namespace OpenFMSL.Core.Thermodynamics
                 pavg.Subscript = "SRK";
                 return pavg;
             }
-
-            var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
-            var expression = p / (R * T);
-            Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
-            prop.Subscript = "ideal";
-            prop.BindTo(expression);
-            return prop;
-
+            else
+            {
+                var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
+                var expression = p / (R * T);
+                Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
+                prop.Subscript = "ideal";
+                prop.BindTo(expression);
+                return prop;
+            }
 
 
         }
@@ -183,7 +189,7 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetVaporDensityExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable p)
         {
             var R = new Variable("R", 8.3144621, SI.J / SI.mol / SI.K);
-            var expression = Sym.Convert(p, SI.Pa) / (R * T);
+            var expression = p / (R * T);
             // expression *= Unit.GetConversionFactor(SI.mol / (SI.m ^ 3), system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarDensity]);
             Variable prop = new Variable("DENV" + "(" + T.FullName + ")", 1);
             prop.Subscript = comp.ID;
@@ -194,19 +200,18 @@ namespace OpenFMSL.Core.Thermodynamics
         public Variable GetLiquidDensityExpression(ThermodynamicSystem system, MolecularComponent comp, Variable T, Variable p)
         {
             var func = comp.GetFunction(EvaluatedProperties.LiquidDensity);
-
-
             var TC = comp.GetConstant(ConstantProperties.CriticalTemperature);
-
             var expression = system.CorrelationFactory.CreateExpression(func.Type, func, T, TC, null);
             expression *= Unit.GetConversionFactor(func.YUnit, system.VariableFactory.Internal.UnitDictionary[PhysicalDimension.MolarDensity]);
 
             var expresssionDENV = GetVaporDensityExpression(system, comp, T, p);
 
             Variable prop = new Variable(system.CorrelationFactory.GetVariableNameForProperty(func.Property) + "(" + T.FullName + ")", 1);
-            prop.LowerBound = 0;
+            prop.LowerBound = 1e-6;
+            prop.UpperBound = 1e8;
             prop.Subscript = comp.ID;
             prop.BindTo(new SafeLiquidDensity(expression, expresssionDENV));
+            //prop.BindTo(expression);
             return prop;
 
 
@@ -238,7 +243,7 @@ namespace OpenFMSL.Core.Thermodynamics
 
             Variable prop = new Variable(system.CorrelationFactory.GetVariableNameForProperty(func.Property) + "(" + T.FullName + ")", 1);
             prop.Subscript = comp.ID;
-            // prop.UpperBound = maxVal;
+            // prop.UpperBound = 1e9;
             prop.BindTo(expr);
             return prop;
         }

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OpenFMSL.Contracts.Documents;
 using OpenFMSL.Contracts.Entities;
+using OpenFMSL.Core.Thermodynamics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,11 @@ namespace ThermodynamicSystemEditor.Factory
             _chartFactory = chartFactory;
         }
         public IThermodynamicSystemViewModel Create(ThermodynamicSystemEntity source)
+        {
+            return new ThermodynamicSystemEditorViewModel(_aggregator, source, _importer, _chartFactory);
+        }
+
+        public IThermodynamicSystemViewModel Create(ThermodynamicSystem source)
         {
             return new ThermodynamicSystemEditorViewModel(_aggregator, source, _importer, _chartFactory);
         }

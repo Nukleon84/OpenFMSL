@@ -161,6 +161,8 @@ namespace OpenFMSL.Core.ModelLibrary
             {
                 K[i] = system.VariableFactory.CreateVariable("K", numString + ", " + system.Components[i].ID, "Equilibrium partition coefficient", PhysicalDimension.Dimensionless);
                 K[i].ValueInSI = 1.2;
+                K[i].LowerBound = 1e-8;
+                K[i].UpperBound = 1e4;
                 x[i] = system.VariableFactory.CreateVariable("x", numString + ", " + system.Components[i].ID, "Liquid molar fraction", PhysicalDimension.MolarFraction);
                 y[i] = system.VariableFactory.CreateVariable("y", numString + ", " + system.Components[i].ID, "Vapor molar fraction", PhysicalDimension.MolarFraction);
                 yeq[i] = system.VariableFactory.CreateVariable("yeq", numString + ", " + system.Components[i].ID, "Equilibrium Vapor molar fraction", PhysicalDimension.MolarFraction);

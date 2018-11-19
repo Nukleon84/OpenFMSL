@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenFMSL.Core</RootNamespace>
     <AssemblyName>OpenFMSL.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,6 +37,14 @@
     </Reference>
     <Reference Include="Cureos.Numerics">
       <HintPath>..\..\..\lib\IPOPT\Cureos.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="GeneticSharp.Domain, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeneticSharp.2.2.0\lib\net462\GeneticSharp.Domain.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GeneticSharp.Infrastructure.Framework, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeneticSharp.2.2.0\lib\net462\GeneticSharp.Infrastructure.Framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,6 +100,7 @@
     <Compile Include="Numerics\Solvers\CSparseWrapper.cs" />
     <Compile Include="Numerics\Solvers\Decomposer.cs" />
     <Compile Include="Numerics\Solvers\DulmageMendelsohnDecomposition.cs" />
+    <Compile Include="Numerics\Solvers\GeneticSharpSolver.cs" />
     <Compile Include="Numerics\Solvers\IpoptSolver.cs" />
     <Compile Include="Numerics\Solvers\MatrixScaling.cs" />
     <Compile Include="Numerics\Solvers\Newton.cs" />
@@ -125,7 +135,9 @@
     <Compile Include="UnitsOfMeasure\UnitSet.cs" />
     <Compile Include="UnitsOfMeasure\USENG.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

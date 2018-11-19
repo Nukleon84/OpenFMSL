@@ -174,7 +174,7 @@ namespace OpenFMSL.Core.Flowsheeting
 
                 Vfmolar = system.VariableFactory.CreateVariable("VF", "Mole-based vapor fraction", PhysicalDimension.MolarFraction);
                 Vfmolar.Group = "Equilibrium";
-                Beta = new Variable("d", 0.5, -10, 10, SI.nil, "Phase equilibrium defect");
+                Beta = new Variable("d", 0.5, -100, 100, SI.nil, "Phase equilibrium defect");
                 Beta.Group = "Equilibrium";
 
                 MinVfBeta = new Variable("d2", 0.1, -100, 100, SI.nil, "min(Vapor fraction,Beta)");
@@ -195,6 +195,9 @@ namespace OpenFMSL.Core.Flowsheeting
                     KValues[i].Subscript = System.Components[i].ID;
                     KValues[i].Group = "Equilibrium";
                     KValues[i].ValueInSI = 1.4;
+                    KValues[i].LowerBound = 1e-8;
+                    KValues[i].UpperBound = 1e6;
+
                     System.EquationFactory.EquilibriumCoefficient(System, KValues[i], Mixed.Temperature, Mixed.Pressure, Liquid.ComponentMolarFraction, Vapor.ComponentMolarFraction, i);
 
 
@@ -403,38 +406,22 @@ namespace OpenFMSL.Core.Flowsheeting
                 case PhaseState.BubblePoint:
                     AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                     AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
-                    AddEquationToEquationSystem(problem, Liquid.TotalMolarflow.IsEqualTo(Sym.Sum(Liquid.ComponentMolarflow)), "Mass Balance");
-                  //  AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
-                   // AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
+                    AddEquationToEquationSystem(problem, Liquid.TotalMolarflow.IsEqualTo(Sym.Sum(Liquid.ComponentMolarflow)), "Mass Balance");         
                     break;
                 case PhaseState.DewPoint:
                     AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                     AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
-                    AddEquationToEquationSystem(problem, Vapor.TotalMolarflow.IsEqualTo(Sym.Sum(Vapor.ComponentMolarflow)), "Mass Balance");
-                    //AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
-                   // AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
+                    AddEquationToEquationSystem(problem, Vapor.TotalMolarflow.IsEqualTo(Sym.Sum(Vapor.ComponentMolarflow)), "Mass Balance");                 
                     break;
                 default:
                     if (Vfmolar.IsFixed)
                     {
                         AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
                         AddEquationToEquationSystem(problem, Beta.IsEqualTo(0), "Equilibrium");
-
-                      //  AddEquationToEquationSystem(problem, (MinVfBeta).IsEqualTo(0), "Equilibrium");
-                      //  AddEquationToEquationSystem(problem, (MaxVfBeta).IsEqualTo(0), "Equilibrium");
-
-
                     }
                     else
                     {
                         AddEquationToEquationSystem(problem, (Sym.Sum(Liquid.ComponentMolarFraction) - Sym.Sum(Vapor.ComponentMolarFraction)).IsEqualTo(Beta), "Equilibrium");
-
-                      //  AddEquationToEquationSystem(problem, (Sym.Min(Vfmolar, Beta)).IsEqualTo(MinVfBeta), "Equilibrium");
-                       // AddEquationToEquationSystem(problem,( Sym.Max(Vfmolar, Beta)).IsEqualTo(MaxVfBeta), "Equilibrium");
-
-                        //AddEquationToEquationSystem(problem, Sym.Max(Sym.Min(Vfmolar, Beta), Sym.Min(Sym.Max(Vfmolar, Beta), Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
-                        //AddEquationToEquationSystem(problem, Sym.Max(MinVfBeta, Sym.Min(MaxVfBeta, Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
-                        //AddEquationToEquationSystem(problem, Sym.Max(MinVfBeta, Sym.Min(MaxVfBeta, Vfmolar - 1)).IsEqualTo(0), "Equilibrium");
                         AddEquationToEquationSystem(problem, Sym.Mid(Vfmolar, Beta, Vfmolar - 1).IsEqualTo(0), "Equilibrium");
                     }
                     AddEquationToEquationSystem(problem, (Mixed.TotalMolarflow).IsEqualTo(Vapor.TotalMolarflow + Liquid.TotalMolarflow), "Mass Balance");

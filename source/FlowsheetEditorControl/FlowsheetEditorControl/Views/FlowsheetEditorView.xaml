@@ -12,16 +12,16 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <!--<ResourceDictionary Source="/Resources/SharedFlowsheetIcons.xaml"/>-->
-                <ResourceDictionary Source="/Controls.FlowsheetEditor;component/Resources/SharedFlowsheetIcons.xaml"/>                
+                <ResourceDictionary Source="/Controls.FlowsheetEditor;component/Resources/SharedFlowsheetIcons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>
 
     </UserControl.Resources>
 
-    <DockPanel>
+    <DockPanel >
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <Button Margin="5,0,10,0" x:Name="Export"  VerticalAlignment="Center" >Export</Button>
+      
             
             <CheckBox Margin="0,10,0,10" VerticalAlignment="Center" IsChecked="{Binding ShowGrid}" ToolTip="Show grid markers">Grid</CheckBox>
             <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding SnapToGrid}" ToolTip="Snap objects to grid">Snap</CheckBox>
@@ -31,7 +31,15 @@
             <CheckBox Margin="5,10,0,10"  VerticalAlignment="Center"   IsChecked="{Binding ShowVapourFraction}" ToolTip="Show vapour fraction">Vapour Fraction</CheckBox>
             <!--<TextBox  Margin="5,10,0,10"  VerticalAlignment="Center"   Text="{Binding CanvasColor}" Width="75" ToolTip="Change canvas background color"></TextBox>
             <Button Margin="5,10,0,10" x:Name="ToggleActivationOfSelectedUnits">Toggle Activation</Button>-->
+            <StackPanel>
+                <Button Margin="5,0,10,0" x:Name="ScaleStreams"  VerticalAlignment="Center" >Scale Streams</Button>
+                <Button Margin="5,0,10,0" x:Name="ResetStreams"  VerticalAlignment="Center" >Reset Streams</Button>
+            </StackPanel>
             
+            <StackPanel>
+                <Button Margin="5,0,10,0" x:Name="Export"  VerticalAlignment="Center" >Export Positions</Button>
+                <Button Margin="5,0,10,0" x:Name="ExportFlowsheetImage_Button" Click="ExportFlowsheetImage_Click" VerticalAlignment="Center" >Export PNG</Button>
+            </StackPanel>
         </StackPanel>
         <Grid>
             <Grid.Resources>
@@ -50,8 +58,8 @@
 
             <ScrollViewer Name="outerScrollViewer"                          
                           HorizontalScrollBarVisibility="Visible"
-                          VerticalScrollBarVisibility="Visible"  KeyDown="theGrid_KeyDown" >
-                <Grid Name="theGrid"  AllowDrop="True" DragEnter="theGrid_DragEnter" Drop="theGrid_Drop">
+                          VerticalScrollBarVisibility="Visible"  KeyDown="theGrid_KeyDown">
+                <Grid Name="theGrid"  AllowDrop="True" DragEnter="theGrid_DragEnter" Drop="theGrid_Drop" >
                     <Grid.LayoutTransform>
                         <TransformGroup>
                             <ScaleTransform x:Name="scaleTransform"/>
@@ -150,7 +158,7 @@
 
 
 
-                    <ItemsControl Name="NodeCanvas" ItemsSource="{Binding Items}" Width="{Binding FlowsheetWidth}" Height="{Binding FlowsheetHeight}">
+                    <ItemsControl Name="NodeCanvas" ItemsSource="{Binding Items}" Width="{Binding FlowsheetWidth}" Height="{Binding FlowsheetHeight}" >
 
 
                         <ItemsControl.ItemTemplate>
@@ -184,7 +192,7 @@
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="FeedStage">
                                                                 <Setter Property="ContentTemplate" Value="{StaticResource FeedStageTemplate}" />
                                                             </DataTrigger>
-                                                            
+
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Stream">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource StreamTemplate}" />
                                                             </DataTrigger>

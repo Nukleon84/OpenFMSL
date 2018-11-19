@@ -42,7 +42,8 @@ namespace OpenFMSL.Core.ModelLibrary
                 K[i] = system.VariableFactory.CreateVariable("K", "Equilibrium partition coefficient", PhysicalDimension.Dimensionless);
                 K[i].Subscript = system.Components[i].ID;
                 K[i].ValueInSI = 1.2;
-                
+                K[i].UpperBound = 1e6;
+
             }
             dp.LowerBound = -1e10;
             dp.ValueInSI = 0;

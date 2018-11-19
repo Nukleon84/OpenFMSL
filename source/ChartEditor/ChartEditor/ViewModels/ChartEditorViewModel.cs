@@ -1,11 +1,14 @@
 ﻿using Caliburn.Micro;
+using Microsoft.Win32;
 using OpenFMSL.Contracts.Documents;
 using OpenFMSL.Contracts.Infrastructure.Reporting;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,11 +23,20 @@ namespace ChartEditor.ViewModels
         public ChartEditorViewModel(ChartModel model)
         {
             Model = model;
+            Redraw();
+
+        }
+
+        public void Redraw()
+        {
+          
             Plot = new PlotModel();
-            Plot.Title = model.Title;
-            if (model.ShowLegend)
+            Plot.DefaultFontSize = Model.DefaultFontSize;
+            Plot.LegendFontSize = Model.LegendFontSize;
+            Plot.Title = Model.Title;
+            if (Model.ShowLegend)
             {
-                switch (model.LegendPosition)
+                switch (Model.LegendPosition)
                 {
                     case OpenFMSL.Contracts.Infrastructure.Reporting.LegendPosition.TopRight:
                         Plot.LegendPosition = OxyPlot.LegendPosition.RightTop;
@@ -46,8 +58,10 @@ namespace ChartEditor.ViewModels
                 Plot.IsLegendVisible = true;
             }
 
-            LinearAxis yAxis = new LinearAxis { Position = AxisPosition.Left, Title = model.YAxisTitle };
-            if (model.IsReversedYAxis)
+            Plot.Axes.Clear();
+
+            LinearAxis yAxis = new LinearAxis { Position = AxisPosition.Left, Title = Model.YAxisTitle, AxisTitleDistance=10 };
+            if (Model.IsReversedYAxis)
             {
                 yAxis.StartPosition = 1;
                 yAxis.EndPosition = 0;
@@ -55,21 +69,24 @@ namespace ChartEditor.ViewModels
 
             Plot.Axes.Add(yAxis);
 
-            LinearAxis xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = model.XAxisTitle };
+            LinearAxis xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = Model.XAxisTitle, AxisTitleDistance = 10 };
             Plot.Axes.Add(xAxis);
 
-            if (!model.AutoScaleX)
+            if (!Model.AutoScaleX)
             {
-                xAxis.Minimum = model.XMin;
-                xAxis.Maximum = model.XMax;
+                xAxis.Minimum = Model.XMin;
+                xAxis.Maximum = Model.XMax;
             }
 
-            if (!model.AutoScaleY)
+            if (!Model.AutoScaleY)
             {
-                yAxis.Minimum = model.YMin;
-                yAxis.Maximum = model.YMax;
+                yAxis.Minimum = Model.YMin;
+                yAxis.Maximum = Model.YMax;
             }
-            foreach (var series in model.Series)
+
+            Plot.Series.Clear();
+
+            foreach (var series in Model.Series)
             {
                 switch (series.Type)
                 {
@@ -150,7 +167,13 @@ namespace ChartEditor.ViewModels
 
                                 line.Points.Add(item);
                             }
+                            if (series.ShowMarker)
+                            {
+                                line.MarkerSize = 2 * series.Thickness;
+                                line.MarkerFill = line.Color;
 
+                            }
+                            
                             if (series.ShowInLegend)
                                 line.RenderInLegend = true;
                             else
@@ -248,8 +271,72 @@ namespace ChartEditor.ViewModels
 
 
             }
+        }
 
 
+
+        static bool ShowSaveFileDialog(string extension, string filter, out string path)
+        {
+            path = "";
+            var dlg = new SaveFileDialog();
+            dlg.DefaultExt = extension;
+            dlg.Filter = filter;
+            dlg.FileName = "chart." + extension;
+            var result = dlg.ShowDialog();
+
+            if (result.HasValue && result.Value)
+            {
+                path = dlg.FileName;
+                return true;
+            }
+            return false;
+        }
+
+        public void SaveAsPNG()
+        {
+            string filename;
+            try
+            {
+                if (ShowSaveFileDialog("png", "PNG files|*.png", out filename))
+                {
+                    //var pngExporter = new OxyPlot.Wpf.PngExporter { Width = (int)Plot.Width, Height = (int)Plot.Height, Background = OxyColors.White };
+                    //  OxyPlot.Wpf.PngExporter.Export(Plot, filename, (int)Plot.Width, (int)Plot.Height, OxyColors.White);
+
+                    using (var stream = File.Create(filename))
+                    {
+                        var exporter = new OxyPlot.Wpf.PngExporter { Width = (int)Plot.Width, Height = (int)Plot.Height, Background = OxyColors.White };
+                        exporter.Export(Plot, stream);
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show(e.Message, "Error");
+            }
+        }
+        public void SaveAsSVG()
+        {
+            string filename;
+            try
+            {
+                if (ShowSaveFileDialog("svg", "SVG files|*.svg", out filename))
+                {
+                    //var pngExporter = new OxyPlot.Wpf.PngExporter { Width = (int)Plot.Width, Height = (int)Plot.Height, Background = OxyColors.White };
+                    //OxyPlot.Wpf.SvgExporter.Export(Plot, filename, (int)Plot.Width, (int)Plot.Height, OxyColors.White);
+
+                    using (var stream = File.Create(filename))
+                    {
+                        var exporter = new SvgExporter { Width = (int)Plot.Width, Height = (int)Plot.Height };
+                        exporter.Export(Plot, stream);
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show(e.Message, "Error");
+            }
         }
 
         public ChartModel Model
@@ -262,6 +349,7 @@ namespace ChartEditor.ViewModels
             set
             {
                 _model = value;
+                NotifyOfPropertyChange(() => Model);
             }
         }
 

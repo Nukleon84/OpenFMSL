@@ -27,6 +27,7 @@ namespace OpenFMSL.Core.Numerics.Solvers
         double _lambdaMin = 0.2;
         bool _doScaling = true;
         bool _doLinesearch = true;
+        bool _suppressLogging = false;
 
         MatrixScalingFrequency _scalingFrequency = MatrixScalingFrequency.Always;
         int _iterations;
@@ -273,6 +274,19 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 _lambdaMin = value;
             }
         }
+
+        public bool SuppressLogging
+        {
+            get
+            {
+                return _suppressLogging;
+            }
+
+            set
+            {
+                _suppressLogging = value;
+            }
+        }
         #endregion
 
         #region Logging Callbacks
@@ -328,7 +342,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
 
         public void Solve(EquationSystem system)
         {
-            Log(String.Format("{0} {1,15} {2,15} {3,7} {4}", "Iter", "Step Length", "Infeasibility", "Damping", "Algorithm"));
+            if (!SuppressLogging)
+                Log(String.Format("{0} {1,15} {2,15} {3,7} {4}", "Iter", "Step Length", "Infeasibility", "Damping", "Algorithm"));
 
             if (!system.IsSquare())
             {
@@ -389,8 +404,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 //b.ToDouble().Max((s) => Math.Abs(s));
                 //if(DebugMode)
                 //debugString= ProblemData.Equations.Max(eq=> Math.Abs(eq.Residual()))
-
-                Log(String.Format(" {0:000} {1,15} {2,15} {3,7} {4,4} {5} {6} {7}", Iterations, varNorm.ToString("G2", CultureInfo.InvariantCulture), eqNorm.ToString("G8", CultureInfo.InvariantCulture), lambda, "NEWTON", algorithm, flags, debugString));
+                if (!SuppressLogging)
+                    Log(String.Format(" {0:000} {1,15} {2,15} {3,7} {4,4} {5} {6} {7}", Iterations, varNorm.ToString("G2", CultureInfo.InvariantCulture), eqNorm.ToString("G8", CultureInfo.InvariantCulture), lambda, "NEWTON", algorithm, flags, debugString));
 
 
                 OnIteration?.Invoke(system);
@@ -602,7 +617,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 IsConverged = true;
                 IsAborted = true;
                 _watch.Stop();
-                LogSuccess("Problem " + ProblemData.Name + " was successfully solved because constraint violation is below tolerance (" + iter + " iterations, " + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds, problem size: " + ProblemData.Variables.Count + ")");
+                if (!SuppressLogging)
+                    LogSuccess("Problem " + ProblemData.Name + " was successfully solved because constraint violation is below tolerance (" + iter + " iterations, " + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds, problem size: " + ProblemData.Variables.Count + ")");
                 return;
             }
             if (equationNorm > 1e16)
@@ -610,7 +626,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 IsConverged = false;
                 IsAborted = true;
                 _watch.Stop();
-                LogError("Problem diverged! (" + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds, Size: " + ProblemData.Variables.Count + ")");
+                if (!SuppressLogging)
+                    LogError("Problem diverged! (" + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds, Size: " + ProblemData.Variables.Count + ")");
                 return;
             }
 
@@ -619,7 +636,8 @@ namespace OpenFMSL.Core.Numerics.Solvers
                 IsConverged = false;
                 IsAborted = true;
                 _watch.Stop();
-                LogError("Maximum number of iterations exceeded (" + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds)");
+                if (!SuppressLogging)
+                    LogError("Maximum number of iterations exceeded (" + _watch.Elapsed.TotalSeconds.ToString("0.00") + " seconds)");
                 return;
             }
         }

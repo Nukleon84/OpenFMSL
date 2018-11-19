@@ -70,6 +70,24 @@ namespace ThermodynamicSystemEditor.ViewModels
 
         }
 
+        public ThermodynamicSystemEditorViewModel(IEventAggregator aggregator, ThermodynamicSystem source, IThermodynamicSystemImporter importer, IChartViewModelFactory chartFactory)
+        {
+            _aggregator = aggregator;
+            //  _source = new ThermodynamicSystemEntity(source.Name);
+            CurrentSystem = source;
+            _importer = importer;
+            _chartFactory = chartFactory;
+            _aggregator.Subscribe(this);
+            //ScriptDocument = new TextDocument(_source.SourceCode);
+
+            var types = Enum.GetValues(typeof(EvaluatedProperties));
+            foreach (var type in types.OfType<EvaluatedProperties>())
+                AvailableFunctionTypes.Add(type);
+            // ParseInputFile();
+            ComponentsForPureAnalysis = CurrentSystem.Components.Select(c => new CheckableComponent() { Data = c }).ToList();
+        }
+
+
         public ThermodynamicSystemEntity Source
         {
             get
@@ -82,7 +100,7 @@ namespace ThermodynamicSystemEditor.ViewModels
         {
             get
             {
-                return ScriptDocument.Text;
+                return _source != null ? ScriptDocument.Text : "";
             }
 
 
@@ -133,7 +151,7 @@ namespace ThermodynamicSystemEditor.ViewModels
                 return _currentSystem?.Components;
             }
         }
-      
+
         public MolecularComponent SelectedComponent
         {
             get
@@ -144,10 +162,10 @@ namespace ThermodynamicSystemEditor.ViewModels
             set
             {
                 _selectedComponent = value;
-             
+
                 NotifyOfPropertyChange(() => SelectedComponent);
                 NotifyOfPropertyChange(() => AvailableConstants);
-                
+
             }
         }
 
@@ -159,7 +177,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             }
         }
 
-    
+
 
         public double MaximumTemperature
         {
@@ -386,13 +404,17 @@ namespace ThermodynamicSystemEditor.ViewModels
         }
         public void SaveInputFile()
         {
-            Source.SourceCode = ScriptDocument.Text;
+            if (Source != null && ScriptDocument != null)
+                Source.SourceCode = ScriptDocument.Text;
         }
 
         public void ParseInputFile()
         {
             try
-            {                
+            {
+                if (ScriptDocument == null)
+                    return;
+
                 CurrentSystem = _importer.ImportNeutralFile(ScriptDocument.Text);
                 ComponentsForPureAnalysis = CurrentSystem.Components.Select(c => new CheckableComponent() { Data = c }).ToList();
 
@@ -410,7 +432,7 @@ namespace ThermodynamicSystemEditor.ViewModels
 
             Task.Factory.StartNew(() => RedrawBinaryAnalysisCharts());
         }
-       
+
         void RedrawBinaryAnalysisCharts()
         {
             var chart = new ChartModel();
@@ -460,7 +482,7 @@ namespace ThermodynamicSystemEditor.ViewModels
                         {
                             var x1 = (double)i / (double)(steps - 1);
                             var x2 = 1.0 - x1;
-                          
+
                             stream.Specify("n[" + BinaryComponent1.ID + "]", x1);
                             stream.Specify("n[" + BinaryComponent2.ID + "]", x2);
 
@@ -469,7 +491,7 @@ namespace ThermodynamicSystemEditor.ViewModels
 
                             x1Values.Add(x1);
                             y1Values.Add(stream.GetVariable("p").ValueInSI / 100.0);
-                            
+
                         }
                         stream.Specify("VF", 1);
 
@@ -477,13 +499,13 @@ namespace ThermodynamicSystemEditor.ViewModels
                         {
                             var x1 = (double)i / (double)(steps - 1);
                             var x2 = 1.0 - x1;
-                           
+
                             stream.Specify("n[" + BinaryComponent1.ID + "]", x1);
                             stream.Specify("n[" + BinaryComponent2.ID + "]", x2);
                             solver.Solve(equationSystem);
                             eval.Reset();
                             x2Values.Add(x1);
-                            y2Values.Add(stream.GetVariable("p").ValueInSI / 100.0);                            
+                            y2Values.Add(stream.GetVariable("p").ValueInSI / 100.0);
                         }
 
                     }
@@ -577,7 +599,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             stream.FillEquationSystem(eq);
             return eq;
         }
-      
+
 
         public void RedrawEnthalpyChart()
         {
@@ -590,7 +612,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             chart.AutoScaleY = true;
             int steps = 41;
 
-            var T = CurrentSystem.VariableFactory.CreateVariable("T", "Temperature",PhysicalDimension.Temperature);
+            var T = CurrentSystem.VariableFactory.CreateVariable("T", "Temperature", PhysicalDimension.Temperature);
             T.OutputUnit = METRIC.C;
             var hV = CurrentSystem.EquationFactory.GetVaporEnthalpyExpression(CurrentSystem, CurrentSystem.Components.IndexOf(SelectedComponent), T);
             var hL = CurrentSystem.EquationFactory.GetLiquidEnthalpyExpression(CurrentSystem, CurrentSystem.Components.IndexOf(SelectedComponent), T);
@@ -602,10 +624,10 @@ namespace ThermodynamicSystemEditor.ViewModels
             {
                 eval.Reset();
                 T.SetValue(MinimumTemperatureEnthalpy + (MaximumTemperatureEnthalpy - MinimumTemperatureEnthalpy) / (double)steps * i, METRIC.C);
-                var y1 = hV.Eval(eval)/1e3;
+                var y1 = hV.Eval(eval) / 1e3;
                 var y2 = hL.Eval(eval) / 1e3;
-      
-                xValues.Add(T.ValueInOutputUnit);                
+
+                xValues.Add(T.ValueInOutputUnit);
                 y1Values.Add(y1);
                 y2Values.Add(y2);
 
@@ -617,10 +639,10 @@ namespace ThermodynamicSystemEditor.ViewModels
             EnthalpyChart = _chartFactory.Create(chart);
         }
 
-       
+
         public void RedrawPureComponentChart()
         {
-         
+
             var chart = new ChartModel();
             chart.Title = SelectedFunctionType.ToString();
             chart.XAxisTitle = "Temperature [°C]";
@@ -630,7 +652,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             chart.AutoScaleY = true;
             int steps = 41;
 
-            foreach (var comp in ComponentsForPureAnalysis.Where(c => c.IsChecked).Select(c=>c.Data))
+            foreach (var comp in ComponentsForPureAnalysis.Where(c => c.IsChecked).Select(c => c.Data))
             {
                 var SelectedFunction = comp.GetFunction(SelectedFunctionType);
                 chart.YAxisTitle = SelectedFunctionType.ToString() + " [" + SelectedFunction.YUnit + "]";
@@ -640,10 +662,10 @@ namespace ThermodynamicSystemEditor.ViewModels
                 T.OutputUnit = METRIC.C;
                 var funcExpr = CurrentSystem.CorrelationFactory.CreateExpression(SelectedFunction.Type, SelectedFunction, T, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
                 double maxVal = 1e20;
-                if(SelectedFunction.Property== EvaluatedProperties.VaporPressure)
+                if (SelectedFunction.Property == EvaluatedProperties.VaporPressure)
                 {
                     var funcExprMax = CurrentSystem.CorrelationFactory.CreateExpression(SelectedFunction.Type, SelectedFunction, comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalTemperature), comp.GetConstant(ConstantProperties.CriticalPressure));
-                    maxVal= funcExprMax.Eval(new Evaluator());
+                    maxVal = funcExprMax.Eval(new Evaluator());
                 }
                 var eval = new Evaluator();
                 List<double> yValues = new List<double>();
@@ -656,8 +678,8 @@ namespace ThermodynamicSystemEditor.ViewModels
                     if (Double.IsNaN(y))
                         y = 0;
 
-                   // if (y > maxVal)
-                   //     y = maxVal;
+                    // if (y > maxVal)
+                    //     y = maxVal;
 
                     xValues.Add(T.ValueInOutputUnit);
                     yValues.Add(y);
@@ -668,7 +690,7 @@ namespace ThermodynamicSystemEditor.ViewModels
             }
 
 
-           
+
             PureComponentPropertyChart = _chartFactory.Create(chart);
         }
         public void Handle(PersistChangesMessage message)

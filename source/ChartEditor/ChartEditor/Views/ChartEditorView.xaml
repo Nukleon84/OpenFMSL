@@ -10,12 +10,18 @@
     <Grid>
         <TabControl TabStripPlacement="Bottom">
             <TabItem Header="Graph">
+                <Grid>
                 <Viewbox Stretch="Uniform" VerticalAlignment="Stretch" HorizontalAlignment="Center">
-        <oxy:PlotView Model="{Binding Plot}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MinHeight="800" MinWidth="800" ></oxy:PlotView>
+                        <oxy:PlotView Model="{Binding Plot}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MinHeight="{Binding Model.PlotAreaHeight}" MinWidth="{Binding Model.PlotAreaWidth}" ></oxy:PlotView>
                 </Viewbox>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">                        
+                        <Button x:Name="SaveAsPNG">PNG</Button>
+                        <Button x:Name="SaveAsSVG">SVG</Button>
+                    </StackPanel>
+                </Grid>
             </TabItem>
             <TabItem Header="Table">
-                
+                <DataGrid ItemsSource="{Binding Model.Series}"></DataGrid>
             </TabItem>
         </TabControl>
     </Grid>

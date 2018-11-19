@@ -28,8 +28,10 @@ namespace OpenFMSL.Core.Expressions
 
                 if (Left.Eval(c) < Right.Eval(c))
                     return Left.Diff(c, var);
-                else
+                else if (Left.Eval(c) > Right.Eval(c))
                     return Right.Diff(c, var);
+                else
+                    return 0.5*(Left.Diff(c, var)+Right.Diff(c, var));
             };
         }
 
@@ -116,14 +118,22 @@ namespace OpenFMSL.Core.Expressions
             EvalFunctional = (c) => Math.Max(Left.Eval(c), Right.Eval(c));
             DiffFunctional = (c, var) =>
              {
-                 
-                // var u = Left.Diff(c, var);
-                // var v = Right.Diff(c, var);
+
+                 // var u = Left.Diff(c, var);
+                 // var v = Right.Diff(c, var);
 
                  if (Left.Eval(c) > Right.Eval(c))
                      return Left.Diff(c, var);
-                 else
+                 else if (Left.Eval(c) < Right.Eval(c))
                      return Right.Diff(c, var);
+                 else
+                     return 0.5 * (Left.Diff(c, var) + Right.Diff(c, var));
+
+
+                /* if (Left.Eval(c) > Right.Eval(c))
+                     return Left.Diff(c, var);
+                 else
+                     return Right.Diff(c, var);*/
              };
         }
 
