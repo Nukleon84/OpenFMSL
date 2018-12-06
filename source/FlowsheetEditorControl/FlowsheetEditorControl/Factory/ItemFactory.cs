@@ -331,47 +331,51 @@ namespace FlowsheetEditor.Factory
                         newItem.Type = "Flash3";
                         newItem.X = x;
                         newItem.Y = y;
-                        newItem.Height = 100;
-                        newItem.Width = 75;
+                        newItem.Height = 60;
+                        newItem.Width = 100;
                         newItem.DisplayIcon = IconTypes.ThreePhaseFlash;               
                         //newItem.SimulationObject = ModelFactory.Create(system, newItem);
                         var inlet = new Connector
                         {
-                            Name = "Inlet[0]",
+                            Name = "In",
                             Type = "Material",
                             X = -5,
-                            Y = 45,
-                            Owner = newItem
+                            Y = newItem.Height/2.0 - 5,
+                            Owner = newItem,
+                            Direction=ConnectorDirection.Left
                         };
                         newItem.Connectors.Add(inlet);
 
                         var outlet1 = new Connector
                         {
-                            Name = "Outlet[0]",
+                            Name = "Vap",
                             Type = "Material",
-                            X = newItem.Width - 5,
-                            Y = 5,
-                            Owner = newItem
+                            X = newItem.Width - 25,
+                            Y = -5,
+                            Owner = newItem,
+                            Direction= ConnectorDirection.Up
                         };
                         newItem.Connectors.Add(outlet1);
 
                         var outlet2 = new Connector
                         {
-                            Name = "Outlet[1]",
+                            Name = "Liq1",
                             Type = "Material",
                             X = newItem.Width - 5,
-                            Y = 35,
-                            Owner = newItem
+                            Y = 25,
+                            Owner = newItem,
+                            Direction= ConnectorDirection.Right
                         };
                         newItem.Connectors.Add(outlet2);
 
                         var outlet3 = new Connector
                         {
-                            Name = "Outlet[2]",
+                            Name = "Liq2",
                             Type = "Material",
-                            X = newItem.Width - 5,
-                            Y = newItem.Height - 25,
-                            Owner = newItem
+                            X = newItem.Width - 25,
+                            Y = newItem.Height - 5,
+                            Owner = newItem,
+                            Direction= ConnectorDirection.Down
                         };
                         newItem.Connectors.Add(outlet3);
                         return newItem;

@@ -76,3 +76,4 @@ buildscripts/build.log
 bin.contracts/OpenFMSL.Contracts.dll
 bin.contracts/OpenFMSL.Contracts.pdb
 bin.contracts/OpenFMSL.Core.pdb
+buildscripts/build.log

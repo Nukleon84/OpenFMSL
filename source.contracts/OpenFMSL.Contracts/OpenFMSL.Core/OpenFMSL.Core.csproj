@@ -85,6 +85,7 @@
     <Compile Include="Flowsheeting\Stream.cs" />
     <Compile Include="ModelLibrary\BlackBoxReactor.cs" />
     <Compile Include="ModelLibrary\ComponentSplitter.cs" />
+    <Compile Include="ModelLibrary\Decanter.cs" />
     <Compile Include="ModelLibrary\FeedStage.cs" />
     <Compile Include="ModelLibrary\Flash.cs" />
     <Compile Include="ModelLibrary\Heater.cs" />

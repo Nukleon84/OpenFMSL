@@ -64,49 +64,49 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
         DataTable _streamTableData;
 
-       
+
 
         string GetStreamProperty(string property, MaterialStream stream)
         {
-           // var connection = visual.GetStreamByName(stream.Name);
+            // var connection = visual.GetStreamByName(stream.Name);
 
             switch (property)
             {
                 case "Name":
                     return stream.Name;
-               /* case "From Unit":
-                    if (connection != null)
-                    {
-                        if (connection.Source == null)
-                            return "";
-                        if (connection.Source.Owner != null)
-                            return connection.Source.Owner.Name;
-                    }
-                    return "";
-                case "From Port":
-                    if (connection != null)
-                    {
-                        if (connection.Source != null)
-                            return connection.Source.Name;
-                    }
-                    return "";
-                case "To Unit":
-                    if (connection != null)
-                    {
-                        if (connection.Sink == null)
-                            return "";
-                        if (connection.Sink.Owner != null)
-                            return connection.Sink.Owner.Name;
-                    }
-                    return "";
-                case "To Port":
-                    if (connection != null)
-                    {
-                        if (connection.Sink != null)
-                            return connection.Sink.Name;
-                    }
-                    return "";
-                    */
+                /* case "From Unit":
+                     if (connection != null)
+                     {
+                         if (connection.Source == null)
+                             return "";
+                         if (connection.Source.Owner != null)
+                             return connection.Source.Owner.Name;
+                     }
+                     return "";
+                 case "From Port":
+                     if (connection != null)
+                     {
+                         if (connection.Source != null)
+                             return connection.Source.Name;
+                     }
+                     return "";
+                 case "To Unit":
+                     if (connection != null)
+                     {
+                         if (connection.Sink == null)
+                             return "";
+                         if (connection.Sink.Owner != null)
+                             return connection.Sink.Owner.Name;
+                     }
+                     return "";
+                 case "To Port":
+                     if (connection != null)
+                     {
+                         if (connection.Sink != null)
+                             return connection.Sink.Name;
+                     }
+                     return "";
+                     */
                 case "Temperature":
                     return stream.Mixed.Temperature.ValueInOutputUnit.ToString("G4");
                 case "Pressure":
@@ -128,9 +128,9 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
             if (Streams.Count == 0)
                 return _streamTableData;
-                      
 
-           // _streamTableData.Columns.Add("Number", typeof(Int32));
+
+            // _streamTableData.Columns.Add("Number", typeof(Int32));
             _streamTableData.Columns.Add("Property");
             _streamTableData.Columns.Add("Unit");
 
@@ -143,7 +143,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
             List<string> properties = new List<string> { "Temperature", "Pressure", "Enthalpy", "Vapour Fraction" };
             //List<string> properties = new List<string> { "Name", "From Unit", "From Port", "To Unit", "To Port", "", "Temperature", "Pressure", "Enthalpy", "Vapour Fraction" };
-            List<string> propertyUnits = new List<string> { 
+            List<string> propertyUnits = new List<string> {
                 system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.Temperature].Symbol,
                 system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.Pressure].Symbol,
                 system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.SpecificMolarEnthalpy].Symbol, "" };
@@ -167,7 +167,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
             }
 
             workRow = _streamTableData.NewRow();
-           // workRow["Number"] = i++;
+            // workRow["Number"] = i++;
             workRow["Property"] = "Phase";
             workRow["Unit"] = "";
             foreach (var stream in Streams)
@@ -177,7 +177,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
             _streamTableData.Rows.Add(workRow);
 
             workRow = _streamTableData.NewRow();
-           // workRow["Number"] = i++;
+            // workRow["Number"] = i++;
             _streamTableData.Rows.Add(workRow);
 
             var components = system.Components;
@@ -186,7 +186,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
             if (PrintMolarVariables)
             {
                 workRow = _streamTableData.NewRow();
-             //   workRow["Number"] = i++;
+                //   workRow["Number"] = i++;
                 workRow["Property"] = "Total Molar Flow";
                 workRow["Unit"] = system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol;
                 foreach (var stream in Streams)
@@ -196,7 +196,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
                 _streamTableData.Rows.Add(workRow);
 
                 workRow = _streamTableData.NewRow();
-               // workRow["Number"] = i++;
+                // workRow["Number"] = i++;
                 workRow["Property"] = "";// "Component Molar Flows";
                 _streamTableData.Rows.Add(workRow);
 
@@ -204,19 +204,23 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
                 for (int j = 0; j < components.Count; j++)
                 {
                     workRow = _streamTableData.NewRow();
-                 //   workRow["Number"] = i++;
+                    //   workRow["Number"] = i++;
                     workRow["Property"] = "ṅ [" + components[j].ID + "]";
                     workRow["Unit"] = system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.MolarFlow].Symbol;
                     foreach (var stream in Streams)
                     {
-                        workRow[stream.Name] = stream.Mixed.ComponentMolarflow[j].ValueInOutputUnit.ToString("0.000");
+                        var value = stream.Mixed.ComponentMolarflow[j].ValueInOutputUnit;
+                        if (value > 1e-8)
+                            workRow[stream.Name] = value.ToString("0.000");
+                        else
+                            workRow[stream.Name] = null;
                     }
                     _streamTableData.Rows.Add(workRow);
                 }
 
                 //Molar fractions
                 workRow = _streamTableData.NewRow();
-              //  workRow["Number"] = i++;
+                //  workRow["Number"] = i++;
                 workRow["Property"] = "";// "Component Molar Fractions";
                 _streamTableData.Rows.Add(workRow);
 
@@ -224,18 +228,26 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
                 for (int j = 0; j < components.Count; j++)
                 {
                     workRow = _streamTableData.NewRow();
-                //    workRow["Number"] = i++;
+                    //    workRow["Number"] = i++;
                     workRow["Property"] = "x [" + components[j].ID + "]";
                     workRow["Unit"] = "mol/mol";
                     foreach (var stream in Streams)
                     {
-                        workRow[stream.Name] = stream.Mixed.ComponentMolarFraction[j].ValueInSI.ToString("0.0000");
+                       // workRow[stream.Name] = stream.Mixed.ComponentMolarFraction[j].ValueInSI.ToString("0.0000");
+
+                        var value = stream.Mixed.ComponentMolarFraction[j].ValueInSI;
+                        if (value > 1e-8)
+                            workRow[stream.Name] = value.ToString("0.000");
+                        else
+                            workRow[stream.Name] = null;
+
+
                     }
                     _streamTableData.Rows.Add(workRow);
                 }
 
                 workRow = _streamTableData.NewRow();
-              //  workRow["Number"] = i++;
+                //  workRow["Number"] = i++;
                 _streamTableData.Rows.Add(workRow);
             }
 
@@ -243,7 +255,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
             // Mass flows
             workRow = _streamTableData.NewRow();
-           // workRow["Number"] = i++;
+            // workRow["Number"] = i++;
             workRow["Property"] = "Total Mass Flow";
             workRow["Unit"] = system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol;
             foreach (var stream in Streams)
@@ -253,7 +265,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
             _streamTableData.Rows.Add(workRow);
 
             workRow = _streamTableData.NewRow();
-          //  workRow["Number"] = i++;
+            //  workRow["Number"] = i++;
             workRow["Property"] = "";//"Component Mass Flows";
             _streamTableData.Rows.Add(workRow);
 
@@ -264,12 +276,20 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
                 if (sumForCompJ > 1e-6 || !RemoveMissingComponents)
                 {
                     workRow = _streamTableData.NewRow();
-             //       workRow["Number"] = i++;
+                    //       workRow["Number"] = i++;
                     workRow["Property"] = "" + components[j].ID + "";
                     workRow["Unit"] = system.VariableFactory.Output.UnitDictionary[UnitsOfMeasure.PhysicalDimension.MassFlow].Symbol;
                     foreach (var stream in Streams)
                     {
-                        workRow[stream.Name] = stream.Mixed.ComponentMassflow[j].ValueInOutputUnit.ToString("0.000");
+                       // workRow[stream.Name] = stream.Mixed.ComponentMassflow[j].ValueInOutputUnit.ToString("0.000");
+
+                        var value = stream.Mixed.ComponentMassflow[j].ValueInOutputUnit;
+                        if (value > 1e-8)
+                            workRow[stream.Name] = value.ToString("0.000");
+                        else
+                            workRow[stream.Name] = null;
+
+
                     }
                     _streamTableData.Rows.Add(workRow);
                 }
@@ -277,7 +297,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
             //Mass fractions
             workRow = _streamTableData.NewRow();
-         //   workRow["Number"] = i++;
+            //   workRow["Number"] = i++;
             workRow["Property"] = "";//"Component Mass Fractions";
             _streamTableData.Rows.Add(workRow);
             for (int j = 0; j < components.Count; j++)
@@ -287,16 +307,25 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
                 if (sumForCompJ > 1e-6 || !RemoveMissingComponents)
                 {
                     workRow = _streamTableData.NewRow();
-          //          workRow["Number"] = i++;
+                    //          workRow["Number"] = i++;
                     workRow["Property"] = "" + components[j].ID + "";
                     workRow["Unit"] = "w-%";
                     foreach (var stream in Streams)
                     {
-                        workRow[stream.Name] = stream.Mixed.ComponentMassFraction[j].ValueInSI.ToString("P2");
+                        //workRow[stream.Name] = stream.Mixed.ComponentMassFraction[j].ValueInSI.ToString("P2");
+
+                        var value = stream.Mixed.ComponentMassFraction[j].ValueInSI;
+                        if (value > 1e-8)
+                            workRow[stream.Name] = value.ToString("0.000");
+                        else
+                            workRow[stream.Name] = null;
+
+
+                        
                     }
                     _streamTableData.Rows.Add(workRow);
                 }
-            }            
+            }
             return _streamTableData;
         }
 
@@ -304,7 +333,7 @@ namespace OpenFMSL.Core.Flowsheeting.Documentation
 
         public StreamTableElement(string name, params MaterialStream[] streams)
         {
-            Name = name;   
+            Name = name;
             Icon.IconType = IconTypes.StreamTable;
             SetColors("Silver", "GhostWhite");
             foreach (MaterialStream stream in streams)

@@ -63,6 +63,48 @@ namespace OpenFMSL.Core.Thermodynamics
             return g;
         }
 
+        public Variable EquilibriumCoefficientLLE(ThermodynamicSystem system, Variable K, Variable T, Variable p, List<Variable> x1, List<Variable> x2, int index)
+        {
+            Expression liquid1Part = null;
+            Expression liquid2Part = null;
+            var currentComponent = system.Components[index];
+
+            if (String.IsNullOrEmpty(K.Subscript))
+                K.Subscript = system.Components[index].ID;
+
+            switch (system.EquilibriumMethod.EquilibriumApproach)
+            {
+                case EquilibriumApproach.GammaPhi:
+                    switch (system.EquilibriumMethod.Activity)
+                    {
+                        case ActivityMethod.UNIQUAC:
+                            {                                
+                                liquid1Part = new ActivityCoefficientUNIQUAC(system, T, x1, index);
+                                liquid2Part = new ActivityCoefficientUNIQUAC(system, T, x2, index);
+                                K.BindTo(liquid2Part / liquid1Part);
+                                break;
+                            }
+                        case ActivityMethod.NRTL:
+                            {                            
+                                liquid1Part = new ActivityCoefficientNRTL(system, T, x1, index);
+                                liquid2Part = new ActivityCoefficientNRTL(system, T, x2, index);
+                                K.BindTo(liquid2Part / liquid1Part);
+                                break;
+                            }
+                        case ActivityMethod.Wilson:
+                            throw new NotSupportedException("Cannot calculate LLE with Wilson Activity Coefficient Model");
+                        default:
+                            throw new NotSupportedException("Cannot calculate LLE without Activity Coefficient Model");                            
+                    }
+
+                    break;
+                case EquilibriumApproach.PhiPhi:
+                    {
+                        throw new NotSupportedException("Only Activity Coefficient Models allowed for LLE");
+                    }
+            }
+            return K;
+        }
 
         public Variable EquilibriumCoefficient(ThermodynamicSystem system, Variable K, Variable T, Variable p, List<Variable> x, List<Variable> y, int index)
         {
@@ -112,7 +154,7 @@ namespace OpenFMSL.Core.Thermodynamics
                             if (currentComponent.IsInert)
                                 liquidPart = new MixtureHenryCoefficient(system, T, x, index);
                             else
-                                liquidPart =  GetVaporPressure(system, currentComponent, T);
+                                liquidPart = GetVaporPressure(system, currentComponent, T);
 
                             K.BindTo(liquidPart / vaporPart);
                             break;

@@ -200,7 +200,7 @@
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource TwoPhaseFlashTemplate}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="ThreePhaseFlash">
-                                                                <Setter Property="ContentTemplate" Value="{DynamicResource HorizontalVesselTemplate}" />
+                                                                <Setter Property="ContentTemplate" Value="{DynamicResource ThreePhaseFlashTemplate}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding DisplayIcon}" Value="Decanter">
                                                                 <Setter Property="ContentTemplate" Value="{DynamicResource HorizontalVesselTemplate}" />

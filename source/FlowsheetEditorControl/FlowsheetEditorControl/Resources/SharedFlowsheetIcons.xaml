@@ -364,14 +364,31 @@
 
     <DataTemplate x:Key="ThreePhaseFlashTemplate" DataType="{x:Type items:VisualUnit}">
         <Grid>
+            <Grid.Resources>
+              
+                <VisualBrush 
+                          x:Key="HatchBrush" 
+                          TileMode="Tile" Viewport="0,0,10,10" 
+                          ViewportUnits="Absolute" Viewbox="0,0,10,10"    
+                          ViewboxUnits="Absolute">
+                    <VisualBrush.Visual>
+                        <Canvas>
+                            <Rectangle Fill="GhostWhite" Width="10" Height="10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 0 l 10 10" />
+                            <Path Stroke="{Binding BorderColor}" Data="M 0 10 l 10 -10" />
+                        </Canvas>
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Grid.Resources>
             <Rectangle RadiusX="15" RadiusY="15" Stroke="{Binding BorderColor}" Fill="{Binding FillColor}" StrokeThickness="2" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left">
             </Rectangle>
-            <Border CornerRadius="0,0,15,15" Margin="0,25,0,0" Background="Yellow" Width="{Binding Width}"  HorizontalAlignment="Left">
+            <Border CornerRadius="0,0,15,15" Margin="0,20,0,0" Background="{StaticResource HatchBrush}" Width="{Binding Width}" Height="40"  HorizontalAlignment="Left">
             </Border>
-            <Border CornerRadius="0,0,15,15" Margin="0,50,0,0" Background="Blue" Width="{Binding Width}"  HorizontalAlignment="Left">
+            <Border CornerRadius="0,0,15,15" Margin="0,40,0,0" Background="Gainsboro" Width="{Binding Width}" Height="20"  HorizontalAlignment="Left">
             </Border>
             <Rectangle Fill="Transparent" RadiusX="15" RadiusY="15" Stroke="{Binding BorderColor}" StrokeThickness="2" Width="{Binding Width}" Height="{Binding Height}"  HorizontalAlignment="Left">
             </Rectangle>
+            
         </Grid>
 
     </DataTemplate>

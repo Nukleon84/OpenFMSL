@@ -25,7 +25,8 @@ namespace OpenFMSL.Core.ModelLibrary
 
             dp = system.VariableFactory.CreateVariable("DP", "Pressure Drop", PhysicalDimension.Pressure);
             p = system.VariableFactory.CreateVariable("P", "Pressure in mixer", PhysicalDimension.Pressure);
-            //dp.LowerBound = 0;
+            dp.LowerBound = -1e8;
+            dp.ValueInSI = 0;
             AddVariable(dp);
             AddVariable(p);
         }
